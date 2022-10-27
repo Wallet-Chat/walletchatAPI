@@ -58,7 +58,7 @@ const docTemplate = `{
         },
         "/community/{community}/{address}": {
             "get": {
-                "description": "TODO: need a creation API for communities, which includes specificied welcome message text, Twitter handle, page title",
+                "description": "TODO: need a creation API for communities, which includes specified welcome message text, Twitter handle, page title",
                 "consumes": [
                     "application/json"
                 ],
@@ -655,7 +655,7 @@ const docTemplate = `{
         },
         "/get_groupchatitems_unreadcnt/{address}/{useraddress}": {
             "get": {
-                "description": "For group chat unread counts, currently the database stores a timestamp for each time a user enters a group chat.\nWe though in the design it would be impractical to keep a read/unread count copy per user per message, but if this\nmethod doesn't proof to be fine grained enough, we could add a boolean relational table of read messgages per user.",
+                "description": "For group chat unread counts, currently the database stores a timestamp for each time a user enters a group chat.\nWe thought in the design it would be impractical to keep a read/unread count copy per user per message, but if this\nmethod doesn't prove to be fine grained enough, we could add a boolean relational table of read messages per user.",
                 "consumes": [
                     "application/json"
                 ],
@@ -789,7 +789,7 @@ const docTemplate = `{
         },
         "/get_unread_cnt/{address}/{nftaddr}/{nftid}": {
             "get": {
-                "description": "Get Unread count for specifc NFT context given a wallet address and specific NFT",
+                "description": "Get Unread count for specific NFT context given a wallet address and specific NFT",
                 "consumes": [
                     "application/json"
                 ],
@@ -980,7 +980,7 @@ const docTemplate = `{
         },
         "/getall_chatitems/{fromaddr}/{toaddr}": {
             "get": {
-                "description": "Get chat data between the given two addresses, TO and FROM and interchangable here",
+                "description": "Get chat data between the given two addresses, TO and FROM and interchangeable here",
                 "consumes": [
                     "application/json"
                 ],
@@ -1106,7 +1106,7 @@ const docTemplate = `{
         },
         "/getnft_chatitems/{fromaddr}/{toaddr}/{nftaddr}/{nftid}": {
             "get": {
-                "description": "Get ALL NFT context items for a specifc NFT context convo between two wallets",
+                "description": "Get ALL NFT context items for a specific NFT context convo between two wallets",
                 "consumes": [
                     "application/json"
                 ],
@@ -1116,7 +1116,7 @@ const docTemplate = `{
                 "tags": [
                     "NFT"
                 ],
-                "summary": "Get NFT Related Chat Items For Given NFT Contract and ID, between two wallet addresses (TO and FROM are interchangable)",
+                "summary": "Get NFT Related Chat Items For Given NFT Contract and ID, between two wallet addresses (TO and FROM are interchangeable)",
                 "parameters": [
                     {
                         "type": "string",
@@ -1425,7 +1425,7 @@ const docTemplate = `{
         },
         "/name/{name}": {
             "get": {
-                "description": "get the given a common name (Kevin.eth, BillyTheKid, etc) what has already been mapped to an Address",
+                "description": "get the given a common name (Kevin.eth, BillyTheKid, etc) that has already been mapped to an Address",
                 "consumes": [
                     "application/json"
                 ],
@@ -1914,7 +1914,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "WalletChat API",
-	Description:      "Wecome to the WalletChat API Documentation\n\nPlease make note that some JSON data structures are shared for both input/output.\nRequired input parameters will have a red * next to them in the data type outline at\nthe bottom of the page, along with a comment.  This means when executing API functionality\nfrom this API page, some fields may need to be removed from the JSON struct before submitting.\nPlease email the developers with any issues.\nSome JSON data structures are output only, and will be marked as such as well.\n\nv0 of the API does not include encryption or authentication, nor does it need /v0 to be called.\nPlease as you are given access to this page, do not abuse this system and impersonate others, or submit offensive material.\nDevelopers monitor this data daily.\n\nv1 will include basic JWT Authentication, however some additional work is in progress to make this fully secure.\nexcept for AUTH functions, all endpoints must prefix /v1 and include Bearer: <JWT> in all requests\n\nv2 will include encyrption for DMs, private keys will be stored locally on client PCs\nwith no way for us to recover any data which is encrypted.",
+	Description:      "Wecome to the WalletChat API Documentation\n\nPlease make note that some JSON data structures are shared for both input/output.\nRequired input parameters will have a red * next to them in the data type outline at\nthe bottom of the page, along with a comment.  This means when executing API functionality\nfrom this API page, some fields may need to be removed from the JSON struct before submitting.\nPlease email the developers with any issues.\nSome JSON data structures are output only, and will be marked as such as well.\n\nv0 of the API does not include encryption or authentication, nor does it need /v0 to be called.\nPlease as you are given access to this page, do not abuse this system and impersonate others, or submit offensive material.\nDevelopers monitor this data daily.\n\nv1 will include basic JWT Authentication, however some additional work is in progress to make this fully secure.\nexcept for AUTH functions, all endpoints must prefix /v1 and include Bearer: <JWT> in all requests\n\nv2 will include encryption for DMs, private keys will be stored locally on client PCs\nwith no way for us to recover any data which is encrypted.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }
