@@ -140,7 +140,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 	//TODO: need to throttle these 2 calls to auto-join?
 	//should auto-join them to the community chat
 	AutoJoinCommunitiesByChain(key, "ethereum")
-	AutoJoinCommunitiesByChain(key, "polygon")
+	//AutoJoinCommunitiesByChain(key, "polygon")
 	AutoJoinPoapChats(key)
 
 	//now add last message from group chat this bookmark is for
@@ -2289,7 +2289,7 @@ func AutoJoinCommunities(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	walletAddr := vars["wallet"]
 	AutoJoinCommunitiesByChain(walletAddr, "ethereum")
-	AutoJoinCommunitiesByChain(walletAddr, "polygon")
+	//AutoJoinCommunitiesByChain(walletAddr, "polygon")
 	AutoJoinPoapChats(walletAddr)
 }
 
