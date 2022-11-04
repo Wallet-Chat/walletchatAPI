@@ -35,14 +35,14 @@ import (
 // @description v1 includes JWT Authentication
 // @description except for AUTH functions, all /v1 endpoints must include "Bearer <JWT>" in all requests showing the Lock Icon"
 // @description For this API Doc, use the "Authorize" button on the right hand side to ender "Bearer <JWT>" where the JWT will
-// @description come from the return value of the /signin endpoint.  Please read the /register, /users/<>/nonce, and /signin
+// @description come from the return value of the /signin endpoint.  Please read the /users/<>/nonce, and /signin
 // @description descriptions to understand the login workflow via JWT Auth.
 // @description
-// @description v1.1 will include encyrption for DMs, using LIT Protocol for encryption
+// @description v2 includes encryption for DMs, using LIT Protocol for encryption
 // @description
 // @wallet_chat API Support via Twitter
 // @contact.url https://walletchat.fun
-// @contact.email walletchatextension@gmail.com
+// @contact.email contact@walletchat.fun
 // @securityDefinitions.apikey BearerAuth
 // @in header
 // @name Authorization
