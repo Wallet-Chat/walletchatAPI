@@ -384,6 +384,40 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/delete_chatitem/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Can only delete messages sent, cannot delete incoming messages",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Unused/Legacy"
+                ],
+                "summary": "Delete Single Chat Item (DM)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "message ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
         "/v1/delete_comments/{fromaddr}/{nftaddr}/{nftid}": {
             "delete": {
                 "security": [

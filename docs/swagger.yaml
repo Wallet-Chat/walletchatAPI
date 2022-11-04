@@ -517,6 +517,27 @@ paths:
       summary: Leave an NFT or Community group chat
       tags:
       - GroupChat
+  /v1/delete_chatitem/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Can only delete messages sent, cannot delete incoming messages
+      parameters:
+      - description: message ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Delete Single Chat Item (DM)
+      tags:
+      - Unused/Legacy
   /v1/delete_comments/{fromaddr}/{nftaddr}/{nftid}:
     delete:
       consumes:

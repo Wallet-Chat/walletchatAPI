@@ -1603,10 +1603,44 @@ func DeleteAllChatitemsToAddressByOwner(w http.ResponseWriter, r *http.Request) 
 	Authuser := auth.GetUserFromReqContext(r)
 	owner := Authuser.Address
 
-	database.Connector.Where("toaddr = ?", to).Where("fromaddr = ?", owner).Delete(&chat)
-	database.Connector.Where("fromaddr = ?", to).Where("toaddr = ?", owner).Delete(&chat)
+	rowsAff := 0
+	dbQuery := database.Connector.Where("toaddr = ?", to).Where("fromaddr = ?", owner).Delete(&chat)
+	rowsAff += int(dbQuery.RowsAffected)
+	dbQuery = database.Connector.Where("fromaddr = ?", to).Where("toaddr = ?", owner).Delete(&chat)
+	rowsAff += int(dbQuery.RowsAffected)
 
-	w.WriteHeader(http.StatusNoContent)
+	if rowsAff > 0 {
+		w.WriteHeader(http.StatusOK)
+	} else {
+		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
+// DeleteAllChatitemsToAddressByOwner godoc
+// @Summary Delete Single Chat Item (DM)
+// @Description Can only delete messages sent, cannot delete incoming messages
+// @Tags Unused/Legacy
+// @Accept  json
+// @Produce  json
+// @Security BearerAuth
+// @Param id path string true "message ID"
+// @Success 204
+// @Router /v1/delete_chatitem/{id} [delete]
+func DeleteChatitem(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	var chat entity.Chatitem
+	Authuser := auth.GetUserFromReqContext(r)
+	owner := Authuser.Address
+
+	dbQuery := database.Connector.Where("id = ?", id).Where("fromaddr = ?", owner).Delete(&chat)
+
+	if dbQuery.RowsAffected > 0 {
+		w.WriteHeader(http.StatusOK)
+	} else {
+		w.WriteHeader(http.StatusNoContent)
+	}
 }
 
 // func CreateSettings(w http.ResponseWriter, r *http.Request) {

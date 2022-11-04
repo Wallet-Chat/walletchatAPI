@@ -118,6 +118,7 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/getnft_chatitems/{address}", controllers.GetNftChatFromAddress).Methods("GET")
 	router.HandleFunc("/update_chatitem/{fromaddr}/{toaddr}", controllers.UpdateChatitemByOwner).Methods("PUT")
 	router.HandleFunc("/deleteall_chatitems/{fromaddr}/{toaddr}", controllers.DeleteAllChatitemsToAddressByOwner).Methods("DELETE")
+	router.HandleFunc("/delete_chatitem/{id}", controllers.DeleteChatitem).Methods("DELETE")
 	router.HandleFunc("/get_inbox/{address}", controllers.GetInboxByOwner).Methods("GET")
 	router.HandleFunc("/create_chatitem", controllers.CreateChatitem).Methods("POST")
 	//router.HandleFunc("/create_chatitem_tmp", controllers.CreateChatitemTmp).Methods("POST")
