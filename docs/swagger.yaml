@@ -553,8 +553,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: 'TODO: Need to protect this with JWT in addition to other API calls
-        needed to use FROM addr from the JWT'
+      description: 'TODO: not yet used'
       parameters:
       - description: Wallet Address
         in: path
@@ -575,8 +574,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: 'TODO: Need to protect this with JWT in addition to other API calls
-        needed to use FROM addr from the JWT'
+      description: Currently deletes all chat items between these two addresses
       parameters:
       - description: 'TO: Address'
         in: path
@@ -816,8 +814,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 'TODO: Need to protect this with JWT in addition to other API calls
-        needed to use FROM addr from the JWT'
+      description: 'TODO: not yet used'
       parameters:
       - description: Wallet Address
         in: path

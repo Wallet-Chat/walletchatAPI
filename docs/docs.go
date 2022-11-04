@@ -439,7 +439,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "TODO: Need to protect this with JWT in addition to other API calls needed to use FROM addr from the JWT",
+                "description": "TODO: not yet used",
                 "consumes": [
                     "application/json"
                 ],
@@ -473,7 +473,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "TODO: Need to protect this with JWT in addition to other API calls needed to use FROM addr from the JWT",
+                "description": "Currently deletes all chat items between these two addresses",
                 "consumes": [
                     "application/json"
                 ],
@@ -841,7 +841,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "TODO: Need to protect this with JWT in addition to other API calls needed to use FROM addr from the JWT",
+                "description": "TODO: not yet used",
                 "consumes": [
                     "application/json"
                 ],

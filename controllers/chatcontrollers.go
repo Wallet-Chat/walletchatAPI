@@ -1585,7 +1585,7 @@ func UpdateChatitemByOwner(w http.ResponseWriter, r *http.Request) {
 
 // DeleteAllChatitemsToAddressByOwner godoc
 // @Summary Delete All Chat Items (DMs) between FROM and TO given addresses
-// @Description TODO: Need to protect this with JWT in addition to other API calls needed to use FROM addr from the JWT
+// @Description Currently deletes all chat items between these two addresses
 // @Tags Unused/Legacy
 // @Accept  json
 // @Produce  json
@@ -1604,6 +1604,8 @@ func DeleteAllChatitemsToAddressByOwner(w http.ResponseWriter, r *http.Request) 
 	owner := Authuser.Address
 
 	database.Connector.Where("toaddr = ?", to).Where("fromaddr = ?", owner).Delete(&chat)
+	database.Connector.Where("fromaddr = ?", to).Where("toaddr = ?", owner).Delete(&chat)
+
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -1659,7 +1661,7 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 
 // DeleteSettings godoc
 // @Summary Delete Settings Info
-// @Description TODO: Need to protect this with JWT in addition to other API calls needed to use FROM addr from the JWT
+// @Description TODO: not yet used
 // @Tags Unused/Legacy
 // @Accept  json
 // @Produce  json
@@ -1681,7 +1683,7 @@ func DeleteSettings(w http.ResponseWriter, r *http.Request) {
 
 // GetSettings godoc
 // @Summary Get Settings Info
-// @Description TODO: Need to protect this with JWT in addition to other API calls needed to use FROM addr from the JWT
+// @Description TODO: not yet used
 // @Tags Unused/Legacy
 // @Accept  json
 // @Produce  json
