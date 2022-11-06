@@ -941,8 +941,8 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 					from := mail.NewEmail("WalletChat Notifications", "contact@walletchat.fun")
 					subject := "Message Waiting In WalletChat"
 					to := mail.NewEmail(toAddrname.Name, settings.Email)
-					plainTextContent := "You have message from" + fromAddrname.Name + " waiting in WalletChat, please login via the app direct to read!"
-					htmlContent := "<strong>You have message from " + fromAddrname.Name + " waiting in WalletChat, please login via the app direct to read!</strong>"
+					plainTextContent := "You have a message from" + fromAddrname.Name + " waiting in WalletChat, please login via the app at https://app.walletchat.fun to read!"
+					htmlContent := "<strong>You have a message from " + fromAddrname.Name + " waiting in WalletChat, please login via the app at https://app.walletchat.fun to read!</strong>"
 					message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
 					client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
 					response, err := client.Send(message)
