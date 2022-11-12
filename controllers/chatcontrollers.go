@@ -128,7 +128,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 
 	//TODO: need to throttle these 2 calls to auto-join?
 	//should auto-join them to the community chat
-	AutoJoinCommunitiesByChain(key, "ethereum")
+	AutoJoinCommunitiesByChain(key, "eth")
 	//AutoJoinCommunitiesByChain(key, "polygon")
 	AutoJoinPoapChats(key)
 
@@ -1057,7 +1057,7 @@ func CreateBookmarkItem(w http.ResponseWriter, r *http.Request) {
 		} else {
 			var result = IsOnChain(bookmark.Nftaddr, "eth")
 			if result {
-				bookmark.Chain = "ethereum"
+				bookmark.Chain = "eth"
 			} else {
 				var result = IsOnChain(bookmark.Nftaddr, "polygon")
 				if result {
@@ -2177,7 +2177,7 @@ func IsOwner(w http.ResponseWriter, r *http.Request) {
 	contract := vars["contract"]
 	wallet := vars["wallet"]
 
-	result := IsOwnerOfNFT(contract, wallet, "ethereum")
+	result := IsOwnerOfNFT(contract, wallet, "eth")
 	if !result {
 		result = IsOwnerOfNFT(contract, wallet, "polygon")
 	}
@@ -2333,9 +2333,9 @@ func FixUpBookmarks(w http.ResponseWriter, r *http.Request) {
 
 	for _, bookmark := range bookmarks {
 		if strings.HasPrefix(bookmark.Nftaddr, "0x") {
-			var result = IsOnChain(bookmark.Nftaddr, "ethereum")
+			var result = IsOnChain(bookmark.Nftaddr, "eth") //Moralis uses "eth" not "ethereum"
 			if result {
-				database.Connector.Model(&entity.Bookmarkitem{}).Where("walletaddr = ?", bookmark.Walletaddr).Where("nftaddr = ?", bookmark.Nftaddr).Update("chain", "ethereum")
+				database.Connector.Model(&entity.Bookmarkitem{}).Where("walletaddr = ?", bookmark.Walletaddr).Where("nftaddr = ?", bookmark.Nftaddr).Update("chain", "eth")
 			} else {
 				var result = IsOnChain(bookmark.Nftaddr, "polygon")
 				if result {
