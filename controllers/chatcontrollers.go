@@ -2420,6 +2420,11 @@ func AutoJoinCommunitiesByChain(walletAddr string, chain string) {
 
 				bookmark.Nftaddr = nft.TokenAddress
 				bookmark.Walletaddr = walletAddr
+
+				//For now if we use Moralis, ethereum needs to be "eth" (NFTPort on client side and LIT uses "ethereum")
+				if chain == "eth" {
+					chain = "ethereum"
+				}
 				bookmark.Chain = chain
 
 				database.Connector.Create(&bookmark)
