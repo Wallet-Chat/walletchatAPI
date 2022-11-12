@@ -128,7 +128,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 
 	//TODO: need to throttle these 2 calls to auto-join?
 	//should auto-join them to the community chat
-	AutoJoinCommunitiesByChain(key, "eth")
+	AutoJoinCommunitiesByChain(key, "ethereum") //Moralis uses "eth" instead of "ethereum" but we change this at lower level
 	//AutoJoinCommunitiesByChain(key, "polygon")
 	AutoJoinPoapChats(key)
 
@@ -979,7 +979,7 @@ func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 	isHolder := false
 	if strings.HasPrefix(chat.Nftaddr, "0x") {
 		//TODO: we should send in chain along with message
-		isHolder = IsOwnerOfNFT(chat.Nftaddr, chat.Fromaddr, "eth")
+		isHolder = IsOwnerOfNFT(chat.Nftaddr, chat.Fromaddr, "ethereum")
 		if !isHolder {
 			isHolder = IsOwnerOfNFT(chat.Nftaddr, chat.Fromaddr, "polygon")
 		}
@@ -1055,9 +1055,9 @@ func CreateBookmarkItem(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(bookmark.Nftaddr, "poap_") {
 			bookmark.Chain = "xdai"
 		} else {
-			var result = IsOnChain(bookmark.Nftaddr, "eth")
+			var result = IsOnChain(bookmark.Nftaddr, "ethereum")
 			if result {
-				bookmark.Chain = "eth"
+				bookmark.Chain = "ethereum"
 			} else {
 				var result = IsOnChain(bookmark.Nftaddr, "polygon")
 				if result {
@@ -1457,7 +1457,7 @@ func GetGroupChatItemsByAddr(w http.ResponseWriter, r *http.Request) {
 	isHolder := false
 	if strings.HasPrefix(nftaddr, "0x") {
 		//TODO: we should send in chain along with message
-		isHolder = IsOwnerOfNFT(nftaddr, fromaddr, "eth")
+		isHolder = IsOwnerOfNFT(nftaddr, fromaddr, "ethereum")
 		if !isHolder {
 			isHolder = IsOwnerOfNFT(nftaddr, fromaddr, "polygon")
 		}
@@ -2177,7 +2177,7 @@ func IsOwner(w http.ResponseWriter, r *http.Request) {
 	contract := vars["contract"]
 	wallet := vars["wallet"]
 
-	result := IsOwnerOfNFT(contract, wallet, "eth")
+	result := IsOwnerOfNFT(contract, wallet, "ethereum")
 	if !result {
 		result = IsOwnerOfNFT(contract, wallet, "polygon")
 	}
@@ -2256,6 +2256,11 @@ func GetOwnerNFTs(walletAddr string, chain string) MoralisOwnerOf {
 
 //internal
 func IsOwnerOfNFT(contractAddr string, walletAddr string, chain string) bool {
+	//For now if we use Moralis, ethereum needs to be "eth"
+	if chain == "ethereum" {
+		chain = "eth"
+	}
+
 	url := "https://deep-index.moralis.io/api/v2/" + walletAddr + "/nft?chain=" + chain + "&format=decimal&token_addresses=" + contractAddr + "&normalizeMetadata=false"
 	//url := "https://deep-index.moralis.io/api/v2/0x57ca1B13510D82a6286a225a217798e079BD0767/nft?chain=eth&format=decimal&token_addresses=0x34d85c9cdeb23fa97cb08333b511ac86e1c4e258&normalizeMetadata=false"
 
@@ -2289,6 +2294,11 @@ func IsOwnerOfNFT(contractAddr string, walletAddr string, chain string) bool {
 }
 
 func IsOnChain(contractAddr string, chain string) bool {
+	//For now if we use Moralis, ethereum needs to be "eth"
+	if chain == "ethereum" {
+		chain = "eth"
+	}
+
 	//url := "https://api.nftport.xyz/v0/nfts/" + contractAddr + "?chain=" + chain
 	url := "https://deep-index.moralis.io/api/v2/nft/" + contractAddr + "?chain=" + chain + "&format=decimal&normalizeMetadata=false"
 
@@ -2333,9 +2343,9 @@ func FixUpBookmarks(w http.ResponseWriter, r *http.Request) {
 
 	for _, bookmark := range bookmarks {
 		if strings.HasPrefix(bookmark.Nftaddr, "0x") {
-			var result = IsOnChain(bookmark.Nftaddr, "eth") //Moralis uses "eth" not "ethereum"
+			var result = IsOnChain(bookmark.Nftaddr, "ethereum")
 			if result {
-				database.Connector.Model(&entity.Bookmarkitem{}).Where("walletaddr = ?", bookmark.Walletaddr).Where("nftaddr = ?", bookmark.Nftaddr).Update("chain", "eth")
+				database.Connector.Model(&entity.Bookmarkitem{}).Where("walletaddr = ?", bookmark.Walletaddr).Where("nftaddr = ?", bookmark.Nftaddr).Update("chain", "ethereum")
 			} else {
 				var result = IsOnChain(bookmark.Nftaddr, "polygon")
 				if result {
@@ -2350,13 +2360,18 @@ func FixUpBookmarks(w http.ResponseWriter, r *http.Request) {
 func AutoJoinCommunities(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	walletAddr := vars["wallet"]
-	AutoJoinCommunitiesByChain(walletAddr, "eth")
+	AutoJoinCommunitiesByChain(walletAddr, "ethereum")
 	//AutoJoinCommunitiesByChain(walletAddr, "polygon")
 	AutoJoinPoapChats(walletAddr)
 }
 
 //internal use only
 func AutoJoinCommunitiesByChain(walletAddr string, chain string) {
+	//For now if we use Moralis, ethereum needs to be "eth"
+	if chain == "ethereum" {
+		chain = "eth"
+	}
+
 	//url := "https://api.nftport.xyz/v0/accounts/" + walletAddr + "?chain=" + chain
 	url := "https://deep-index.moralis.io/api/v2/" + walletAddr + "/nft?chain=" + chain + "&format=decimal&normalizeMetadata=false"
 
