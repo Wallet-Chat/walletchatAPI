@@ -725,31 +725,6 @@ paths:
       summary: Get Public Comments Count for given NFT Contract and ID
       tags:
       - NFT
-  /v1/get_groupchatitems/{address}:
-    get:
-      consumes:
-      - application/json
-      description: Community Chat Data
-      parameters:
-      - description: Get Group Chat Data By NFT Address
-        in: path
-        name: message
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/entity.Groupchatitem'
-            type: array
-      security:
-      - BearerAuth: []
-      summary: GetGroupChatItems gets group chat data for a given NFT address
-      tags:
-      - NFT
   /v1/get_groupchatitems/{address}/{useraddress}:
     get:
       consumes:

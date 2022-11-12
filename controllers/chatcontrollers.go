@@ -34,17 +34,6 @@ func stringInSlice(a string, list []string) bool {
 	return false
 }
 
-type NFTPortOwnerOf struct {
-	Response string `json:"response"`
-	Nfts     []struct {
-		ContractAddress string `json:"contract_address"`
-		TokenID         string `json:"token_id"`
-		CreatorAddress  string `json:"creator_address"`
-	} `json:"nfts"`
-	Total        int         `json:"total"`
-	Continuation interface{} `json:"continuation"`
-}
-
 // GetInboxByOwner godoc
 // @Summary Get Inbox Summary With Last Message
 // @Description Get Each 1-on-1 Conversation, NFT and Community Chat For Display in Inbox
@@ -914,9 +903,8 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 	//ensure user in body is same as user in JWT
 	Authuser := auth.GetUserFromReqContext(r)
 	walletaddr := Authuser.Address
-	chat.Fromaddr = strings.ToLower(chat.Fromaddr)
 
-	if walletaddr == chat.Fromaddr {
+	if strings.EqualFold(walletaddr, chat.Fromaddr) {
 		dbQuery := database.Connector.Create(&chat)
 		if dbQuery.RowsAffected == 0 {
 			fmt.Println(dbQuery.Error)
@@ -987,7 +975,17 @@ func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 
 	Authuser := auth.GetUserFromReqContext(r)
 
-	if chat.Fromaddr == Authuser.Address {
+	//ensure user holds the NFT first
+	isHolder := false
+	if strings.HasPrefix(chat.Nftaddr, "0x") {
+		//TODO: we should send in chain along with message
+		isHolder = IsOwnerOfNFT(chat.Nftaddr, chat.Fromaddr, "eth")
+		if !isHolder {
+			isHolder = IsOwnerOfNFT(chat.Nftaddr, chat.Fromaddr, "polygon")
+		}
+	}
+
+	if strings.EqualFold(chat.Fromaddr, Authuser.Address) && isHolder {
 		database.Connector.Create(&chat)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
@@ -1023,7 +1021,7 @@ func CreateCommunityChatitem(w http.ResponseWriter, r *http.Request) {
 	chat.Timestamp_dtm = time.Now()
 
 	Authuser := auth.GetUserFromReqContext(r)
-	if chat.Fromaddr == Authuser.Address {
+	if strings.EqualFold(chat.Fromaddr, Authuser.Address) {
 		database.Connector.Create(&chat)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
@@ -1031,29 +1029,6 @@ func CreateCommunityChatitem(w http.ResponseWriter, r *http.Request) {
 	} else {
 		w.WriteHeader(http.StatusForbidden)
 	}
-}
-
-// GetGroupChatItems godoc
-// @Summary GetGroupChatItems gets group chat data for a given NFT address
-// @Description Community Chat Data
-// @Tags NFT
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param message path string true "Get Group Chat Data By NFT Address"
-// @Success 200 {array} entity.Groupchatitem
-// @Router /v1/get_groupchatitems/{address} [get]
-func GetGroupChatItems(w http.ResponseWriter, r *http.Request) {
-	//vars := mux.Vars(r)
-	//key := vars["address"]
-	Authuser := auth.GetUserFromReqContext(r)
-	key := Authuser.Address
-
-	var chat []entity.Groupchatitem
-	database.Connector.Where("nftaddr = ?", key).Find(&chat)
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(chat)
 }
 
 // CreateBookmarkItem godoc
@@ -1073,24 +1048,21 @@ func CreateBookmarkItem(w http.ResponseWriter, r *http.Request) {
 
 	Authuser := auth.GetUserFromReqContext(r)
 
-	if bookmark.Walletaddr == Authuser.Address {
+	if strings.EqualFold(bookmark.Walletaddr, Authuser.Address) {
 		//fmt.Printf("Bookmark Item: %#v\n", chat)
 		bookmark.Chain = "none"
-		//0x check is a cheap hack right now since NFTPort.xyz is rate limiting us a lot
-		if strings.HasPrefix(bookmark.Nftaddr, "0x") {
-			bookmark.Chain = "ethereum"
-		}
+
 		if strings.HasPrefix(bookmark.Nftaddr, "poap_") {
 			bookmark.Chain = "xdai"
-		}
-		//end hack for limiting NFTport API
-		var result = IsOnChain(bookmark.Nftaddr, "ethereum")
-		if result {
-			bookmark.Chain = "ethereum"
 		} else {
-			var result = IsOnChain(bookmark.Nftaddr, "polygon")
+			var result = IsOnChain(bookmark.Nftaddr, "eth")
 			if result {
-				bookmark.Chain = "polygon"
+				bookmark.Chain = "ethereum"
+			} else {
+				var result = IsOnChain(bookmark.Nftaddr, "polygon")
+				if result {
+					bookmark.Chain = "polygon"
+				}
 			}
 		}
 
@@ -1120,7 +1092,7 @@ func DeleteBookmarkItem(w http.ResponseWriter, r *http.Request) {
 
 	Authuser := auth.GetUserFromReqContext(r)
 
-	if bookmark.Walletaddr == Authuser.Address {
+	if strings.EqualFold(bookmark.Walletaddr, Authuser.Address) {
 		var success = database.Connector.Where("nftaddr = ?", bookmark.Nftaddr).Where("walletaddr = ?", bookmark.Walletaddr).Delete(bookmark)
 
 		var returnval bool
@@ -1480,32 +1452,48 @@ func GetGroupChatItemsByAddr(w http.ResponseWriter, r *http.Request) {
 
 	var chat []entity.Groupchatitem
 
-	var chatReadTime entity.Groupchatreadtime
-	var dbQuery = database.Connector.Where("fromaddr = ?", fromaddr).Where("nftaddr = ?", nftaddr).Find(&chatReadTime)
-
-	//fmt.Printf("Group Chat Get By Addr Result: %#v\n", chatReadTime)
-
-	//if no respsonse to this query, its the first time a user is reading the chat history, send it all
-	if dbQuery.RowsAffected == 0 {
-		//database.Connector.Where("nftaddr = ?", nftaddr).Find(&chat)  //mana requests all data for now
-
-		//add the first read element to the group timestamp table cross reference
-		chatReadTime.Fromaddr = fromaddr
-		chatReadTime.Nftaddr = nftaddr
-		chatReadTime.Readtimestamp_dtm = time.Now()
-
-		database.Connector.Create(&chatReadTime)
-	} else {
-		//database.Connector.Where("timestamp > ?", chatReadTime.Readtimestamp_dtm).Where("nftaddr = ?", nftaddr).Find(&chat) //mana requests all data for now
-		//set timestamp when this was last grabbed
-		currtime := time.Now()
-		database.Connector.Model(&entity.Groupchatreadtime{}).Where("fromaddr = ?", fromaddr).Where("nftaddr = ?", nftaddr).Update("readtimestamp_dtm", currtime)
+	//TODO this will use up API calls fast if we are polling all the time
+	//ensure user holds the NFT first
+	isHolder := false
+	if strings.HasPrefix(nftaddr, "0x") {
+		//TODO: we should send in chain along with message
+		isHolder = IsOwnerOfNFT(nftaddr, fromaddr, "eth")
+		if !isHolder {
+			isHolder = IsOwnerOfNFT(nftaddr, fromaddr, "polygon")
+		}
 	}
-	//this line goes away if we selectively load data in the future
-	database.Connector.Where("nftaddr = ?", nftaddr).Find(&chat) //mana requests all data for now
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(chat)
+	//if user is not a holder, can't get the messages
+	if isHolder {
+		var chatReadTime entity.Groupchatreadtime
+		var dbQuery = database.Connector.Where("fromaddr = ?", fromaddr).Where("nftaddr = ?", nftaddr).Find(&chatReadTime)
+
+		//fmt.Printf("Group Chat Get By Addr Result: %#v\n", chatReadTime)
+
+		//if no respsonse to this query, its the first time a user is reading the chat history, send it all
+		if dbQuery.RowsAffected == 0 {
+			//database.Connector.Where("nftaddr = ?", nftaddr).Find(&chat)  //mana requests all data for now
+
+			//add the first read element to the group timestamp table cross reference
+			chatReadTime.Fromaddr = fromaddr
+			chatReadTime.Nftaddr = nftaddr
+			chatReadTime.Readtimestamp_dtm = time.Now()
+
+			database.Connector.Create(&chatReadTime)
+		} else {
+			//database.Connector.Where("timestamp > ?", chatReadTime.Readtimestamp_dtm).Where("nftaddr = ?", nftaddr).Find(&chat) //mana requests all data for now
+			//set timestamp when this was last grabbed
+			currtime := time.Now()
+			database.Connector.Model(&entity.Groupchatreadtime{}).Where("fromaddr = ?", fromaddr).Where("nftaddr = ?", nftaddr).Update("readtimestamp_dtm", currtime)
+		}
+		//this line goes away if we selectively load data in the future
+		database.Connector.Where("nftaddr = ?", nftaddr).Find(&chat) //manapixels requests all data for now
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(chat)
+	} else {
+		w.WriteHeader(http.StatusForbidden)
+	}
 }
 
 // GetGroupChatItemsByAddrLen godoc
@@ -2199,14 +2187,16 @@ func IsOwner(w http.ResponseWriter, r *http.Request) {
 }
 
 //internal
-func GetOwnerNFTs(walletAddr string, chain string) NFTPortOwnerOf {
+func GetOwnerNFTs(walletAddr string, chain string) MoralisOwnerOf {
 	//url := "https://eth-mainnet.alchemyapi.io/v2/${process.env.REACT_APP_ALCHEMY_API_KEY}/getOwnersForToken" + contractAddr
-	url := "https://api.nftport.xyz/v0/accounts/" + walletAddr + "?chain=" + chain
+	//url := "https://api.nftport.xyz/v0/accounts/" + walletAddr + "?chain=" + chain
+	url := "https://deep-index.moralis.io/api/v2/" + walletAddr + "/nft?chain=" + chain + "&format=decimal&normalizeMetadata=false"
 
 	req, _ := http.NewRequest("GET", url, nil)
 
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", os.Getenv("NFTPORT_API_KEY"))
+	//req.Header.Add("Authorization", os.Getenv("NFTPORT_API_KEY"))
+	req.Header.Add("X-API-Key", os.Getenv("MORALIS_NFT_API_KEY"))
 
 	// Send req using http Client
 	client := &http.Client{}
@@ -2221,7 +2211,7 @@ func GetOwnerNFTs(walletAddr string, chain string) NFTPortOwnerOf {
 		log.Println("Error while reading the response bytes:", err)
 	}
 
-	var result NFTPortOwnerOf
+	var result MoralisOwnerOf
 	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
 		fmt.Println("Can not unmarshal JSON")
 	}
@@ -2231,15 +2221,49 @@ func GetOwnerNFTs(walletAddr string, chain string) NFTPortOwnerOf {
 	return result
 }
 
-//internal use
+//internal use (NFTPORT version)
+// func IsOwnerOfNFT(contractAddr string, walletAddr string, chain string) bool {
+// 	//url := "https://eth-mainnet.alchemyapi.io/v2/${process.env.REACT_APP_ALCHEMY_API_KEY}/getOwnersForToken" + contractAddr
+// 	url := "https://api.nftport.xyz/v0/accounts/" + walletAddr + "?chain=" + chain + "&contract_address=" + contractAddr
+
+// 	req, _ := http.NewRequest("GET", url, nil)
+
+// 	req.Header.Add("Content-Type", "application/json")
+// 	req.Header.Add("Authorization", os.Getenv("NFTPORT_API_KEY"))
+
+// 	// Send req using http Client
+// 	client := &http.Client{}
+// 	resp, err := client.Do(req)
+// 	if err != nil {
+// 		log.Println("Error on response.\n[ERROR] -", err)
+// 	}
+// 	defer resp.Body.Close()
+
+// 	body, err := ioutil.ReadAll(resp.Body)
+// 	if err != nil {
+// 		log.Println("Error while reading the response bytes:", err)
+// 	}
+
+// 	var result NFTPortOwnerOf
+// 	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
+// 		fmt.Println("Can not unmarshal JSON")
+// 	}
+
+// 	//fmt.Printf("IsOwner: %#v\n", result.Total)
+
+// 	return result.Total > 0
+// }
+
+//internal
 func IsOwnerOfNFT(contractAddr string, walletAddr string, chain string) bool {
-	//url := "https://eth-mainnet.alchemyapi.io/v2/${process.env.REACT_APP_ALCHEMY_API_KEY}/getOwnersForToken" + contractAddr
-	url := "https://api.nftport.xyz/v0/accounts/" + walletAddr + "?chain=" + chain + "&contract_address=" + contractAddr
+	url := "https://deep-index.moralis.io/api/v2/" + walletAddr + "/nft?chain=" + chain + "&format=decimal&token_addresses=" + contractAddr + "&normalizeMetadata=false"
+	//url := "https://deep-index.moralis.io/api/v2/0x57ca1B13510D82a6286a225a217798e079BD0767/nft?chain=eth&format=decimal&token_addresses=0x34d85c9cdeb23fa97cb08333b511ac86e1c4e258&normalizeMetadata=false"
 
 	req, _ := http.NewRequest("GET", url, nil)
 
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", os.Getenv("NFTPORT_API_KEY"))
+	req.Header.Add("accept", "application/json")
+	//req.Header.Add("Authorization", os.Getenv("NFTPORT_API_KEY"))
+	req.Header.Add("X-API-Key", os.Getenv("MORALIS_NFT_API_KEY"))
 
 	// Send req using http Client
 	client := &http.Client{}
@@ -2254,7 +2278,7 @@ func IsOwnerOfNFT(contractAddr string, walletAddr string, chain string) bool {
 		log.Println("Error while reading the response bytes:", err)
 	}
 
-	var result NFTPortOwnerOf
+	var result MoralisOwnerOf
 	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
 		fmt.Println("Can not unmarshal JSON")
 	}
@@ -2265,12 +2289,14 @@ func IsOwnerOfNFT(contractAddr string, walletAddr string, chain string) bool {
 }
 
 func IsOnChain(contractAddr string, chain string) bool {
-	url := "https://api.nftport.xyz/v0/nfts/" + contractAddr + "?chain=" + chain
+	//url := "https://api.nftport.xyz/v0/nfts/" + contractAddr + "?chain=" + chain
+	url := "https://deep-index.moralis.io/api/v2/nft/" + contractAddr + "?chain=" + chain + "&format=decimal&normalizeMetadata=false"
 
 	req, _ := http.NewRequest("GET", url, nil)
 
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", os.Getenv("NFTPORT_API_KEY"))
+	//req.Header.Add("Authorization", os.Getenv("NFTPORT_API_KEY"))
+	req.Header.Add("X-API-Key", os.Getenv("MORALIS_NFT_API_KEY"))
 
 	// Send req using http Client
 	client := &http.Client{}
@@ -2285,7 +2311,7 @@ func IsOnChain(contractAddr string, chain string) bool {
 		log.Println("Error while reading the response bytes:", err)
 	}
 
-	var result NFTPortNftContract
+	var result MoralisContractInfoNFT
 	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
 		fmt.Println("Can not unmarshal JSON")
 	}
@@ -2293,7 +2319,7 @@ func IsOnChain(contractAddr string, chain string) bool {
 	//fmt.Printf("Chain Response: %#v\n", result.Response)
 
 	var returnVal = false
-	if result.Response == "OK" {
+	if result.Total > 0 {
 		returnVal = true
 	}
 	return returnVal
@@ -2324,20 +2350,21 @@ func FixUpBookmarks(w http.ResponseWriter, r *http.Request) {
 func AutoJoinCommunities(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	walletAddr := vars["wallet"]
-	AutoJoinCommunitiesByChain(walletAddr, "ethereum")
+	AutoJoinCommunitiesByChain(walletAddr, "eth")
 	//AutoJoinCommunitiesByChain(walletAddr, "polygon")
 	AutoJoinPoapChats(walletAddr)
 }
 
 //internal use only
 func AutoJoinCommunitiesByChain(walletAddr string, chain string) {
-	//TODO: OS is more accurate
-	url := "https://api.nftport.xyz/v0/accounts/" + walletAddr + "?chain=" + chain
+	//url := "https://api.nftport.xyz/v0/accounts/" + walletAddr + "?chain=" + chain
+	url := "https://deep-index.moralis.io/api/v2/" + walletAddr + "/nft?chain=" + chain + "&format=decimal&normalizeMetadata=false"
 
 	req, _ := http.NewRequest("GET", url, nil)
 
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", os.Getenv("NFTPORT_API_KEY"))
+	//req.Header.Add("Authorization", os.Getenv("NFTPORT_API_KEY"))
+	req.Header.Add("X-API-Key", os.Getenv("MORALIS_NFT_API_KEY"))
 
 	// Send req using http Client
 	client := &http.Client{}
@@ -2352,31 +2379,31 @@ func AutoJoinCommunitiesByChain(walletAddr string, chain string) {
 		log.Println("Error while reading the response bytes:", err)
 	}
 
-	var result NFTPortOwnerOf
+	var result MoralisOwnerOf
 	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
 		fmt.Println("Can not unmarshal JSON")
 	}
 
 	//fmt.Printf("IsOwner: %#v\n", result.Total)
-	for _, nft := range result.Nfts {
+	for _, nft := range result.Result {
 		//TODO: could be optimized, good enough for now
 		var bookmarkExists entity.Bookmarkitem
-		var dbResult = database.Connector.Where("nftaddr = ?", nft.ContractAddress).Where("walletaddr = ?", walletAddr).Find(&bookmarkExists)
+		var dbResult = database.Connector.Where("nftaddr = ?", nft.TokenAddress).Where("walletaddr = ?", walletAddr).Find(&bookmarkExists)
 
 		if dbResult.RowsAffected == 0 {
 			//check if the user already manually unjoined, if so don't auto rejoin them
 			var userUnjoined entity.Userunjoined
-			var dbUnjoined = database.Connector.Where("nftaddr = ?", nft.ContractAddress).Where("walletaddr = ?", walletAddr).Find(&userUnjoined)
+			var dbUnjoined = database.Connector.Where("nftaddr = ?", nft.TokenAddress).Where("walletaddr = ?", walletAddr).Find(&userUnjoined)
 			userAlreadyUnjoined := false
 			if dbUnjoined.RowsAffected > 0 {
 				userAlreadyUnjoined = userUnjoined.Unjoined
 			}
 
 			if !userAlreadyUnjoined {
-				fmt.Println("Found new NFT: " + nft.ContractAddress)
+				fmt.Println("Found new NFT: " + nft.TokenAddress)
 				var bookmark entity.Bookmarkitem
 
-				bookmark.Nftaddr = nft.ContractAddress
+				bookmark.Nftaddr = nft.TokenAddress
 				bookmark.Walletaddr = walletAddr
 				bookmark.Chain = chain
 
@@ -2483,6 +2510,65 @@ type POAPInfoByAddress struct {
 	Owner   string `json:"owner"`
 	Chain   string `json:"chain"`
 	Created string `json:"created"`
+}
+
+type NFTPortOwnerOf struct {
+	Response string `json:"response"`
+	Nfts     []struct {
+		ContractAddress string `json:"contract_address"`
+		TokenID         string `json:"token_id"`
+		CreatorAddress  string `json:"creator_address"`
+	} `json:"nfts"`
+	Total        int         `json:"total"`
+	Continuation interface{} `json:"continuation"`
+}
+
+type MoralisOwnerOf struct {
+	Total    int         `json:"total"`
+	Page     int         `json:"page"`
+	PageSize int         `json:"page_size"`
+	Cursor   interface{} `json:"cursor"`
+	Result   []struct {
+		TokenAddress      string    `json:"token_address"`
+		TokenID           string    `json:"token_id"`
+		OwnerOf           string    `json:"owner_of"`
+		BlockNumber       string    `json:"block_number"`
+		BlockNumberMinted string    `json:"block_number_minted"`
+		TokenHash         string    `json:"token_hash"`
+		Amount            string    `json:"amount"`
+		ContractType      string    `json:"contract_type"`
+		Name              string    `json:"name"`
+		Symbol            string    `json:"symbol"`
+		TokenURI          string    `json:"token_uri"`
+		Metadata          string    `json:"metadata"`
+		LastTokenURISync  time.Time `json:"last_token_uri_sync"`
+		LastMetadataSync  time.Time `json:"last_metadata_sync"`
+		MinterAddress     string    `json:"minter_address"`
+	} `json:"result"`
+	Status string `json:"status"`
+}
+
+type MoralisContractInfoNFT struct {
+	Total    int    `json:"total"`
+	Page     int    `json:"page"`
+	PageSize int    `json:"page_size"`
+	Cursor   string `json:"cursor"`
+	Result   []struct {
+		TokenAddress      string      `json:"token_address"`
+		TokenID           string      `json:"token_id"`
+		Amount            string      `json:"amount"`
+		TokenHash         string      `json:"token_hash"`
+		BlockNumberMinted string      `json:"block_number_minted"`
+		UpdatedAt         interface{} `json:"updated_at"`
+		ContractType      string      `json:"contract_type"`
+		Name              string      `json:"name"`
+		Symbol            string      `json:"symbol"`
+		TokenURI          string      `json:"token_uri"`
+		Metadata          string      `json:"metadata"`
+		LastTokenURISync  time.Time   `json:"last_token_uri_sync"`
+		LastMetadataSync  time.Time   `json:"last_metadata_sync"`
+		MinterAddress     string      `json:"minter_address"`
+	} `json:"result"`
 }
 
 type NFTPortNftContract struct {

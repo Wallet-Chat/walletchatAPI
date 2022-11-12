@@ -709,46 +709,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/get_groupchatitems/{address}": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Community Chat Data",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "NFT"
-                ],
-                "summary": "GetGroupChatItems gets group chat data for a given NFT address",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Get Group Chat Data By NFT Address",
-                        "name": "message",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Groupchatitem"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/v1/get_groupchatitems/{address}/{useraddress}": {
             "get": {
                 "security": [
