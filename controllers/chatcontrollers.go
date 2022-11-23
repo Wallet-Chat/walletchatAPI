@@ -915,7 +915,7 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 			var settings entity.Settings
 			var dbResult = database.Connector.Where("walletaddr = ?", chat.Toaddr).Find(&settings)
 			if dbResult.RowsAffected > 0 {
-				if strings.Contains(settings.Email, "@") && settings.Notifydm {
+				if strings.Contains(settings.Email, "@") && strings.EqualFold(settings.Notifydm, "true") {
 					var fromAddrname entity.Addrnameitem
 					database.Connector.Where("address = ?", chat.Fromaddr).Find(&fromAddrname)
 					var toAddrname entity.Addrnameitem
@@ -957,7 +957,7 @@ func SendNotificationEmails() {
 				var addrnameDB entity.Addrnameitem
 				var dbQuery = database.Connector.Where("address = ?", settings[i].Walletaddr).Find(&addrnameDB)
 
-				if dbQuery.RowsAffected > 0 && settings[i].Notify24 {
+				if dbQuery.RowsAffected > 0 && strings.EqualFold(settings[i].Notify24, "true") {
 					from := mail.NewEmail("WalletChat Notifications", "contact@walletchat.fun")
 					subject := "Message Waiting In WalletChat"
 					to := mail.NewEmail(addrnameDB.Name, settings[i].Email)
@@ -1698,7 +1698,23 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 		if dbResults.RowsAffected == 0 {
 			dbResults = database.Connector.Create(&settings)
 		} else {
-			dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", settings.Walletaddr).Update("email", settings.Email)
+			if settings.Email != "" {
+				dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", settings.Walletaddr).Update("email", settings.Email)
+			}
+			if settings.Notifydm != "" {
+				booleanVal, err := strconv.ParseBool(settings.Notifydm)
+				if err != nil {
+					log.Println("Error while converting boolean:", err)
+				}
+				dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", settings.Walletaddr).Update("notifydm", booleanVal)
+			}
+			if settings.Notify24 != "" {
+				booleanVal, err := strconv.ParseBool(settings.Notifydm)
+				if err != nil {
+					log.Println("Error while converting boolean:", err)
+				}
+				dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", settings.Walletaddr).Update("notify24", booleanVal)
+			}
 		}
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")

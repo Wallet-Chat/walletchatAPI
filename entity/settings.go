@@ -6,6 +6,6 @@ type Settings struct {
 	Walletaddr string `json:"walletaddr"`
 	//Publickey  string `json:"publickey"`
 	Email    string `json:"email"`
-	Notifydm bool   `json:"notifydm"`
-	Notify24 bool   `json:"notify24"`
+	Notifydm string `json:"notifydm"`
+	Notify24 string `json:"notify24"`
 }
