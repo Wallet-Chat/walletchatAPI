@@ -4,7 +4,8 @@ package entity
 type Settings struct {
 	ID         int    `json:"id"`
 	Walletaddr string `json:"walletaddr"`
-	//Publickey  string `json:"publickey"` //need this for encryption, don't want to get it over and over
-	Email string `json:"email"`
-	//Allow_read_rx string `json:"allow_read_rx"`
+	//Publickey  string `json:"publickey"`
+	Email    string `json:"email"`
+	Notifydm bool   `json:"notifydm"`
+	Notify24 bool   `json:"notify24"`
 }

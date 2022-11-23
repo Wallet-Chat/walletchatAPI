@@ -89,6 +89,7 @@ func main() {
 	wsRouter.HandleFunc("/welcome", auth.WelcomeHandler()).Methods("GET")
 
 	initaliseHandlers(wsRouter)
+	go sendPeriodicNotifications() //run concurrently
 
 	//handler := cors.Default().Handler(router) //cors.AllowAll().Handler(router)
 	c := cors.New(cors.Options{
@@ -99,6 +100,10 @@ func main() {
 	})
 	handler := c.Handler(router)
 	log.Fatal(http.ListenAndServe(":8080", handler))
+}
+
+func sendPeriodicNotifications() {
+	controllers.SendNotificationEmails()
 }
 
 func initaliseHandlers(router *mux.Router) {
