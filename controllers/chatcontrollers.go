@@ -1688,32 +1688,30 @@ func DeleteChatitem(w http.ResponseWriter, r *http.Request) {
 // @Router /v1/update_settings [POST]
 func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
-	var settings entity.Settings
-	json.Unmarshal(requestBody, &settings)
+	var settingsRX entity.Settings
+	json.Unmarshal(requestBody, &settingsRX)
 
+	log.Println("RX Settings", settingsRX)
+	addr := strings.ToLower(settingsRX.Walletaddr)
 	Authuser := auth.GetUserFromReqContext(r)
-	if strings.EqualFold(Authuser.Address, settings.Walletaddr) {
-		var dbResults = database.Connector.Where("walletaddr = ?", settings.Walletaddr).Find(&settings)
+	if strings.EqualFold(Authuser.Address, addr) {
+		var settings entity.Settings
+		var dbResults = database.Connector.Where("walletaddr = ?", addr).Find(&settings)
 
 		if dbResults.RowsAffected == 0 {
 			dbResults = database.Connector.Create(&settings)
 		} else {
-			if settings.Email != "" {
-				dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", settings.Walletaddr).Update("email", settings.Email)
+			if settingsRX.Email != "" {
+				log.Println("Updating Email", settingsRX.Email)
+				dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("email", settingsRX.Email)
 			}
-			if settings.Notifydm != "" {
-				booleanVal, err := strconv.ParseBool(settings.Notifydm)
-				if err != nil {
-					log.Println("Error while converting boolean:", err)
-				}
-				dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", settings.Walletaddr).Update("notifydm", booleanVal)
+			if settingsRX.Notifydm != "" {
+				log.Println("Updating Daily Notifications", settingsRX.Notifydm)
+				dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("notifydm", settingsRX.Notifydm)
 			}
-			if settings.Notify24 != "" {
-				booleanVal, err := strconv.ParseBool(settings.Notifydm)
-				if err != nil {
-					log.Println("Error while converting boolean:", err)
-				}
-				dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", settings.Walletaddr).Update("notify24", booleanVal)
+			if settingsRX.Notify24 != "" {
+				log.Println("Updating Daily Notifications", settingsRX.Notify24)
+				dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("notify24", settingsRX.Notify24)
 			}
 		}
 		w.WriteHeader(http.StatusOK)
@@ -1721,7 +1719,7 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(dbResults.RowsAffected)
 	} else {
 		fmt.Println("UpdateSettings - JWT Address: ", Authuser.Address)
-		fmt.Println("UpdateSettings - POST Address: ", settings.Walletaddr)
+		fmt.Println("UpdateSettings - POST Address: ", addr)
 		w.WriteHeader(http.StatusForbidden)
 	}
 }
