@@ -948,7 +948,7 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 
 func SendNotificationEmails() {
 	for {
-		fmt.Println("Hello !!")
+		fmt.Println("** Sending Daily Notifications **")
 		var settings []entity.Settings
 		database.Connector.Find(&settings)
 		for i := 0; i < len(settings); i++ {
@@ -976,7 +976,7 @@ func SendNotificationEmails() {
 				}
 			}
 		}
-		time.Sleep(time.Minute * 1)
+		time.Sleep(time.Minute * 60 * 24)
 	}
 }
 
