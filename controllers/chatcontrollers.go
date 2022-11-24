@@ -1699,7 +1699,7 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 		var dbResults = database.Connector.Where("walletaddr = ?", addr).Find(&settings)
 
 		if dbResults.RowsAffected == 0 {
-			dbResults = database.Connector.Create(&settings)
+			dbResults = database.Connector.Create(&settingsRX)
 		} else {
 			if settingsRX.Email != "" {
 				log.Println("Updating Email", settingsRX.Email)
