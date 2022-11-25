@@ -926,7 +926,7 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 					subject := "Message Waiting In WalletChat"
 					to := mail.NewEmail(toAddrname.Name, settings.Email)
 					plainTextContent := "You have a message from" + fromAddrname.Name + " waiting in WalletChat, please login via the app at https://app.walletchat.fun to read!"
-					htmlContent := "<strong>You have a message from " + fromAddrname.Name + " waiting in WalletChat, please login via the app at https://app.walletchat.fun to read!</strong>"
+					htmlContent := email.NotificationEmailDM(toAddrname.Name, fromAddrname.Name)
 					message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
 					client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
 					response, err := client.Send(message)
@@ -963,7 +963,7 @@ func SendNotificationEmails() {
 					subject := "Message Waiting In WalletChat"
 					to := mail.NewEmail(addrnameDB.Name, settings[i].Email)
 					plainTextContent := "You have " + strconv.Itoa(config.Dm) + " unread DM(s), " + strconv.Itoa(config.Nft) + " unread NFT group chat messages, and " + strconv.Itoa(config.Community) + " unread custom community chat messages waiting in WalletChat. Please login via the app at https://app.walletchat.fun to read!"
-					htmlContent := email.NotificationEmail(strconv.Itoa(config.Dm), strconv.Itoa(config.Nft), strconv.Itoa(config.Community))
+					htmlContent := email.NotificationEmail24(addrnameDB.Name, strconv.Itoa(config.Dm), strconv.Itoa(config.Nft), strconv.Itoa(config.Community))
 					message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
 					client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
 					response, err := client.Send(message)
