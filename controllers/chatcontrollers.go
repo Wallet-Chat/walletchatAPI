@@ -107,6 +107,12 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 			itemToInsert.Litaccesscond = vchatitem.Litaccesscond
 			//fmt.Printf("encrypted symmetric LIT key: %#v %#v %#v\n", vchatitem.Encryptsymkey, vchatitem.Toaddr, vchatitem.Fromaddr)
 
+			var imgname entity.Imageitem
+			var result = database.Connector.Where("addr = ?", chatmember).Find(&imgname)
+			if result.RowsAffected > 0 {
+				itemToInsert.LogoData = imgname.Base64data
+			}
+
 			found := false
 			for i := 0; i < len(userInbox); i++ {
 				if itemToInsert.Timestamp_dtm.After(userInbox[i].Timestamp_dtm) {
