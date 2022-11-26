@@ -98,7 +98,7 @@ type Addrnameitem struct {
 type Imageitem struct {
 	Id         int    `gorm:"primaryKey;autoIncrement"`
 	Base64data string `json:"base64data"`
-	Name       string `json:"name"`
+	Addr       string `json:"addr"`
 }
 
 //we have to keep track if a user has manually unjoined, if they did don't auto-join them again

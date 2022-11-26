@@ -190,15 +190,15 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		}
 		returnItem.Contexttype = entity.Community
 
-		//get common name from nftaddress
-		var addrname entity.Addrnameitem
-		var result = database.Connector.Where("address = ?", groupchat.Nftaddr).Find(&addrname)
-		if result.RowsAffected > 0 {
-			returnItem.Name = addrname.Name
-		}
+		// //get common name from nftaddress
+		// var addrname entity.Addrnameitem
+		// var result = database.Connector.Where("address = ?", groupchat.Nftaddr).Find(&addrname)
+		// if result.RowsAffected > 0 {
+		// 	returnItem.Name = addrname.Name
+		// }
 		//not sure if long term we will store by name (WalletChat HQ) or nftaddr (walletchat)
 		var imgname entity.Imageitem
-		result = database.Connector.Where("name = ?", returnItem.Name).Find(&imgname)
+		var result = database.Connector.Where("addr = ?", groupchat.Nftaddr).Find(&imgname)
 		if result.RowsAffected > 0 {
 			returnItem.LogoData = imgname.Base64data
 		}
@@ -1260,20 +1260,19 @@ func GetBookmarkItems(w http.ResponseWriter, r *http.Request) {
 // @Router /v1/image [post]
 func CreateImageItem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
-	var imgname entity.Imageitem
-	json.Unmarshal(requestBody, &imgname)
+	var imageaddr entity.Imageitem
+	json.Unmarshal(requestBody, &imageaddr)
 
-	//Authuser := auth.GetUserFromReqContext(r)
-	//TODO: get address to name mapping or send it in
+	Authuser := auth.GetUserFromReqContext(r)
 
-	//if strings.EqualFold(Authuser.Address, imgname) {
-	database.Connector.Create(&imgname)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(imgname)
-	// } else {
-	// 	w.WriteHeader(http.StatusForbidden)
-	// }
+	if strings.EqualFold(Authuser.Address, imageaddr.Addr) {
+		database.Connector.Create(&imageaddr)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(imageaddr)
+	} else {
+		w.WriteHeader(http.StatusForbidden)
+	}
 }
 
 // UpdateImageItem godoc
@@ -1294,7 +1293,7 @@ func UpdateImageItem(w http.ResponseWriter, r *http.Request) {
 	//TODO same as above, need address
 
 	var result = database.Connector.Model(&entity.Addrnameitem{}).
-		Where("name = ?", imgname.Name).
+		Where("addr = ?", imgname.Addr).
 		Update("base64data", imgname.Base64data)
 
 	var returnval bool
