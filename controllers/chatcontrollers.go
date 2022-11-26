@@ -1313,19 +1313,19 @@ func UpdateImageItem(w http.ResponseWriter, r *http.Request) {
 // @Accept  json
 // @Produce  json
 // @Security BearerAuth
-// @Param name path string true "Common Name Mapped to User/Community"
+// @Param name path string true "Wallet/NFT Address Mapped to User/Community"
 // @Success 200 {array} entity.Imageitem
-// @Router /v1/image/{name} [get]
+// @Router /v1/image/{addr} [get]
 func GetImageItem(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	name := vars["name"]
+	addr := vars["addr"]
 
-	var imgname []entity.Imageitem
+	var imgaddr []entity.Imageitem
 
-	database.Connector.Where("name = ?", name).Find(&imgname)
+	database.Connector.Where("addr = ?", addr).Find(&imgaddr)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(imgname)
+	json.NewEncoder(w).Encode(imgaddr)
 }
 
 // CreateAddrNameItem godoc

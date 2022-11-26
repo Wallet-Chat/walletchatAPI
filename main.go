@@ -158,7 +158,7 @@ func initaliseHandlers(router *mux.Router) {
 	//Logos / Images stored in base64
 	router.HandleFunc("/image", controllers.CreateImageItem).Methods("POST")
 	router.HandleFunc("/image", controllers.UpdateImageItem).Methods("PUT")
-	router.HandleFunc("/image/{name}", controllers.GetImageItem).Methods("GET")
+	router.HandleFunc("/image/{addr}", controllers.GetImageItem).Methods("GET")
 
 	//settings items - currently this is the public key added upon first login for encryption/signing without MM
 	//router.HandleFunc("/create_settings", controllers.CreateSettings).Methods("POST")
