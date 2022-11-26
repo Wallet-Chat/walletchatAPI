@@ -1287,18 +1287,23 @@ func CreateImageItem(w http.ResponseWriter, r *http.Request) {
 // @Router /v1/image [put]
 func UpdateImageItem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
-	var imgname entity.Imageitem
-	json.Unmarshal(requestBody, &imgname)
-
-	//TODO same as above, need address
-
-	var result = database.Connector.Model(&entity.Addrnameitem{}).
-		Where("addr = ?", imgname.Addr).
-		Update("base64data", imgname.Base64data)
+	var imageaddr entity.Imageitem
+	json.Unmarshal(requestBody, &imageaddr)
 
 	var returnval bool
-	if result.RowsAffected > 0 {
-		returnval = true
+	Authuser := auth.GetUserFromReqContext(r)
+	if strings.EqualFold(Authuser.Address, imageaddr.Addr) {
+		var result = database.Connector.Model(&entity.Imageitem{}).
+			Where("addr = ?", imageaddr.Addr).
+			Update("base64data", imageaddr.Base64data)
+
+		if result.RowsAffected > 0 {
+			returnval = true
+		} else {
+			database.Connector.Create(&imageaddr)
+		}
+	} else {
+		w.WriteHeader(http.StatusForbidden)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
