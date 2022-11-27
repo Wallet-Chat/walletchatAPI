@@ -197,14 +197,14 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		returnItem.Contexttype = entity.Community
 
 		// //get common name from nftaddress
-		// var addrname entity.Addrnameitem
-		// var result = database.Connector.Where("address = ?", groupchat.Nftaddr).Find(&addrname)
-		// if result.RowsAffected > 0 {
-		// 	returnItem.Name = addrname.Name
-		// }
+		var addrname entity.Addrnameitem
+		var result = database.Connector.Where("address = ?", groupchat.Nftaddr).Find(&addrname)
+		if result.RowsAffected > 0 {
+			returnItem.Name = addrname.Name
+		}
 		//not sure if long term we will store by name (WalletChat HQ) or nftaddr (walletchat)
 		var imgname entity.Imageitem
-		var result = database.Connector.Where("addr = ?", groupchat.Nftaddr).Find(&imgname)
+		result = database.Connector.Where("addr = ?", groupchat.Nftaddr).Find(&imgname)
 		if result.RowsAffected > 0 {
 			returnItem.LogoData = imgname.Base64data
 		}
@@ -1045,7 +1045,7 @@ func CreateCommunityChatitem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var chat entity.Groupchatitem
 	if err := json.Unmarshal(requestBody, &chat); err != nil { // Parse []byte to the go struct pointer
-		fmt.Println("Can not unmarshal JSON in CreateCommunityChat")
+		fmt.Println("Can not unmarshal JSON in CreateCommunityChat", requestBody)
 	}
 
 	//set type (could hack this in GET side but this is probably cleaner?)
@@ -1956,7 +1956,7 @@ func GetTwitterHandle(contractAddr string) string {
 
 	var result OpenseaData
 	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
-		fmt.Println("Can not unmarshal JSON")
+		fmt.Println("Can not unmarshal JSON - GetTwitterHandle")
 	}
 
 	collection := result.Collection.TwitterUsername
@@ -1993,7 +1993,7 @@ func GetTwitterID(twitterHandle string) string {
 
 	var result TwitterIdResp
 	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
-		fmt.Println("Can not unmarshal JSON")
+		fmt.Println("Can not unmarshal JSON - GetTwitterID", body)
 	}
 
 	twitterID := result.Data.Id
@@ -2035,7 +2035,7 @@ func GetTweetsFromAPI(twitterID string) TwitterTweetsData {
 
 	var result TwitterTweetsData
 	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
-		fmt.Println("Can not unmarshal JSON")
+		fmt.Println("Can not unmarshal JSON - GetTweetsFromAPI", body)
 	}
 	//fmt.Println("length twitter: ", len(result.Data))
 
@@ -2267,7 +2267,7 @@ func GetOwnerNFTs(walletAddr string, chain string) MoralisOwnerOf {
 
 	var result MoralisOwnerOf
 	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
-		fmt.Println("Can not unmarshal JSON")
+		fmt.Println("Can not unmarshal JSON - GetOwnerNFTs", body)
 	}
 
 	//fmt.Printf("IsOwner: %#v\n", result.Total)
@@ -2339,7 +2339,7 @@ func IsOwnerOfNFT(contractAddr string, walletAddr string, chain string) bool {
 
 	var result MoralisOwnerOf
 	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
-		fmt.Println("Can not unmarshal JSON")
+		fmt.Println("Can not unmarshal JSON - IsOwnerOfNFT", body)
 	}
 
 	//fmt.Printf("IsOwner: %#v\n", result.Total)
@@ -2377,7 +2377,7 @@ func IsOnChain(contractAddr string, chain string) bool {
 
 	var result MoralisContractInfoNFT
 	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
-		fmt.Println("Can not unmarshal JSON")
+		fmt.Println("Can not unmarshal JSON - IsOnChain", body)
 	}
 
 	//fmt.Printf("Chain Response: %#v\n", result.Response)
@@ -2450,7 +2450,7 @@ func AutoJoinCommunitiesByChain(walletAddr string, chain string) {
 
 	var result MoralisOwnerOf
 	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
-		fmt.Println("Can not unmarshal JSON")
+		fmt.Println("Can not unmarshal JSON - AutoJoinCommunitiesByChain", body)
 	}
 
 	//fmt.Printf("IsOwner: %#v\n", result.Total)
@@ -2555,7 +2555,7 @@ func getPoapInfoByAddress(walletAddr string) []POAPInfoByAddress {
 		}
 
 		if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
-			fmt.Println("Can not unmarshal JSON")
+			fmt.Println("Can not unmarshal JSON - getPoapInfoByAddress", body)
 		}
 	}
 
