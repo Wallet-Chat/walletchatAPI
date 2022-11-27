@@ -2125,9 +2125,9 @@ func GetCommunityChat(w http.ResponseWriter, r *http.Request) {
 	landingData.Name = "WalletChat HQ" //TODO this should come from a table which stores info set in in a CREATE community chat table
 
 	//logo base64 data (url requires other changes)
-	var imgname entity.Imageitem
-	database.Connector.Where("name = ?", community).Find(&imgname)
-	landingData.Logo = imgname.Base64data
+	var imgaddr entity.Imageitem
+	database.Connector.Where("addr = ?", community).Find(&imgaddr)
+	landingData.Logo = imgaddr.Base64data
 
 	//WalletChat is verified of course
 	landingData.Verified = true
