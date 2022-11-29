@@ -2564,7 +2564,7 @@ func getPoapInfoByAddress(walletAddr string) []POAPInfoByAddress {
 	return result
 }
 
-type POAPInfoByAddress struct {
+type POAPInfoByAddress []struct {
 	Event struct {
 		ID          int    `json:"id"`
 		FancyID     string `json:"fancy_id"`
