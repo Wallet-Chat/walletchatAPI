@@ -94,8 +94,9 @@ func main() {
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"https://app.walletchat.fun", "http://localhost:3000", "http://localhost:8080", "https://v1.walletchat.fun"},
 		AllowCredentials: true,
+		AllowedHeaders: []string{"*"},
 		// Enable Debugging for testing, consider disabling in production
-		//Debug: true,
+		Debug: true,
 	})
 	handler := c.Handler(router)
 	log.Fatal(http.ListenAndServe(":8080", handler))
