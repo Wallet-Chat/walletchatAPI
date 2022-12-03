@@ -1501,6 +1501,9 @@ func GetGroupChatItemsByAddr(w http.ResponseWriter, r *http.Request) {
 		if !isHolder {
 			isHolder = IsOwnerOfNFT(nftaddr, fromaddr, "polygon")
 		}
+	} else if !isHolder && strings.HasPrefix(nftaddr, "poap_") {
+		split := strings.Split(nftaddr, "_")
+		isHolder = IsOwnerOfPOAP(split[1], fromaddr)
 	}
 
 	//if user is not a holder, can't get the messages
@@ -2345,6 +2348,24 @@ func IsOwnerOfNFT(contractAddr string, walletAddr string, chain string) bool {
 	//fmt.Printf("IsOwner: %#v\n", result.Total)
 
 	return result.Total > 0
+}
+
+func IsOwnerOfPOAP(eventId string, walletAddr string) bool {
+	url := "https://api.poap.tech/actions/scan/" + walletAddr + "/" + eventId
+
+	req, _ := http.NewRequest("GET", url, nil)
+
+	req.Header.Add("accept", "application/json")
+	req.Header.Add("X-API-Key", os.Getenv("POAP_API_KEY"))
+
+	// Send req using http Client
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println("Error on response.\n[ERROR] -", err)
+	}
+
+	return resp.StatusCode != 404
 }
 
 func IsOnChain(contractAddr string, chain string) bool {
