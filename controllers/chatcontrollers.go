@@ -2555,7 +2555,7 @@ func getPoapInfoByAddress(walletAddr string) []POAPInfoByAddress {
 		}
 
 		if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
-			fmt.Println("Can not unmarshal JSON - getPoapInfoByAddress", body)
+			fmt.Println("Can not unmarshal JSON - getPoapInfoByAddress", resp.Body)
 		}
 	}
 
