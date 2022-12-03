@@ -1019,6 +1019,9 @@ func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 		if !isHolder {
 			isHolder = IsOwnerOfNFT(chat.Nftaddr, chat.Fromaddr, "polygon")
 		}
+	} else if !isHolder && strings.HasPrefix(chat.Nftaddr, "poap_") {
+		split := strings.Split(chat.Nftaddr, "_")
+		isHolder = IsOwnerOfPOAP(split[1], chat.Fromaddr)
 	}
 
 	if strings.EqualFold(chat.Fromaddr, Authuser.Address) && isHolder {
