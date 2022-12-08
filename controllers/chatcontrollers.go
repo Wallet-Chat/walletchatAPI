@@ -196,7 +196,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		}
 		returnItem.Contexttype = entity.Community
 
-		// //get common name from nftaddress
+		//get common name from nftaddress
 		var addrname entity.Addrnameitem
 		var result = database.Connector.Where("address = ?", groupchat.Nftaddr).Find(&addrname)
 		if result.RowsAffected > 0 {
@@ -939,9 +939,7 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 					if err != nil {
 						log.Println(err)
 					} else {
-						fmt.Println(response.StatusCode)
-						fmt.Println(response.Body)
-						fmt.Println(response.Headers)
+						_ = response
 					}
 				}
 			}
@@ -976,9 +974,7 @@ func SendNotificationEmails() {
 					if err != nil {
 						log.Println(err)
 					} else {
-						if response == nil {
-							log.Println(response)
-						}
+						_ = response
 					}
 				}
 			}
