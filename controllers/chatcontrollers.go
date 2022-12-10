@@ -2115,9 +2115,6 @@ func GetCommunityChat(w http.ResponseWriter, r *http.Request) {
 	key := vars["address"]
 	var landingData LandingPageItems
 
-	//todo someday this will be for general communities (need to rename functions)
-	//fmt.Printf("Get WalletChat HQ: %#v\n", community)
-
 	//for now, the walletchat living room is all users by default
 	var members []entity.Bookmarkitem
 	database.Connector.Where("nftaddr = ?", community).Find(&members)
@@ -2153,7 +2150,7 @@ func GetCommunityChat(w http.ResponseWriter, r *http.Request) {
 		newgroupchatuser.Contexttype = entity.Community
 		newgroupchatuser.Fromaddr = key
 		newgroupchatuser.Nftaddr = community
-		newgroupchatuser.Message = "Welcome " + key + " to Wallet Chat HQ!" //TODO end of this message should come from a table which stores info set in in a CREATE community chat table
+		newgroupchatuser.Message = "Welcome " + key + " to " + landingData.Name + "!"
 		newgroupchatuser.Timestamp_dtm = time.Now()
 		newgroupchatuser.Timestamp = time.Now().Format("2006-01-02T15:04:05.000Z")
 
@@ -2197,21 +2194,31 @@ func GetCommunityChat(w http.ResponseWriter, r *http.Request) {
 	database.Connector.Where("nftaddr = ?", community).Find(&groupchat)
 	landingData.Messages = groupchat
 
-	//get twitter data
-	twitterID := GetTwitterID("wallet_chat") //could get this once and hardcode the ID in here too to save one API call
-	tweets := GetTweetsFromAPI(twitterID)
-	formatted := FormatTwitterData(tweets)
-	landingData.Tweets = formatted
+	//get social media info
+	var socialmedia entity.Communitysocial
+	dbResult := database.Connector.Where("community = ?", community).Where("type = ?", "twitter").Find(&socialmedia)
 
-	//social data
-	var twitterSocial SocialMsg
-	twitterSocial.Type = "twitter"
-	twitterSocial.Username = "@wallet_chat" //TODO this should come from a table which stores info set in in a CREATE community chat table
-	landingData.Social = append(landingData.Social, twitterSocial)
-	var discordSocial SocialMsg
-	discordSocial.Type = "discord"
-	discordSocial.Username = "WalletChat" //TODO this should come from a table which stores info set in in a CREATE community chat table
-	landingData.Social = append(landingData.Social, discordSocial)
+	if dbResult.RowsAffected > 0 {
+		//get twitter data
+		twitterID := GetTwitterID(socialmedia.Name)
+		tweets := GetTweetsFromAPI(twitterID)
+		formatted := FormatTwitterData(tweets)
+		landingData.Tweets = formatted
+
+		//social data
+		var twitterSocial SocialMsg
+		twitterSocial.Type = socialmedia.Type
+		twitterSocial.Username = socialmedia.Name
+		landingData.Social = append(landingData.Social, twitterSocial)
+	}
+
+	dbResult = database.Connector.Where("community = ?", community).Where("type = ?", "discord").Find(&socialmedia)
+	if dbResult.RowsAffected > 0 {
+		var discordSocial SocialMsg
+		discordSocial.Type = socialmedia.Type
+		discordSocial.Username = socialmedia.Name
+		landingData.Social = append(landingData.Social, discordSocial)
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(landingData)

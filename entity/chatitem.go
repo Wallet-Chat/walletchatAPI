@@ -30,6 +30,13 @@ type Unreadcountitem struct {
 	Community int `json:"community"`
 }
 
+//secondary table to help only load new messages for each user (not reload whole chat history)
+type Communitysocial struct {
+	Id   int    `gorm:"primaryKey;autoIncrement"`
+	Type string `json:"type"`
+	Name string `json:"name"`
+}
+
 type Chatitem struct {
 	Id            int       `gorm:"primary_key"`                 //AUTO-GENERATED (PRIMARY KEY)
 	Fromaddr      string    `json:"fromaddr" binding:"required"` //*** REQUIRED INPUT ***
