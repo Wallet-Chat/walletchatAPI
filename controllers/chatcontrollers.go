@@ -2120,8 +2120,10 @@ func GetCommunityChat(w http.ResponseWriter, r *http.Request) {
 	database.Connector.Where("nftaddr = ?", community).Find(&members)
 	landingData.Members = len(members)
 
-	//name
-	landingData.Name = "WalletChat HQ" //TODO this should come from a table which stores info set in in a CREATE community chat table
+	//name (this might be better moved to a different table someday)
+	var addrname entity.Addrnameitem
+	database.Connector.Where("address = ?", community).Find(&addrname)
+	landingData.Name = addrname.Name
 
 	//logo base64 data (url requires other changes)
 	var imgaddr entity.Imageitem
@@ -2197,8 +2199,8 @@ func GetCommunityChat(w http.ResponseWriter, r *http.Request) {
 	//get social media info
 	var socialmedia entity.Communitysocial
 	dbResult := database.Connector.Where("community = ?", community).Where("type = ?", "twitter").Find(&socialmedia)
-
 	if dbResult.RowsAffected > 0 {
+		fmt.Println("adding Twitter social: ", socialmedia.Name)
 		//get twitter data
 		twitterID := GetTwitterID(socialmedia.Name)
 		tweets := GetTweetsFromAPI(twitterID)
@@ -2212,11 +2214,13 @@ func GetCommunityChat(w http.ResponseWriter, r *http.Request) {
 		landingData.Social = append(landingData.Social, twitterSocial)
 	}
 
-	dbResult = database.Connector.Where("community = ?", community).Where("type = ?", "discord").Find(&socialmedia)
+	var socialdiscord entity.Communitysocial
+	dbResult = database.Connector.Where("community = ?", community).Where("type = ?", "discord").Find(&socialdiscord)
 	if dbResult.RowsAffected > 0 {
+		fmt.Println("adding Discord social: ", socialdiscord.Name)
 		var discordSocial SocialMsg
-		discordSocial.Type = socialmedia.Type
-		discordSocial.Username = socialmedia.Name
+		discordSocial.Type = socialdiscord.Type
+		discordSocial.Username = socialdiscord.Name
 		landingData.Social = append(landingData.Social, discordSocial)
 	}
 
