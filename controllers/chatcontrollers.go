@@ -2133,7 +2133,7 @@ func GetCommunityChat(w http.ResponseWriter, r *http.Request) {
 	//WalletChat is verified of course
 	landingData.Verified = true
 
-	//auto-join new users to WalletChat community (they can leave later)
+	//auto-join new users to WalletChat community (they can leave later) - might need to break this out
 	var bookmarks []entity.Bookmarkitem
 	var dbQuery = database.Connector.Where("nftaddr = ?", community).Where("walletaddr = ?", key).Find(&bookmarks)
 	if dbQuery.RowsAffected == 0 {
@@ -2200,7 +2200,7 @@ func GetCommunityChat(w http.ResponseWriter, r *http.Request) {
 	var socialmedia entity.Communitysocial
 	dbResult := database.Connector.Where("community = ?", community).Where("type = ?", "twitter").Find(&socialmedia)
 	if dbResult.RowsAffected > 0 {
-		fmt.Println("adding Twitter social: ", socialmedia.Name)
+		//fmt.Println("adding Twitter social: ", socialmedia.Name)
 		//get twitter data
 		twitterID := GetTwitterID(socialmedia.Name)
 		tweets := GetTweetsFromAPI(twitterID)
@@ -2217,7 +2217,7 @@ func GetCommunityChat(w http.ResponseWriter, r *http.Request) {
 	var socialdiscord entity.Communitysocial
 	dbResult = database.Connector.Where("community = ?", community).Where("type = ?", "discord").Find(&socialdiscord)
 	if dbResult.RowsAffected > 0 {
-		fmt.Println("adding Discord social: ", socialdiscord.Name)
+		//fmt.Println("adding Discord social: ", socialdiscord.Name)
 		var discordSocial SocialMsg
 		discordSocial.Type = socialdiscord.Type
 		discordSocial.Username = socialdiscord.Name
