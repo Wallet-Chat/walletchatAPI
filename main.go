@@ -89,7 +89,7 @@ func main() {
 	wsRouter.HandleFunc("/welcome", auth.WelcomeHandler()).Methods("GET")
 
 	initaliseHandlers(wsRouter)
-	go sendPeriodicNotifications() //run concurrently
+	//go sendPeriodicNotifications() //run concurrently
 
 	//handler := cors.Default().Handler(router) //cors.AllowAll().Handler(router)
 	c := cors.New(cors.Options{
@@ -159,6 +159,7 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/image", controllers.CreateImageItem).Methods("POST")
 	router.HandleFunc("/image", controllers.UpdateImageItem).Methods("PUT")
 	router.HandleFunc("/image/{addr}", controllers.GetImageItem).Methods("GET")
+	router.HandleFunc("/imagepfp", controllers.CreateImageItemPFP).Methods("POST")
 
 	//settings items - currently this is the public key added upon first login for encryption/signing without MM
 	//router.HandleFunc("/create_settings", controllers.CreateSettings).Methods("POST")

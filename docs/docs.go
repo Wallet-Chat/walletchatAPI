@@ -1546,14 +1546,14 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/entity.Bookmarkitem"
+                                "$ref": "#/definitions/entity.Imageitem"
                             }
                         }
                     }
                 }
             }
         },
-        "/v1/image/{name}": {
+        "/v1/image/{addr}": {
             "get": {
                 "security": [
                     {
@@ -1574,10 +1574,52 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Common Name Mapped to User/Community",
+                        "description": "Wallet/NFT Address Mapped to User/Community",
                         "name": "name",
                         "in": "path",
                         "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Imageitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/imagepfp": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "public facing PFP storage to make it faster for UI to get and load images",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Common"
+                ],
+                "summary": "Store Image in Bucket Storage",
+                "parameters": [
+                    {
+                        "description": "Profile Thumbnail Pic (PFP)",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Imageitem"
+                        }
                     }
                 ],
                 "responses": {
@@ -2188,14 +2230,14 @@ const docTemplate = `{
         "entity.Imageitem": {
             "type": "object",
             "properties": {
+                "addr": {
+                    "type": "string"
+                },
                 "base64data": {
                     "type": "string"
                 },
                 "id": {
                     "type": "integer"
-                },
-                "name": {
-                    "type": "string"
                 }
             }
         },
@@ -2203,11 +2245,17 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "email": {
-                    "description": "Publickey  string ` + "`" + `json:\"publickey\"` + "`" + ` //need this for encryption, don't want to get it over and over",
+                    "description": "Publickey  string ` + "`" + `json:\"publickey\"` + "`" + `",
                     "type": "string"
                 },
                 "id": {
                     "type": "integer"
+                },
+                "notify24": {
+                    "type": "string"
+                },
+                "notifydm": {
+                    "type": "string"
                 },
                 "walletaddr": {
                     "type": "string"

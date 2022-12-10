@@ -231,21 +231,24 @@ definitions:
     type: object
   entity.Imageitem:
     properties:
+      addr:
+        type: string
       base64data:
         type: string
       id:
         type: integer
-      name:
-        type: string
     type: object
   entity.Settings:
     properties:
       email:
-        description: Publickey  string `json:"publickey"` //need this for encryption,
-          don't want to get it over and over
+        description: Publickey  string `json:"publickey"`
         type: string
       id:
         type: integer
+      notify24:
+        type: string
+      notifydm:
+        type: string
       walletaddr:
         type: string
     type: object
@@ -1247,7 +1250,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/entity.Bookmarkitem'
+              $ref: '#/definitions/entity.Imageitem'
             type: array
       security:
       - BearerAuth: []
@@ -1280,14 +1283,14 @@ paths:
       summary: Store Image in DB for later user (update existing photo)
       tags:
       - Common
-  /v1/image/{name}:
+  /v1/image/{addr}:
     get:
       consumes:
       - application/json
       description: Retreive image data for use with user/community/nft group dislayed
         icon
       parameters:
-      - description: Common Name Mapped to User/Community
+      - description: Wallet/NFT Address Mapped to User/Community
         in: path
         name: name
         required: true
@@ -1304,6 +1307,33 @@ paths:
       security:
       - BearerAuth: []
       summary: Get Thumbnail Image Data
+      tags:
+      - Common
+  /v1/imagepfp:
+    post:
+      consumes:
+      - application/json
+      description: public facing PFP storage to make it faster for UI to get and load
+        images
+      parameters:
+      - description: Profile Thumbnail Pic (PFP)
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Imageitem'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Imageitem'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Store Image in Bucket Storage
       tags:
       - Common
   /v1/is_owner/{contract}/{wallet}:
