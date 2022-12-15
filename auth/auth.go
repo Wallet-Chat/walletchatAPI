@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -24,6 +25,8 @@ import (
 	_ "rest-go-demo/docs"
 
 	"github.com/0xsequence/go-sequence/api"
+
+	"blockwatch.cc/tzgo/tezos"
 )
 
 var (
@@ -398,6 +401,31 @@ func ValidateMessageSignatureSequenceWallet(chainID string, walletAddress string
 	return isValid
 }
 
+func ValidateMessageSignatureTezosWallet(key, sig, msg string) error {
+	pk, err := tezos.ParseKey(key)
+	if err != nil {
+		return err
+	}
+	s, err := tezos.ParseSignature(sig)
+	if err != nil {
+		return err
+	}
+	m := []byte(msg)
+	if strings.HasPrefix(msg, "0x") {
+		m, err = hex.DecodeString(msg)
+		if err != nil {
+			return err
+		}
+	}
+	digest := tezos.Digest([]byte(m))
+	if err := pk.Verify(digest[:], s); err == nil {
+		fmt.Println("Tezos Signature OK")
+	} else {
+		return err
+	}
+	return nil
+}
+
 func Authenticate(address string, nonce string, message string, sigHex string) (Authuser, error) {
 	fmt.Println("Authenticate: " + address + "\r\n msg: " + message + " sig: " + sigHex)
 	Authuser, err := Get(address)
@@ -409,7 +437,7 @@ func Authenticate(address string, nonce string, message string, sigHex string) (
 	}
 
 	recoveredAddr := " "
-	if len(sigHex) > 590 { //594 without the 0x to be exact, but we can clean this up
+	if len(sigHex) > 590 { //594 without the 0x to be exact, but we can clean this up TODO: should be something more specific
 		fmt.Println("Using Smart Contract Wallet Signature")
 		isValidSequenceWalletSig := ValidateMessageSignatureSequenceWallet("mainnet", address, sigHex, message)
 
@@ -418,6 +446,15 @@ func Authenticate(address string, nonce string, message string, sigHex string) (
 			fmt.Println("Smart Contract Wallet Signature Valid!")
 		}
 
+	} else if strings.HasPrefix(sigHex, "edsig") { //Tezos Wallet Signature
+		fmt.Println("Using Tezos Wallet Signature")
+		returnsNilForSuccess := ValidateMessageSignatureTezosWallet(address, sigHex, message)
+		if returnsNilForSuccess != nil {
+			fmt.Println("failed to recover Tezos Signature")
+			return Authuser, err
+		}
+		recoveredAddr = address
+		fmt.Println("Tezos Wallet Signature Valid!")
 	} else {
 		sig := hexutil.MustDecode(sigHex)
 		// https://github.com/ethereum/go-ethereum/blob/master/internal/ethapi/api.go#L516

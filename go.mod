@@ -18,6 +18,8 @@ require (
 	github.com/0xsequence/ethkit v1.14.1 // indirect
 	github.com/StackExchange/wmi v0.0.0-20180116203802-5d049714c4a6 // indirect
 	github.com/deckarep/golang-set v1.8.0 // indirect
+	github.com/decred/dcrd/dcrec/secp256k1 v1.0.3 // indirect
+	github.com/decred/dcrd/dcrec/secp256k1/v2 v2.0.0 // indirect
 	github.com/go-ole/go-ole v1.2.1 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/google/uuid v1.3.0 // indirect
@@ -46,6 +48,7 @@ require (
 )
 
 require (
+	blockwatch.cc/tzgo v1.15.0
 	github.com/0xsequence/go-sequence v0.12.8
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/aws/aws-sdk-go v1.44.157
