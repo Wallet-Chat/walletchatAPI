@@ -119,7 +119,8 @@ func Update(user Authuser) error {
 // ============================================================================
 
 var (
-	hexRegex   *regexp.Regexp = regexp.MustCompile(`^0x[a-fA-F0-9]{40}$`)
+	//TODO - might need to pass in chain type for
+	//hexRegexEVM   *regexp.Regexp = regexp.MustCompile(`^0x[a-fA-F0-9]{40}$`)
 	nonceRegex *regexp.Regexp = regexp.MustCompile(`^[0-9]+$`)
 )
 
@@ -128,9 +129,9 @@ type RegisterPayload struct {
 }
 
 func (p RegisterPayload) Validate() error {
-	if !hexRegex.MatchString(p.Address) {
-		return ErrInvalidAddress
-	}
+	// if !hexRegexEVM.MatchString(p.Address) {
+	// 	return ErrInvalidAddress
+	// }
 	return nil
 }
 
@@ -183,10 +184,11 @@ func UserNonceHandler() http.HandlerFunc {
 		vars := mux.Vars(r)
 		address := vars["address"]
 		//fmt.Println("getting nonce for user: ", address)
-		if !hexRegex.MatchString(address) {
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
+
+		// if !hexRegexEVM.MatchString(address) {
+		// 	w.WriteHeader(http.StatusBadRequest)
+		// 	return
+		// }
 
 		//combining /register and /users (no need to call both and check each time)
 		nonce, err := GetNonce()
@@ -228,9 +230,9 @@ type SigninPayload struct {
 }
 
 func (s SigninPayload) Validate() error {
-	if !hexRegex.MatchString(s.Address) {
-		return ErrInvalidAddress
-	}
+	// if !hexRegexEVM.MatchString(s.Address) {
+	// 	return ErrInvalidAddress
+	// }
 	if !nonceRegex.MatchString(s.Nonce) {
 		return ErrInvalidNonce
 	}
@@ -408,12 +410,12 @@ func Authenticate(address string, nonce string, message string, sigHex string) (
 
 	recoveredAddr := " "
 	if len(sigHex) > 590 { //594 without the 0x to be exact, but we can clean this up
-		fmt.Println("Using Sequence Wallet Signature")
+		fmt.Println("Using Smart Contract Wallet Signature")
 		isValidSequenceWalletSig := ValidateMessageSignatureSequenceWallet("mainnet", address, sigHex, message)
 
 		if isValidSequenceWalletSig {
 			recoveredAddr = address
-			fmt.Println("Sequence Wallet Signature Valid!")
+			fmt.Println("Smart Contract Wallet Signature Valid!")
 		}
 
 	} else {

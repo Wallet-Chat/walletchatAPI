@@ -89,7 +89,8 @@ func main() {
 	wsRouter.HandleFunc("/welcome", auth.WelcomeHandler()).Methods("GET")
 
 	initaliseHandlers(wsRouter)
-	//go sendPeriodicNotifications() //run concurrently
+	go sendPeriodicNotifications() //run concurrently
+	controllers.InitRandom()
 
 	//handler := cors.Default().Handler(router) //cors.AllowAll().Handler(router)
 	c := cors.New(cors.Options{
@@ -139,10 +140,10 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/get_groupchatitems/{address}/{useraddress}", controllers.GetGroupChatItemsByAddr).Methods("GET")
 	router.HandleFunc("/get_groupchatitems_unreadcnt/{address}/{useraddress}", controllers.GetGroupChatItemsByAddrLen).Methods("GET")
 
-	//group chat
-	//TODO: we need a create community API call, which provides twitter/discord handles, welcome message, Title/Name (see hardcoded items in GetCommunityChat)
+	//community chat
 	router.HandleFunc("/community/{community}/{address}", controllers.GetCommunityChat).Methods("GET") //TODO: make common
-	router.HandleFunc("/community", controllers.CreateCommunityChatitem).Methods("POST")
+	router.HandleFunc("/community", controllers.CreateCommunityChatItem).Methods("POST")
+	router.HandleFunc("/create_community", controllers.CreateCommunity).Methods("POST")
 
 	//bookmarks
 	router.HandleFunc("/create_bookmark", controllers.CreateBookmarkItem).Methods("POST")
@@ -166,6 +167,7 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/update_settings", controllers.UpdateSettings).Methods("POST")
 	router.HandleFunc("/get_settings/{address}", controllers.GetSettings).Methods("GET")
 	router.HandleFunc("/delete_settings/{address}", controllers.DeleteSettings).Methods("DELETE")
+	router.HandleFunc("/verify_email/{email}/{code}", controllers.VerifyEmail).Methods("GET")
 
 	//comments on a specific NFT
 	router.HandleFunc("/create_comments", controllers.CreateComments).Methods("POST")

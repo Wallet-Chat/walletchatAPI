@@ -208,6 +208,17 @@ definitions:
       timestamp:
         type: string
     type: object
+  entity.Createcommunityitem:
+    properties:
+      community:
+        type: string
+      socialname:
+        type: string
+      socialtype:
+        type: string
+      title:
+        type: string
+    type: object
   entity.Groupchatitem:
     properties:
       context_type:
@@ -244,13 +255,19 @@ definitions:
         description: Publickey  string `json:"publickey"`
         type: string
       id:
+        description: AUTO-GENERATED (PRIMARY KEY)
         type: integer
       notify24:
+        description: RECEIVE NOTIFICATION FOR EVERY DM RECEIVED
         type: string
       notifydm:
+        description: RECEIVE DAILY NOTIFICATION SUMMARY EMAIL
         type: string
       walletaddr:
+        description: '*** REQUIRED INPUT ***'
         type: string
+    required:
+    - walletaddr
     type: object
 info:
   contact:
@@ -468,6 +485,32 @@ paths:
       summary: Comments are used within an NFT community chat
       tags:
       - NFT
+  /v1/create_community:
+    post:
+      consumes:
+      - application/json
+      description: Community Chat Creation
+      parameters:
+      - description: Community Message Creation
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Createcommunityitem'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Createcommunityitem'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: CreateCommunity creates new custom community chat
+      tags:
+      - GroupChat
   /v1/create_groupchatitem:
     post:
       consumes:

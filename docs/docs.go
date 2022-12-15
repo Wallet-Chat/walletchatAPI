@@ -300,6 +300,48 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/create_community": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Community Chat Creation",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "GroupChat"
+                ],
+                "summary": "CreateCommunity creates new custom community chat",
+                "parameters": [
+                    {
+                        "description": "Community Message Creation",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Createcommunityitem"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Createcommunityitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/v1/create_groupchatitem": {
             "post": {
                 "security": [
@@ -2195,6 +2237,23 @@ const docTemplate = `{
                 }
             }
         },
+        "entity.Createcommunityitem": {
+            "type": "object",
+            "properties": {
+                "community": {
+                    "type": "string"
+                },
+                "socialname": {
+                    "type": "string"
+                },
+                "socialtype": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "entity.Groupchatitem": {
             "type": "object",
             "properties": {
@@ -2243,21 +2302,28 @@ const docTemplate = `{
         },
         "entity.Settings": {
             "type": "object",
+            "required": [
+                "walletaddr"
+            ],
             "properties": {
                 "email": {
                     "description": "Publickey  string ` + "`" + `json:\"publickey\"` + "`" + `",
                     "type": "string"
                 },
                 "id": {
+                    "description": "AUTO-GENERATED (PRIMARY KEY)",
                     "type": "integer"
                 },
                 "notify24": {
+                    "description": "RECEIVE NOTIFICATION FOR EVERY DM RECEIVED",
                     "type": "string"
                 },
                 "notifydm": {
+                    "description": "RECEIVE DAILY NOTIFICATION SUMMARY EMAIL",
                     "type": "string"
                 },
                 "walletaddr": {
+                    "description": "*** REQUIRED INPUT ***",
                     "type": "string"
                 }
             }

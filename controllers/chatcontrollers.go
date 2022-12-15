@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"os"
@@ -21,14 +22,14 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	ens "github.com/wealdtech/go-ens/v3"
 
-	"github.com/gorilla/mux"
-	"github.com/sendgrid/sendgrid-go"
-	"github.com/sendgrid/sendgrid-go/helpers/mail"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/gorilla/mux"
+	"github.com/sendgrid/sendgrid-go"
+	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
 func stringInSlice(a string, list []string) bool {
@@ -926,7 +927,7 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 			//also notify the TO user of a new message (need to throttle this somehow)
 			var settings entity.Settings
 			var dbResult = database.Connector.Where("walletaddr = ?", chat.Toaddr).Find(&settings)
-			if dbResult.RowsAffected > 0 {
+			if dbResult.RowsAffected > 0 && strings.EqualFold("true", settings.Verified) {
 				if strings.Contains(settings.Email, "@") && strings.EqualFold(settings.Notifydm, "true") {
 					var fromAddrname entity.Addrnameitem
 					database.Connector.Where("address = ?", chat.Fromaddr).Find(&fromAddrname)
@@ -967,7 +968,7 @@ func SendNotificationEmails() {
 				var addrnameDB entity.Addrnameitem
 				var dbQuery = database.Connector.Where("address = ?", settings[i].Walletaddr).Find(&addrnameDB)
 
-				if dbQuery.RowsAffected > 0 && strings.EqualFold(settings[i].Notify24, "true") {
+				if dbQuery.RowsAffected > 0 && strings.EqualFold(settings[i].Notify24, "true") && strings.EqualFold("true", settings[i].Verified) {
 					from := mail.NewEmail("WalletChat Notifications", "contact@walletchat.fun")
 					subject := "Message Waiting In WalletChat"
 					to := mail.NewEmail(addrnameDB.Name, settings[i].Email)
@@ -1035,6 +1036,51 @@ func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// CreateCommunity godoc
+// @Summary CreateCommunity creates new custom community chat
+// @Description Community Chat Creation
+// @Tags GroupChat
+// @Accept  json
+// @Produce  json
+// @Security BearerAuth
+// @Param message body entity.Createcommunityitem true "Community Message Creation"
+// @Success 200 {array} entity.Createcommunityitem
+// @Router /v1/create_community [post]
+func CreateCommunity(w http.ResponseWriter, r *http.Request) {
+	requestBody, _ := ioutil.ReadAll(r.Body)
+	var communityInfo entity.Createcommunityitem
+	if err := json.Unmarshal(requestBody, &communityInfo); err != nil { // Parse []byte to the go struct pointer
+		fmt.Println("Can not unmarshal JSON in CreateCommunityChat", requestBody)
+	}
+
+	fmt.Println("input data: ", communityInfo)
+
+	var social entity.Communitysocial
+	social.Community = communityInfo.Community
+	social.Type = communityInfo.Socialtype
+	social.Name = communityInfo.Socialname
+
+	var addrname entity.Addrnameitem
+	addrname.Address = communityInfo.Community
+	addrname.Name = communityInfo.Title
+
+	var mappings []entity.Addrnameitem
+	//currently, community chat is in the addrname mapping table in the DB
+	dbQuery := database.Connector.Where("address = ?", addrname.Address).Find(&mappings)
+
+	//TODO: do we need to limit the people that can create community chat groups?
+	//Authuser := auth.GetUserFromReqContext(r)
+	//if strings.EqualFold(chat.Fromaddr, Authuser.Address) {
+	if dbQuery.RowsAffected == 0 {
+		database.Connector.Create(&social)
+		database.Connector.Create(&addrname)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+	} else {
+		w.WriteHeader(http.StatusForbidden)
+	}
+}
+
 // CreateCommunityChatitem godoc
 // @Summary CreateCommunityChatitem creates GroupChatitem just with community tag (likely could be consolidated)
 // @Description Community Chat Data
@@ -1045,7 +1091,7 @@ func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 // @Param message body entity.Groupchatitem true "Community Message Chat Data"
 // @Success 200 {array} entity.Groupchatitem
 // @Router /v1/community [post]
-func CreateCommunityChatitem(w http.ResponseWriter, r *http.Request) {
+func CreateCommunityChatItem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var chat entity.Groupchatitem
 	if err := json.Unmarshal(requestBody, &chat); err != nil { // Parse []byte to the go struct pointer
@@ -1755,9 +1801,20 @@ func DeleteChatitem(w http.ResponseWriter, r *http.Request) {
 // 	}
 // }
 
+var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+func InitRandom() {
+	rand.Seed(time.Now().UnixNano())
+}
+func randSeq(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
+}
 // UpdateSettings godoc
 // @Summary Settings hold a user address and the email address for notifications if they opt-in
-// @Description Currently this only updates email address field
+// @Description Update settings, email address, daily notifications and per DM notifications
 // @Tags Common
 // @Accept  json
 // @Produce  json
@@ -1779,10 +1836,63 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 
 		if dbResults.RowsAffected == 0 {
 			dbResults = database.Connector.Create(&settingsRX)
+			log.Println("Created New Settings")
+			//send verification email
+			if strings.Contains(settingsRX.Email, "@") {
+				var toAddrname entity.Addrnameitem
+				dbResults = database.Connector.Where("address = ?", settingsRX.Walletaddr).Find(&toAddrname)
+				if dbResults.RowsAffected == 0 {
+					log.Println("Did not find addrname item for: ", settingsRX.Walletaddr)
+				}
+				var verificationCode = randSeq(10)
+				dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("verified", verificationCode)
+				if dbResults.RowsAffected == 0 {
+					log.Println("Did not update verification code item for: ", addr)
+				}
+				from := mail.NewEmail("WalletChat Notifications", "contact@walletchat.fun")
+				subject := "Please Verify Email for ApeCoinStaking.io / NF3.exchange"
+				to := mail.NewEmail(toAddrname.Name, settingsRX.Email)
+				plainTextContent := "Please verify your email entered at ApeCoinStaking.io / NF3.exchange by clicking here: https://nf3.walletchat.fun/verify-email?email=" + settings.Email + "&code=" + verificationCode
+				htmlContent := email.NotificationEmailVerify(toAddrname.Name, "Email Verification", settingsRX.Email, verificationCode)
+				message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
+				client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
+				response, err := client.Send(message)
+				if err != nil {
+					log.Println(err)
+				} else {
+					_ = response
+				}
+			}
 		} else {
 			if settingsRX.Email != "" {
 				log.Println("Updating Email", settingsRX.Email)
 				dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("email", settingsRX.Email)
+				//send verification email
+					if strings.Contains(settingsRX.Email, "@") {
+						var toAddrname entity.Addrnameitem
+						database.Connector.Where("address = ?", settingsRX.Walletaddr).Find(&toAddrname)
+
+						var verificationCode = randSeq(10)
+						dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("verified", verificationCode)
+
+						from := mail.NewEmail("WalletChat Notifications", "contact@walletchat.fun")
+						subject := "Please Verify Email for ApeCoinStaking.io / NF3.exchange"
+						to := mail.NewEmail(toAddrname.Name, settingsRX.Email)
+						plainTextContent := "Please verify your email entered at ApeCoinStaking.io / NF3.exchange by clicking here: https://nf3.walletchat.fun/verify-email?email=" + settings.Email + "&code=" + verificationCode
+						htmlContent := email.NotificationEmailVerify(toAddrname.Name, "Email Verification", settingsRX.Email, verificationCode)
+						message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
+						client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
+						response, err := client.Send(message)
+						if err != nil {
+							log.Println(err)
+						} else {
+							_ = response
+						}
+					}
+				}
+			if settingsRX.Verified != "" {
+				log.Println("Updating Verifed Email Status", settingsRX.Verified)
+				dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("verified", settingsRX.Verified)
 			}
 			if settingsRX.Notifydm != "" {
 				log.Println("Updating Daily Notifications", settingsRX.Notifydm)
@@ -1800,6 +1910,38 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("UpdateSettings - JWT Address: ", Authuser.Address)
 		fmt.Println("UpdateSettings - POST Address: ", addr)
 		w.WriteHeader(http.StatusForbidden)
+	}
+}
+// UpdateSettings godoc
+// @Summary Link a user can click in email to verify email address, will have unique code
+// @Description Users will get an email when signing-up to verify email, to ensure we do not send spam
+// @Tags Common
+// @Accept  json
+// @Produce  json
+// @Security BearerAuth
+// @Param message body entity.Settings true "update struct"
+// @Success 200 {array} entity.Settings
+// @Router /v1/verify_email/{email}/{verification_code} [GET]
+func VerifyEmail(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	email := vars["email"]
+	code := vars["code"]
+	log.Println("Verify Email: ", email)
+	var settingsRX []entity.Settings
+	var dbResults = database.Connector.Where("email = ?", email).Find(&settingsRX)
+	if dbResults.RowsAffected == 0 {
+		w.WriteHeader(http.StatusForbidden)
+	} else {
+		for i := 0; i < len(settingsRX); i++ {
+			if settingsRX[i].Verified == code {
+				log.Println("Updating Verifed Email Status", settingsRX[i].Verified)
+				dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", settingsRX[i].Walletaddr).Update("verified", "true")
+				break
+			}
+		}
+		w.WriteHeader(http.StatusOK)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(dbResults.RowsAffected)
 	}
 }
 

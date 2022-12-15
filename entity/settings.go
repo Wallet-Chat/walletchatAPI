@@ -2,10 +2,11 @@ package entity
 
 //Settings object for REST(CRUD)
 type Settings struct {
-	ID         int    `json:"id"`
-	Walletaddr string `json:"walletaddr"`
+	ID         int    `json:"id"`                             //AUTO-GENERATED (PRIMARY KEY)
+	Walletaddr string `json:"walletaddr" validate:"required"` //*** REQUIRED INPUT ***
 	//Publickey  string `json:"publickey"`
-	Email    string `json:"email"`
-	Notifydm string `json:"notifydm"`
-	Notify24 string `json:"notify24"`
+	Email    string `json:"email"`    //EMAIL ADDRESS TO GET NOTIFICATIONS
+	Verified string `json:"verified"` //USER CONFIRMED EMAIL OR NOT (string value true/false)
+	Notifydm string `json:"notifydm"` //RECEIVE DAILY NOTIFICATION SUMMARY EMAIL (string value true/false)
+	Notify24 string `json:"notify24"` //RECEIVE NOTIFICATION FOR EVERY DM RECEIVED (string value true/false)
 }
