@@ -271,7 +271,13 @@ func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		address := strings.ToLower(p.Address)
+
+		//Tezos addresses are case sensitive
+		address := p.Address
+		if !strings.HasPrefix(p.Address, "tz") {
+			address = strings.ToLower(p.Address)
+		}
+
 		Authuser, err := Authenticate(address, p.Nonce, p.Msg, p.Sig)
 		switch err {
 		case nil:
@@ -406,10 +412,12 @@ func ValidateMessageSignatureTezosWallet(key, sig, msg string) error {
 	if err != nil {
 		return err
 	}
+	fmt.Println("Tezos Key OK")
 	s, err := tezos.ParseSignature(sig)
 	if err != nil {
 		return err
 	}
+	fmt.Println("Tezos Sig Correct Format")
 	m := []byte(msg)
 	if strings.HasPrefix(msg, "0x") {
 		m, err = hex.DecodeString(msg)
@@ -445,12 +453,11 @@ func Authenticate(address string, nonce string, message string, sigHex string) (
 			recoveredAddr = address
 			fmt.Println("Smart Contract Wallet Signature Valid!")
 		}
-
-	} else if strings.HasPrefix(sigHex, "edsig") { //Tezos Wallet Signature
+	} else if strings.HasPrefix(address, "tz") { //Tezos Wallet Signature
 		fmt.Println("Using Tezos Wallet Signature")
 		returnsNilForSuccess := ValidateMessageSignatureTezosWallet(address, sigHex, message)
 		if returnsNilForSuccess != nil {
-			fmt.Println("failed to recover Tezos Signature")
+			fmt.Println("failed to recover Tezos Signature", returnsNilForSuccess)
 			return Authuser, err
 		}
 		recoveredAddr = address
