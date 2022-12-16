@@ -22,7 +22,6 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	ens "github.com/wealdtech/go-ens/v3"
 
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -1802,6 +1801,7 @@ func DeleteChatitem(w http.ResponseWriter, r *http.Request) {
 // }
 
 var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
 func InitRandom() {
 	rand.Seed(time.Now().UnixNano())
 }
@@ -1812,6 +1812,7 @@ func randSeq(n int) string {
 	}
 	return string(b)
 }
+
 // UpdateSettings godoc
 // @Summary Settings hold a user address and the email address for notifications if they opt-in
 // @Description Update settings, email address, daily notifications and per DM notifications
@@ -1868,28 +1869,28 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 				log.Println("Updating Email", settingsRX.Email)
 				dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("email", settingsRX.Email)
 				//send verification email
-					if strings.Contains(settingsRX.Email, "@") {
-						var toAddrname entity.Addrnameitem
-						database.Connector.Where("address = ?", settingsRX.Walletaddr).Find(&toAddrname)
+				if strings.Contains(settingsRX.Email, "@") {
+					var toAddrname entity.Addrnameitem
+					database.Connector.Where("address = ?", settingsRX.Walletaddr).Find(&toAddrname)
 
-						var verificationCode = randSeq(10)
-						dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("verified", verificationCode)
+					var verificationCode = randSeq(10)
+					dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("verified", verificationCode)
 
-						from := mail.NewEmail("WalletChat Notifications", "contact@walletchat.fun")
-						subject := "Please Verify Email for ApeCoinStaking.io / NF3.exchange"
-						to := mail.NewEmail(toAddrname.Name, settingsRX.Email)
-						plainTextContent := "Please verify your email entered at ApeCoinStaking.io / NF3.exchange by clicking here: https://nf3.walletchat.fun/verify-email?email=" + settings.Email + "&code=" + verificationCode
-						htmlContent := email.NotificationEmailVerify(toAddrname.Name, "Email Verification", settingsRX.Email, verificationCode)
-						message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
-						client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
-						response, err := client.Send(message)
-						if err != nil {
-							log.Println(err)
-						} else {
-							_ = response
-						}
+					from := mail.NewEmail("WalletChat Notifications", "contact@walletchat.fun")
+					subject := "Please Verify Email for ApeCoinStaking.io / NF3.exchange"
+					to := mail.NewEmail(toAddrname.Name, settingsRX.Email)
+					plainTextContent := "Please verify your email entered at ApeCoinStaking.io / NF3.exchange by clicking here: https://nf3.walletchat.fun/verify-email?email=" + settings.Email + "&code=" + verificationCode
+					htmlContent := email.NotificationEmailVerify(toAddrname.Name, "Email Verification", settingsRX.Email, verificationCode)
+					message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
+					client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
+					response, err := client.Send(message)
+					if err != nil {
+						log.Println(err)
+					} else {
+						_ = response
 					}
 				}
+			}
 			if settingsRX.Verified != "" {
 				log.Println("Updating Verifed Email Status", settingsRX.Verified)
 				dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("verified", settingsRX.Verified)
@@ -1912,6 +1913,7 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
 	}
 }
+
 // UpdateSettings godoc
 // @Summary Link a user can click in email to verify email address, will have unique code
 // @Description Users will get an email when signing-up to verify email, to ensure we do not send spam
@@ -2794,7 +2796,7 @@ func getPoapInfoByAddress(walletAddr string) []POAPInfoByAddress {
 		}
 
 		if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
-			fmt.Println("Can not unmarshal JSON - getPoapInfoByAddress", resp.Body)
+			fmt.Println("Can not unmarshal JSON - getPoapInfoByAddress", resp.Body, walletAddr)
 		}
 	}
 
