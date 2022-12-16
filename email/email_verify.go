@@ -178,8 +178,8 @@ func NotificationEmailVerify(toname string, fromname string, email string, verif
                                   <tr>
                                     <td style="padding-right: 0px;padding-left: 0px;" align="center">
   
-                                      <img align="center" border="0" src="https://assets.unlayer.com/projects/115376/1670888282120-banner-ape-stake.jpg" alt="" title="" style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 100%;max-width: 580px;"
-                                        width="580" />
+                                      <img align="center" border="0" src="https://assets.unlayer.com/projects/115376/1671227005813-walletchat%20logo_large.png" alt="" title="" style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 27%;max-width: 156.6px;"
+                                        width="156.6" />
   
                                     </td>
                                   </tr>
@@ -221,10 +221,11 @@ func NotificationEmailVerify(toname string, fromname string, email string, verif
                               <td style="overflow-wrap:break-word;word-break:break-word;padding:33px 55px;font-family:'Cabin',sans-serif;" align="left">
   
                                 <div style="line-height: 160%; text-align: center; word-wrap: break-word;">
-                                  <p style="line-height: 160%; font-size: 14px;"><span style="font-size: 22px; line-height: 35.2px;">Hi ` + toname + `, please verify your email </span></p>
-                                  <p style="line-height: 160%; font-size: 14px;"><span style="font-size: 22px; line-height: 35.2px;">for ApeCoinStaking.io / NF3.exchange!</span></p>
+                                  <p style="line-height: 160%; font-size: 14px;"><span style="font-size: 22px; line-height: 35.2px;">Hi ` + toname + `, please click below to verify your email </span></p>
+                                  <p style="line-height: 160%; font-size: 14px;"><span style="font-size: 22px; line-height: 35.2px;">for WalletChat.fun!</span></p>
                                   <p style="line-height: 160%; font-size: 14px;"> </p>
-                                  <p style="line-height: 160%; font-size: 14px;"><span style="font-size: 22px; line-height: 35.2px;">Or go to nf3.walletchat.fun/me/verify-email and enter the code: <span style="color: #e03e2d; font-size: 22px; line-height: 35.2px;"><strong>` + verificationCode + `</strong></span></span>
+                                  <p style="line-height: 160%; font-size: 14px;"><span style="font-size: 22px; line-height: 35.2px;">Or go to app.walletchat.fun/verify_email and enter the code: <span style="color: #e03e2d; font-size: 22px; line-height: 35.2px;"><strong>` + verificationCode + `</strong></span></span>
+                                  </p>
                                 </div>
   
                               </td>
@@ -239,8 +240,8 @@ func NotificationEmailVerify(toname string, fromname string, email string, verif
   
                                 <!--[if mso]><style>.v-button {background: transparent !important;}</style><![endif]-->
                                 <div align="center">
-                                  <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="https://nf3.walletchat.fun/me/verify-email" style="height:46px; v-text-anchor:middle; width:171px;" arcsize="8.5%"  stroke="f" fillcolor="#ff0083"><w:anchorlock/><center style="color:#FFFFFF;font-family:'Cabin',sans-serif;"><![endif]-->
-                                  <a href="https://nf3.walletchat.fun/me/verify-email?email=` + email + `&code=` + verificationCode + `" target="_blank" class="v-button" style="box-sizing: border-box;display: inline-block;font-family:'Cabin',sans-serif;text-decoration: none;-webkit-text-size-adjust: none;text-align: center;color: #FFFFFF; background-color: #ff0083; border-radius: 4px;-webkit-border-radius: 4px; -moz-border-radius: 4px; width:auto; max-width:100%; overflow-wrap: break-word; word-break: break-word; word-wrap:break-word; mso-border-alt: none;">
+                                  <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="https://api.n3.walletchat.fun/verify_email/email/code" style="height:46px; v-text-anchor:middle; width:171px;" arcsize="8.5%"  stroke="f" fillcolor="#2c292a"><w:anchorlock/><center style="color:#FFFFFF;font-family:'Cabin',sans-serif;"><![endif]-->
+                                  <a href="https://api.n3.walletchat.fun/verify_email/email/code" target="_blank" class="v-button" style="box-sizing: border-box;display: inline-block;font-family:'Cabin',sans-serif;text-decoration: none;-webkit-text-size-adjust: none;text-align: center;color: #FFFFFF; background-color: #2c292a; border-radius: 4px;-webkit-border-radius: 4px; -moz-border-radius: 4px; width:auto; max-width:100%; overflow-wrap: break-word; word-break: break-word; word-wrap:break-word; mso-border-alt: none;">
                                     <span style="display:block;padding:14px 44px 13px;line-height:120%;"><span style="font-size: 16px; line-height: 19.2px;"><strong>Verify Email</strong></span></span>
                                   </a>
                                   <!--[if mso]></center></v:roundrect><![endif]-->
@@ -283,7 +284,7 @@ func NotificationEmailVerify(toname string, fromname string, email string, verif
   
                                 <div style="color: #003399; line-height: 160%; text-align: center; word-wrap: break-word;">
                                   <p style="font-size: 14px; line-height: 160%;"><span style="font-size: 20px; line-height: 32px;"><strong>Questions?</strong></span></p>
-                                  <p style="font-size: 14px; line-height: 160%;"><span style="font-size: 16px; line-height: 25.6px; color: #000000;">hello@nf3x.io</span></p>
+                                  <p style="font-size: 14px; line-height: 160%;"><span style="font-size: 16px; line-height: 25.6px; color: #000000;">contact@walletchat.fun</span></p>
                                 </div>
   
                               </td>
@@ -306,7 +307,7 @@ func NotificationEmailVerify(toname string, fromname string, email string, verif
                                       <tbody>
                                         <tr style="vertical-align: top">
                                           <td align="left" valign="middle" style="word-break: break-word;border-collapse: collapse !important;vertical-align: top">
-                                            <a href="hello@nf3x.io" title="Email" target="_blank">
+                                            <a href="contact@walletchat.fun" title="Email" target="_blank">
                                               <img src="https://cdn.tools.unlayer.com/social/icons/circle-black/email.png" alt="Email" title="Email" width="32" style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: block !important;border: none;height: auto;float: none;max-width: 32px !important">
                                             </a>
                                           </td>
@@ -320,7 +321,7 @@ func NotificationEmailVerify(toname string, fromname string, email string, verif
                                       <tbody>
                                         <tr style="vertical-align: top">
                                           <td align="left" valign="middle" style="word-break: break-word;border-collapse: collapse !important;vertical-align: top">
-                                            <a href="https://twitter.com/nf3exchange" title="Twitter" target="_blank">
+                                            <a href="https://twitter.com/wallet_chat" title="Twitter" target="_blank">
                                               <img src="https://cdn.tools.unlayer.com/social/icons/circle-black/twitter.png" alt="Twitter" title="Twitter" width="32" style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: block !important;border: none;height: auto;float: none;max-width: 32px !important">
                                             </a>
                                           </td>

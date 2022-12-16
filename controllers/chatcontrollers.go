@@ -1851,9 +1851,9 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 					log.Println("Did not update verification code item for: ", addr)
 				}
 				from := mail.NewEmail("WalletChat Notifications", "contact@walletchat.fun")
-				subject := "Please Verify Email for ApeCoinStaking.io / NF3.exchange"
+				subject := "Please Verify Email for walletchat.fun"
 				to := mail.NewEmail(toAddrname.Name, settingsRX.Email)
-				plainTextContent := "Please verify your email entered at ApeCoinStaking.io / NF3.exchange by clicking here: https://nf3.walletchat.fun/verify-email?email=" + settings.Email + "&code=" + verificationCode
+				plainTextContent := "Please verify your email entered at walletchat.fun by clicking here: https://walletchat.fun/verify-email?email=" + settings.Email + "&code=" + verificationCode
 				htmlContent := email.NotificationEmailVerify(toAddrname.Name, "Email Verification", settingsRX.Email, verificationCode)
 				message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
 				client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
