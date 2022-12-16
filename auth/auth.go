@@ -206,7 +206,11 @@ func UserNonceHandler() http.HandlerFunc {
 		CreateIfNotExists(user)
 		//end of copied /register functionality
 
-		Authuser, err := Get(strings.ToLower(address))
+		if !strings.HasPrefix(address, "tz") { //Tezos accounts are case senstive
+			address = strings.ToLower(address)
+		}
+
+		Authuser, err := Get(address)
 		if err != nil {
 			switch errors.Is(err, ErrUserNotExists) {
 			case true:
@@ -272,9 +276,9 @@ func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 			return
 		}
 
-		//Tezos addresses are case sensitive
+		//Tezos addresses are case sensitive (here address is the full public key)
 		address := p.Address
-		if !strings.HasPrefix(p.Address, "tz") {
+		if !strings.HasPrefix(p.Address, "edpk") {
 			address = strings.ToLower(p.Address)
 		}
 
@@ -407,35 +411,49 @@ func ValidateMessageSignatureSequenceWallet(chainID string, walletAddress string
 	return isValid
 }
 
-func ValidateMessageSignatureTezosWallet(key, sig, msg string) error {
+func ValidateMessageSignatureTezosWallet(key, sig, msg string) string {
 	pk, err := tezos.ParseKey(key)
+	fmt.Println("Tezos Key Input", key, pk.Address())
 	if err != nil {
-		return err
+		fmt.Println("Tezos Validate Error: ", err)
+		return "fail"
 	}
-	fmt.Println("Tezos Key OK")
+	fmt.Println("Tezos Key OK", pk)
 	s, err := tezos.ParseSignature(sig)
 	if err != nil {
-		return err
+		fmt.Println("Tezos Validate Error: ", err)
+		return "fail"
 	}
 	fmt.Println("Tezos Sig Correct Format")
-	m := []byte(msg)
-	if strings.HasPrefix(msg, "0x") {
-		m, err = hex.DecodeString(msg)
-		if err != nil {
-			return err
-		}
+	m, err := hex.DecodeString(msg) //input as ASCII HEX from Beacon Payload data
+	if err != nil {
+		fmt.Println("Tezos Validate Error: ", err)
+		return "fail"
 	}
 	digest := tezos.Digest([]byte(m))
 	if err := pk.Verify(digest[:], s); err == nil {
 		fmt.Println("Tezos Signature OK")
 	} else {
-		return err
+		fmt.Println("Tezos Validate Error: ", err)
+		return "fail"
 	}
-	return nil
+	return pk.Address().String()
 }
 
 func Authenticate(address string, nonce string, message string, sigHex string) (Authuser, error) {
 	fmt.Println("Authenticate: " + address + "\r\n msg: " + message + " sig: " + sigHex)
+
+	tezosPubKey := " "
+	if strings.HasPrefix(address, "edpk") {
+		tezosPubKey = address
+		pk, err := tezos.ParseKey(address)
+		fmt.Println("Tezos Key", pk.Address().String())
+		if err != nil {
+			fmt.Println("Tezos Validate Error: ", err)
+		}
+		address = pk.Address().String()
+	}
+
 	Authuser, err := Get(address)
 	if err != nil {
 		return Authuser, err
@@ -453,15 +471,15 @@ func Authenticate(address string, nonce string, message string, sigHex string) (
 			recoveredAddr = address
 			fmt.Println("Smart Contract Wallet Signature Valid!")
 		}
-	} else if strings.HasPrefix(address, "tz") { //Tezos Wallet Signature
+	} else if strings.HasPrefix(tezosPubKey, "edpk") { //Tezos Wallet
 		fmt.Println("Using Tezos Wallet Signature")
-		returnsNilForSuccess := ValidateMessageSignatureTezosWallet(address, sigHex, message)
-		if returnsNilForSuccess != nil {
-			fmt.Println("failed to recover Tezos Signature", returnsNilForSuccess)
+		returnsKeyForSuccess := ValidateMessageSignatureTezosWallet(tezosPubKey, sigHex, message)
+		if returnsKeyForSuccess == "fail" {
+			fmt.Println("failed to recover Tezos Signature")
 			return Authuser, err
 		}
-		recoveredAddr = address
-		fmt.Println("Tezos Wallet Signature Valid!")
+		recoveredAddr = returnsKeyForSuccess
+		fmt.Println("Tezos Wallet Signature Valid!", returnsKeyForSuccess)
 	} else {
 		sig := hexutil.MustDecode(sigHex)
 		// https://github.com/ethereum/go-ethereum/blob/master/internal/ethapi/api.go#L516
