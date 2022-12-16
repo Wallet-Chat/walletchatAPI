@@ -193,6 +193,10 @@ func UserNonceHandler() http.HandlerFunc {
 		// 	return
 		// }
 
+		if !strings.HasPrefix(address, "tz") { //Tezos accounts are case senstive
+			address = strings.ToLower(address)
+		}
+
 		//combining /register and /users (no need to call both and check each time)
 		nonce, err := GetNonce()
 		if err != nil {
@@ -200,15 +204,11 @@ func UserNonceHandler() http.HandlerFunc {
 			return
 		}
 		user := Authuser{
-			Address: strings.ToLower(address), // let's only store lower case
+			Address: address, // let's only store lower case
 			Nonce:   nonce,
 		}
 		CreateIfNotExists(user)
 		//end of copied /register functionality
-
-		if !strings.HasPrefix(address, "tz") { //Tezos accounts are case senstive
-			address = strings.ToLower(address)
-		}
 
 		Authuser, err := Get(address)
 		if err != nil {
