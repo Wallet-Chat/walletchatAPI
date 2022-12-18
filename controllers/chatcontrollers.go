@@ -1020,6 +1020,8 @@ func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 		if !isHolder {
 			isHolder = IsOwnerOfNFT(chat.Nftaddr, chat.Fromaddr, "polygon")
 		}
+	} else if !isHolder && strings.HasPrefix(chat.Nftaddr, "tz") { //Tezos check
+		isHolder = IsOwnerOfNFT(chat.Nftaddr, chat.Fromaddr, "tezos")
 	} else if !isHolder && strings.HasPrefix(chat.Nftaddr, "poap_") {
 		split := strings.Split(chat.Nftaddr, "_")
 		isHolder = IsOwnerOfPOAP(split[1], chat.Fromaddr)
@@ -2456,9 +2458,14 @@ func IsOwner(w http.ResponseWriter, r *http.Request) {
 	contract := vars["contract"]
 	wallet := vars["wallet"]
 
-	result := IsOwnerOfNFT(contract, wallet, "ethereum")
-	if !result {
-		result = IsOwnerOfNFT(contract, wallet, "polygon")
+	result := false
+	if strings.HasPrefix(wallet, "tz") {
+		result = IsOwnerOfNFT(contract, wallet, "tezos")
+	} else {
+		result = IsOwnerOfNFT(contract, wallet, "ethereum")
+		if !result {
+			result = IsOwnerOfNFT(contract, wallet, "polygon")
+		}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
