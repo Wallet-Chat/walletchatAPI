@@ -1020,7 +1020,7 @@ func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 		if !isHolder {
 			isHolder = IsOwnerOfNFT(chat.Nftaddr, chat.Fromaddr, "polygon")
 		}
-	} else if !isHolder && strings.HasPrefix(chat.Nftaddr, "tz") { //Tezos check
+	} else if !isHolder && strings.HasPrefix(chat.Fromaddr, "tz") { //Tezos check
 		isHolder = IsOwnerOfNFT(chat.Nftaddr, chat.Fromaddr, "tezos")
 	} else if !isHolder && strings.HasPrefix(chat.Nftaddr, "poap_") {
 		split := strings.Split(chat.Nftaddr, "_")
