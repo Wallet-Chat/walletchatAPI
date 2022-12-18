@@ -2816,6 +2816,10 @@ func getPoapInfoByAddress(walletAddr string) []POAPInfoByAddress {
 	var result []POAPInfoByAddress
 	url := "https://api.poap.tech/actions/scan/" + walletAddr
 
+	if strings.HasPrefix(walletAddr, "tz") {
+		return result
+	}
+
 	// Create a new request using http
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Add("X-API-KEY", os.Getenv("POAP_API_KEY"))
