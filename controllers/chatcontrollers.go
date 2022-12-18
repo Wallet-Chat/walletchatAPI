@@ -1611,6 +1611,8 @@ func GetGroupChatItemsByAddr(w http.ResponseWriter, r *http.Request) {
 		if !isHolder {
 			isHolder = IsOwnerOfNFT(nftaddr, fromaddr, "polygon")
 		}
+	} else if !isHolder && strings.HasPrefix(fromaddr, "tz") { //Tezos check
+		isHolder = IsOwnerOfNFT(nftaddr, fromaddr, "tezos")
 	} else if !isHolder && strings.HasPrefix(nftaddr, "poap_") {
 		split := strings.Split(nftaddr, "_")
 		isHolder = IsOwnerOfPOAP(split[1], fromaddr)
@@ -2538,36 +2540,65 @@ func IsOwnerOfNFT(contractAddr string, walletAddr string, chain string) bool {
 		chain = "eth"
 	}
 
-	url := "https://deep-index.moralis.io/api/v2/" + walletAddr + "/nft?chain=" + chain + "&format=decimal&token_addresses=" + contractAddr + "&normalizeMetadata=false"
-	//url := "https://deep-index.moralis.io/api/v2/0x57ca1B13510D82a6286a225a217798e079BD0767/nft?chain=eth&format=decimal&token_addresses=0x34d85c9cdeb23fa97cb08333b511ac86e1c4e258&normalizeMetadata=false"
+	if chain == "tezos" {
+		//fmt.Println("Tezos Chain ", walletAddr, contractAddr)
+		url := "https://api.tzkt.io/v1/tokens/balances?" + walletAddr + "&token.contract=" + contractAddr
 
-	req, _ := http.NewRequest("GET", url, nil)
+		req, _ := http.NewRequest("GET", url, nil)
 
-	req.Header.Add("accept", "application/json")
-	//req.Header.Add("Authorization", os.Getenv("NFTPORT_API_KEY"))
-	req.Header.Add("X-API-Key", os.Getenv("MORALIS_NFT_API_KEY"))
+		req.Header.Add("accept", "application/json")
 
-	// Send req using http Client
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Println("Error on response.\n[ERROR] -", err)
+		// Send req using http Client
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Println("Error on response.\n[ERROR] -", err)
+		}
+		defer resp.Body.Close()
+
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Println("Error while reading the response bytes:", err)
+		}
+
+		var result []TezosOwnerOf
+		if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
+			fmt.Println("Can not unmarshal JSON - Tezos IsOwnerOfNFT", body)
+		}
+		//fmt.Printf("IsOwner: %#v\n", result.Total)
+
+		return len(result) > 0
+	} else {
+		url := "https://deep-index.moralis.io/api/v2/" + walletAddr + "/nft?chain=" + chain + "&format=decimal&token_addresses=" + contractAddr + "&normalizeMetadata=false"
+		//url := "https://deep-index.moralis.io/api/v2/0x57ca1B13510D82a6286a225a217798e079BD0767/nft?chain=eth&format=decimal&token_addresses=0x34d85c9cdeb23fa97cb08333b511ac86e1c4e258&normalizeMetadata=false"
+
+		req, _ := http.NewRequest("GET", url, nil)
+
+		req.Header.Add("accept", "application/json")
+		//req.Header.Add("Authorization", os.Getenv("NFTPORT_API_KEY"))
+		req.Header.Add("X-API-Key", os.Getenv("MORALIS_NFT_API_KEY"))
+
+		// Send req using http Client
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Println("Error on response.\n[ERROR] -", err)
+		}
+		defer resp.Body.Close()
+
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Println("Error while reading the response bytes:", err)
+		}
+
+		var result MoralisOwnerOf
+		if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
+			fmt.Println("Can not unmarshal JSON - IsOwnerOfNFT", body)
+		}
+		//fmt.Printf("IsOwner: %#v\n", result.Total)
+
+		return result.Total > 0
 	}
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Println("Error while reading the response bytes:", err)
-	}
-
-	var result MoralisOwnerOf
-	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
-		fmt.Println("Can not unmarshal JSON - IsOwnerOfNFT", body)
-	}
-
-	//fmt.Printf("IsOwner: %#v\n", result.Total)
-
-	return result.Total > 0
 }
 
 func IsOwnerOfPOAP(eventId string, walletAddr string) bool {
@@ -2884,6 +2915,50 @@ type MoralisContractInfoNFT struct {
 		LastMetadataSync  time.Time   `json:"last_metadata_sync"`
 		MinterAddress     string      `json:"minter_address"`
 	} `json:"result"`
+}
+
+type TezosOwnerOf struct {
+	ID      int64 `json:"id"`
+	Account struct {
+		Address string `json:"address"`
+	} `json:"account"`
+	Token struct {
+		ID       int64 `json:"id"`
+		Contract struct {
+			Address string `json:"address"`
+		} `json:"contract"`
+		TokenID     string `json:"tokenId"`
+		Standard    string `json:"standard"`
+		TotalSupply string `json:"totalSupply"`
+		Metadata    struct {
+			Name      string        `json:"name"`
+			Image     string        `json:"image"`
+			Rights    string        `json:"rights"`
+			Symbol    string        `json:"symbol"`
+			Formats   []interface{} `json:"formats"`
+			Creators  []string      `json:"creators"`
+			Decimals  string        `json:"decimals"`
+			Royalties struct {
+				Shares struct {
+					Address string `json:"address"`
+				} `json:"shares"`
+				Decimals string `json:"decimals"`
+			} `json:"royalties"`
+			Attributes         []interface{} `json:"attributes"`
+			DisplayURI         string        `json:"displayUri"`
+			ArtifactURI        string        `json:"artifactUri"`
+			Description        string        `json:"description"`
+			ThumbnailURI       string        `json:"thumbnailUri"`
+			IsBooleanAmount    bool          `json:"isBooleanAmount"`
+			ShouldPreferSymbol bool          `json:"shouldPreferSymbol"`
+		} `json:"metadata"`
+	} `json:"token"`
+	Balance        string    `json:"balance"`
+	TransfersCount int       `json:"transfersCount"`
+	FirstLevel     int       `json:"firstLevel"`
+	FirstTime      time.Time `json:"firstTime"`
+	LastLevel      int       `json:"lastLevel"`
+	LastTime       time.Time `json:"lastTime"`
 }
 
 type NFTPortNftContract struct {
