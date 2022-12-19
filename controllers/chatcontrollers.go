@@ -1855,10 +1855,13 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 					log.Println("Did not update verification code item for: ", addr)
 				}
 				from := mail.NewEmail("WalletChat Notifications", "contact@walletchat.fun")
-				subject := "Please Verify Email for walletchat.fun"
+					subject := "Please Verify Email for " + settingsRX.Signupsite
 				to := mail.NewEmail(toAddrname.Name, settingsRX.Email)
-				plainTextContent := "Please verify your email entered at walletchat.fun by clicking here: https://walletchat.fun/verify-email?email=" + settings.Email + "&code=" + verificationCode
-				htmlContent := email.NotificationEmailVerify(toAddrname.Name, "Email Verification", settingsRX.Email, verificationCode)
+					if settingsRX.Signupsite == "" {
+						settingsRX.Signupsite = settingsRX.Domain //from the main webapp, domain and signup site is the same
+					}
+					plainTextContent := "Please verify your email entered at " + settingsRX.Signupsite + " by clicking here: " + settingsRX.Domain + "/verify-email?email=" + settings.Email + "&code=" + verificationCode
+					htmlContent := email.NotificationEmailVerify(toAddrname.Name, "Email Verification", settingsRX.Email, verificationCode, settingsRX.Signupsite, settingsRX.Domain)
 				message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
 				client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
 				response, err := client.Send(message)
@@ -1881,10 +1884,16 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 					dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("verified", verificationCode)
 
 					from := mail.NewEmail("WalletChat Notifications", "contact@walletchat.fun")
-					subject := "Please Verify Email for ApeCoinStaking.io / NF3.exchange"
-					to := mail.NewEmail(toAddrname.Name, settingsRX.Email)
-					plainTextContent := "Please verify your email entered at ApeCoinStaking.io / NF3.exchange by clicking here: https://nf3.walletchat.fun/verify-email?email=" + settings.Email + "&code=" + verificationCode
-					htmlContent := email.NotificationEmailVerify(toAddrname.Name, "Email Verification", settingsRX.Email, verificationCode)
+						if settingsRX.Signupsite == "" {
+							settingsRX.Signupsite = settingsRX.Domain //from the main webapp, domain and signup site is the same
+						}
+						if settingsRX.Signupsite != "" {
+							settings.Signupsite = settingsRX.Signupsite //use the received one over past saved signup site.
+						}
+						subject := "Please Verify Email for " + settings.Signupsite
+						to := mail.NewEmail(toAddrname.Name, settingsRX.Email)
+						plainTextContent := "Please verify your email entered at " + settings.Signupsite + " by clicking here: " + settings.Domain + "/verify-email?email=" + settings.Email + "&code=" + verificationCode
+						htmlContent := email.NotificationEmailVerify(toAddrname.Name, "Email Verification", settingsRX.Email, verificationCode, settingsRX.Signupsite, settingsRX.Domain)
 					message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
 					client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
 					response, err := client.Send(message)
@@ -1906,6 +1915,14 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 			if settingsRX.Notify24 != "" {
 				log.Println("Updating Daily Notifications", settingsRX.Notify24)
 				dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("notify24", settingsRX.Notify24)
+			}
+			if settingsRX.Signupsite != "" {
+				log.Println("Updating Signup Site", settingsRX.Signupsite)
+				dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("signupsite", settingsRX.Signupsite)
+			}
+			if settingsRX.Domain != "" {
+				log.Println("Updating Domain", settingsRX.Domain)
+				dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("domain", settingsRX.Domain)
 			}
 		}
 		w.WriteHeader(http.StatusOK)
@@ -1938,6 +1955,7 @@ func VerifyEmail(w http.ResponseWriter, r *http.Request) {
 	if dbResults.RowsAffected == 0 {
 		w.WriteHeader(http.StatusForbidden)
 	} else {
+		dbResults.RowsAffected = 0
 		for i := 0; i < len(settingsRX); i++ {
 			if settingsRX[i].Verified == code {
 				log.Println("Updating Verifed Email Status", settingsRX[i].Verified)
@@ -1945,9 +1963,13 @@ func VerifyEmail(w http.ResponseWriter, r *http.Request) {
 				break
 			}
 		}
+		if dbResults.RowsAffected == 0 {
+			w.WriteHeader(http.StatusForbidden)
+		} else {
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(dbResults.RowsAffected)
+		}
 	}
 }
 

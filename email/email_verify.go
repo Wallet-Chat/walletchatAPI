@@ -1,6 +1,6 @@
 package email
 
-func NotificationEmailVerify(toname string, fromname string, email string, verificationCode string) string {
+func NotificationEmailVerify(toname string, fromname string, email string, verificationCode string, signupsite string, domain string) string {
 	return `<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
   <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
   
@@ -221,11 +221,10 @@ func NotificationEmailVerify(toname string, fromname string, email string, verif
                               <td style="overflow-wrap:break-word;word-break:break-word;padding:33px 55px;font-family:'Cabin',sans-serif;" align="left">
   
                                 <div style="line-height: 160%; text-align: center; word-wrap: break-word;">
-                                  <p style="line-height: 160%; font-size: 14px;"><span style="font-size: 22px; line-height: 35.2px;">Hi ` + toname + `, please click below to verify your email </span></p>
-                                  <p style="line-height: 160%; font-size: 14px;"><span style="font-size: 22px; line-height: 35.2px;">for WalletChat.fun!</span></p>
+                                  <p style="line-height: 160%; font-size: 14px;"><span style="font-size: 22px; line-height: 35.2px;">Hi ` + toname + `, please verify your email </span></p>
+                                  <p style="line-height: 160%; font-size: 14px;"><span style="font-size: 22px; line-height: 35.2px;">for ` + signupsite + `!</span></p>
                                   <p style="line-height: 160%; font-size: 14px;"> </p>
-                                  <p style="line-height: 160%; font-size: 14px;"><span style="font-size: 22px; line-height: 35.2px;">Or go to app.walletchat.fun/verify_email and enter the code: <span style="color: #e03e2d; font-size: 22px; line-height: 35.2px;"><strong>` + verificationCode + `</strong></span></span>
-                                  </p>
+                                  <p style="line-height: 160%; font-size: 14px;"><span style="font-size: 22px; line-height: 35.2px;">Or enter the code: <span style="color: #e03e2d; font-size: 22px; line-height: 35.2px;"><strong>` + verificationCode + `</strong></span></span>
                                 </div>
   
                               </td>
@@ -240,8 +239,8 @@ func NotificationEmailVerify(toname string, fromname string, email string, verif
   
                                 <!--[if mso]><style>.v-button {background: transparent !important;}</style><![endif]-->
                                 <div align="center">
-                                  <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="https://api.n3.walletchat.fun/verify_email/email/code" style="height:46px; v-text-anchor:middle; width:171px;" arcsize="8.5%"  stroke="f" fillcolor="#2c292a"><w:anchorlock/><center style="color:#FFFFFF;font-family:'Cabin',sans-serif;"><![endif]-->
-                                  <a href="https://api.n3.walletchat.fun/verify_email/email/code" target="_blank" class="v-button" style="box-sizing: border-box;display: inline-block;font-family:'Cabin',sans-serif;text-decoration: none;-webkit-text-size-adjust: none;text-align: center;color: #FFFFFF; background-color: #2c292a; border-radius: 4px;-webkit-border-radius: 4px; -moz-border-radius: 4px; width:auto; max-width:100%; overflow-wrap: break-word; word-break: break-word; word-wrap:break-word; mso-border-alt: none;">
+                                  <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="https://` + domain + `/me/verify-email" style="height:46px; v-text-anchor:middle; width:171px;" arcsize="8.5%"  stroke="f" fillcolor="#ff0083"><w:anchorlock/><center style="color:#FFFFFF;font-family:'Cabin',sans-serif;"><![endif]-->
+                                  <a href="https://` + domain + `/me/verify-email?email=` + email + `&code=` + verificationCode + `" target="_blank" class="v-button" style="box-sizing: border-box;display: inline-block;font-family:'Cabin',sans-serif;text-decoration: none;-webkit-text-size-adjust: none;text-align: center;color: #FFFFFF; background-color: #ff0083; border-radius: 4px;-webkit-border-radius: 4px; -moz-border-radius: 4px; width:auto; max-width:100%; overflow-wrap: break-word; word-break: break-word; word-wrap:break-word; mso-border-alt: none;">
                                     <span style="display:block;padding:14px 44px 13px;line-height:120%;"><span style="font-size: 16px; line-height: 19.2px;"><strong>Verify Email</strong></span></span>
                                   </a>
                                   <!--[if mso]></center></v:roundrect><![endif]-->
