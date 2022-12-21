@@ -463,7 +463,8 @@ func Authenticate(address string, nonce string, message string, sigHex string) (
 	}
 
 	recoveredAddr := " "
-	if len(sigHex) > 590 { //594 without the 0x to be exact, but we can clean this up TODO: should be something more specific
+	fmt.Println("Signature Length: ", len(sigHex))
+	if len(sigHex) > 500 { //594 without the 0x to be exact, but we can clean this up TODO: should be something more specific
 		fmt.Println("Using Smart Contract Wallet Signature")
 		isValidSequenceWalletSig := ValidateMessageSignatureSequenceWallet("mainnet", address, sigHex, message)
 
@@ -488,7 +489,7 @@ func Authenticate(address string, nonce string, message string, sigHex string) (
 		msg := accounts.TextHash([]byte(message))
 		recovered, err := crypto.SigToPub(msg, sig)
 		if err != nil {
-			fmt.Println("failed to recover signature 1")
+			fmt.Println("failed to recover EVM signature ")
 			return Authuser, err
 		}
 
