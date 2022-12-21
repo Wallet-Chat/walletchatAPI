@@ -464,7 +464,7 @@ func Authenticate(address string, nonce string, message string, sigHex string) (
 
 	recoveredAddr := " "
 	fmt.Println("Signature Length: ", len(sigHex))
-	if len(sigHex) > 500 { //594 without the 0x to be exact, but we can clean this up TODO: should be something more specific
+	if len(sigHex) > 400 { //594 without the 0x to be exact, but we can clean this up TODO: should be something more specific
 		fmt.Println("Using Smart Contract Wallet Signature")
 		isValidSequenceWalletSig := ValidateMessageSignatureSequenceWallet("mainnet", address, sigHex, message)
 
