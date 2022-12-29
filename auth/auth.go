@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"crypto/ed25519"
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
@@ -230,6 +231,7 @@ func UserNonceHandler() http.HandlerFunc {
 }
 
 type SigninPayload struct {
+	Name    string `json:"name"`
 	Address string `json:"address"`
 	Nonce   string `json:"nonce"`
 	Sig     string `json:"sig"`
@@ -282,7 +284,7 @@ func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 			address = strings.ToLower(p.Address)
 		}
 
-		Authuser, err := Authenticate(address, p.Nonce, p.Msg, p.Sig)
+		Authuser, err := Authenticate(p.Name, address, p.Nonce, p.Msg, p.Sig)
 		switch err {
 		case nil:
 		case ErrAuthError:
@@ -440,18 +442,44 @@ func ValidateMessageSignatureTezosWallet(key, sig, msg string) string {
 	return pk.Address().String()
 }
 
-func Authenticate(address string, nonce string, message string, sigHex string) (Authuser, error) {
-	fmt.Println("Authenticate: " + address + "\r\n msg: " + message + " sig: " + sigHex)
+func ValidateMessageSignatureNearWallet(key, sig, msg string) bool {
+	msgBytes := []byte(msg) //message is just a string here
 
-	tezosPubKey := " "
+	// Decode the public key from the signature
+	var pubKey ed25519.PublicKey
+	keyBytes, err := hex.DecodeString(key) //
+	if err != nil {
+		fmt.Println("NEAR Validate Error 1: ", err, key)
+	}
+	copy(pubKey, keyBytes)
+
+	sigBytes, err := hex.DecodeString(sig) //
+	if err != nil {
+		fmt.Println("NEAR Validate Error 2: ", err, sig)
+	}
+
+	// Verify the signature
+	valid := ed25519.Verify(keyBytes, msgBytes, sigBytes)
+	return valid
+}
+
+func Authenticate(walletName string, address string, nonce string, message string, sigHex string) (Authuser, error) {
+	//fmt.Println("Authenticate: " + address + "\r\n msg: " + message + " sig: " + sigHex)
+
+	pubKey := " "
 	if strings.HasPrefix(address, "edpk") {
-		tezosPubKey = address
+		pubKey = address
 		pk, err := tezos.ParseKey(address)
 		fmt.Println("Tezos Key", pk.Address().String())
 		if err != nil {
 			fmt.Println("Tezos Validate Error: ", err)
 		}
 		address = pk.Address().String()
+	}
+	//Massage data for NEAR wallets.  They have a common name and pub key natively
+	if strings.HasSuffix(walletName, ".near") || strings.HasSuffix(walletName, ".testnet") {
+		pubKey = address
+		address = walletName
 	}
 
 	Authuser, err := Get(address)
@@ -472,9 +500,16 @@ func Authenticate(address string, nonce string, message string, sigHex string) (
 			recoveredAddr = address
 			fmt.Println("Smart Contract Wallet Signature Valid!")
 		}
-	} else if strings.HasPrefix(tezosPubKey, "edpk") { //Tezos Wallet
+	} else if strings.HasSuffix(walletName, ".near") || strings.HasSuffix(walletName, ".testnet") { //NEAR wallet
+		fmt.Println("Using NEAR Wallet Signature")
+		isValidNearWalletSig := ValidateMessageSignatureNearWallet(pubKey, sigHex, message)
+		if isValidNearWalletSig {
+			recoveredAddr = walletName
+			fmt.Println("NEAR Wallet Signature Valid!", walletName)
+		}
+	} else if strings.HasPrefix(pubKey, "edpk") { //Tezos Wallet
 		fmt.Println("Using Tezos Wallet Signature")
-		returnsKeyForSuccess := ValidateMessageSignatureTezosWallet(tezosPubKey, sigHex, message)
+		returnsKeyForSuccess := ValidateMessageSignatureTezosWallet(pubKey, sigHex, message)
 		if returnsKeyForSuccess == "fail" {
 			fmt.Println("failed to recover Tezos Signature")
 			return Authuser, err

@@ -5,6 +5,8 @@ definitions:
         type: string
       msg:
         type: string
+      name:
+        type: string
       nonce:
         type: string
       sig:
@@ -251,6 +253,9 @@ definitions:
     type: object
   entity.Settings:
     properties:
+      domain:
+        description: DOMAIN
+        type: string
       email:
         description: Publickey  string `json:"publickey"`
         type: string
@@ -258,10 +263,16 @@ definitions:
         description: AUTO-GENERATED (PRIMARY KEY)
         type: integer
       notify24:
-        description: RECEIVE NOTIFICATION FOR EVERY DM RECEIVED
+        description: RECEIVE NOTIFICATION FOR EVERY DM RECEIVED (string value true/false)
         type: string
       notifydm:
-        description: RECEIVE DAILY NOTIFICATION SUMMARY EMAIL
+        description: RECEIVE DAILY NOTIFICATION SUMMARY EMAIL (string value true/false)
+        type: string
+      signupsite:
+        description: LATEST SITE WHERE NOTIFICATIONS EMAIL WAS ENTERED
+        type: string
+      verified:
+        description: USER CONFIRMED EMAIL OR NOT (string value true/false)
         type: string
       walletaddr:
         description: '*** REQUIRED INPUT ***'
@@ -1519,7 +1530,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: Currently this only updates email address field
+      description: Update settings, email address, daily notifications and per DM
+        notifications
       parameters:
       - description: update struct
         in: body
@@ -1540,6 +1552,34 @@ paths:
       - BearerAuth: []
       summary: Settings hold a user address and the email address for notifications
         if they opt-in
+      tags:
+      - Common
+  /v1/verify_email/{email}/{verification_code}:
+    get:
+      consumes:
+      - application/json
+      description: Users will get an email when signing-up to verify email, to ensure
+        we do not send spam
+      parameters:
+      - description: update struct
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Settings'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Settings'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Link a user can click in email to verify email address, will have unique
+        code
       tags:
       - Common
 securityDefinitions:

@@ -1892,7 +1892,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Currently this only updates email address field",
+                "description": "Update settings, email address, daily notifications and per DM notifications",
                 "consumes": [
                     "application/json"
                 ],
@@ -1926,6 +1926,48 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/v1/verify_email/{email}/{verification_code}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Users will get an email when signing-up to verify email, to ensure we do not send spam",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Common"
+                ],
+                "summary": "Link a user can click in email to verify email address, will have unique code",
+                "parameters": [
+                    {
+                        "description": "update struct",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Settings"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Settings"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -1936,6 +1978,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "msg": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 },
                 "nonce": {
@@ -2306,6 +2351,10 @@ const docTemplate = `{
                 "walletaddr"
             ],
             "properties": {
+                "domain": {
+                    "description": "DOMAIN",
+                    "type": "string"
+                },
                 "email": {
                     "description": "Publickey  string ` + "`" + `json:\"publickey\"` + "`" + `",
                     "type": "string"
@@ -2315,11 +2364,19 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "notify24": {
-                    "description": "RECEIVE NOTIFICATION FOR EVERY DM RECEIVED",
+                    "description": "RECEIVE NOTIFICATION FOR EVERY DM RECEIVED (string value true/false)",
                     "type": "string"
                 },
                 "notifydm": {
-                    "description": "RECEIVE DAILY NOTIFICATION SUMMARY EMAIL",
+                    "description": "RECEIVE DAILY NOTIFICATION SUMMARY EMAIL (string value true/false)",
+                    "type": "string"
+                },
+                "signupsite": {
+                    "description": "LATEST SITE WHERE NOTIFICATIONS EMAIL WAS ENTERED",
+                    "type": "string"
+                },
+                "verified": {
+                    "description": "USER CONFIRMED EMAIL OR NOT (string value true/false)",
                     "type": "string"
                 },
                 "walletaddr": {
