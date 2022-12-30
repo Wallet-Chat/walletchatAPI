@@ -140,9 +140,11 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 
 	//TODO: need to throttle these 2 calls to auto-join?
 	//should auto-join them to the community chat
-	AutoJoinCommunitiesByChain(key, "ethereum") //Moralis uses "eth" instead of "ethereum" but we change this at lower level
-	//AutoJoinCommunitiesByChain(key, "polygon")
-	AutoJoinPoapChats(key)
+	if strings.HasPrefix(key, "0x") || strings.HasSuffix(key, ".eth") {
+		AutoJoinCommunitiesByChain(key, "ethereum") //Moralis uses "eth" instead of "ethereum" but we change this at lower level
+		//AutoJoinCommunitiesByChain(key, "polygon")
+		AutoJoinPoapChats(key)
+	}
 
 	//now add last message from group chat this bookmark is for
 	var gchat []entity.Groupchatitem //even though I use this in a Last() function I need to store as an array, or subsequenct DB queries fail!
