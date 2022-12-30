@@ -2572,7 +2572,7 @@ func IsOwnerOfNFT(contractAddr string, walletAddr string, chain string) bool {
 	}
 
 	if chain == "near" {
-		fmt.Println("Near Chain ", walletAddr, contractAddr)
+		//fmt.Println("Near Chain ", walletAddr, contractAddr)
 		url := "https://near-mainnet.api.pagoda.co/eapi/v1/accounts/" + walletAddr + "/NFT/" + contractAddr
 
 		req, _ := http.NewRequest("GET", url, nil)
@@ -2597,7 +2597,7 @@ func IsOwnerOfNFT(contractAddr string, walletAddr string, chain string) bool {
 		if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
 			fmt.Println("Can not unmarshal JSON - Near IsOwnerOfNFT", body)
 		}
-		fmt.Printf("IsOwner: %#v\n", result.Nfts)
+		//fmt.Printf("IsOwner: %#v\n", result.Nfts)
 
 		return len(result.Nfts) > 0
 	}
