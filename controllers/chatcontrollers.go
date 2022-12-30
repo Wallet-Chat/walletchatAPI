@@ -1022,6 +1022,8 @@ func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 		if !isHolder {
 			isHolder = IsOwnerOfNFT(chat.Nftaddr, chat.Fromaddr, "polygon")
 		}
+	} else if !isHolder && (strings.HasSuffix(chat.Fromaddr, ".near") || strings.HasSuffix(chat.Fromaddr, ".testnet")) { //NEAR check
+		isHolder = IsOwnerOfNFT(chat.Nftaddr, chat.Fromaddr, "near")
 	} else if !isHolder && strings.HasPrefix(chat.Fromaddr, "tz") { //Tezos check
 		isHolder = IsOwnerOfNFT(chat.Nftaddr, chat.Fromaddr, "tezos")
 	} else if !isHolder && strings.HasPrefix(chat.Nftaddr, "poap_") {
@@ -1615,7 +1617,7 @@ func GetGroupChatItemsByAddr(w http.ResponseWriter, r *http.Request) {
 		if !isHolder {
 			isHolder = IsOwnerOfNFT(nftaddr, fromaddr, "polygon")
 		}
-	} else if !isHolder && (strings.HasSuffix(nftaddr, ".near") || strings.HasSuffix(nftaddr, ".testnet")) { //NEAR check
+	} else if !isHolder && (strings.HasSuffix(fromaddr, ".near") || strings.HasSuffix(fromaddr, ".testnet")) { //NEAR check
 		isHolder = IsOwnerOfNFT(nftaddr, fromaddr, "near")
 	} else if !isHolder && strings.HasPrefix(fromaddr, "tz") { //Tezos check
 		isHolder = IsOwnerOfNFT(nftaddr, fromaddr, "tezos")
