@@ -1613,6 +1613,8 @@ func GetGroupChatItemsByAddr(w http.ResponseWriter, r *http.Request) {
 		if !isHolder {
 			isHolder = IsOwnerOfNFT(nftaddr, fromaddr, "polygon")
 		}
+	} else if !isHolder && (strings.HasSuffix(nftaddr, ".near") || strings.HasSuffix(nftaddr, ".testnet")) { //NEAR check
+		isHolder = IsOwnerOfNFT(nftaddr, fromaddr, "near")
 	} else if !isHolder && strings.HasPrefix(fromaddr, "tz") { //Tezos check
 		isHolder = IsOwnerOfNFT(nftaddr, fromaddr, "tezos")
 	} else if !isHolder && strings.HasPrefix(nftaddr, "poap_") {
@@ -2569,6 +2571,36 @@ func IsOwnerOfNFT(contractAddr string, walletAddr string, chain string) bool {
 		chain = "eth"
 	}
 
+	if chain == "near" {
+		fmt.Println("Near Chain ", walletAddr, contractAddr)
+		url := "https://near-mainnet.api.pagoda.co/eapi/v1/accounts/" + walletAddr + "/NFT/" + contractAddr
+
+		req, _ := http.NewRequest("GET", url, nil)
+
+		req.Header.Add("accept", "application/json")
+		req.Header.Add("X-API-Key", os.Getenv("PAGODA_NFT_API_KEY"))
+
+		// Send req using http Client
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Println("Error on response.\n[ERROR] -", err)
+		}
+		defer resp.Body.Close()
+
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Println("Error while reading the response bytes:", err)
+		}
+
+		var result NearOwnerOf
+		if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
+			fmt.Println("Can not unmarshal JSON - Near IsOwnerOfNFT", body)
+		}
+		fmt.Printf("IsOwner: %#v\n", result.Nfts)
+
+		return len(result.Nfts) > 0
+	}
 	if chain == "tezos" {
 		//fmt.Println("Tezos Chain ", walletAddr, contractAddr)
 		url := "https://api.tzkt.io/v1/tokens/balances?" + walletAddr + "&token.contract=" + contractAddr
@@ -2992,6 +3024,34 @@ type TezosOwnerOf struct {
 	FirstTime      time.Time `json:"firstTime"`
 	LastLevel      int       `json:"lastLevel"`
 	LastTime       time.Time `json:"lastTime"`
+}
+
+type NearOwnerOf struct {
+	Nfts []struct {
+		TokenID        string `json:"token_id"`
+		OwnerAccountID string `json:"owner_account_id"`
+		Metadata       struct {
+			Title         string      `json:"title"`
+			Description   interface{} `json:"description"`
+			Media         string      `json:"media"`
+			MediaHash     interface{} `json:"media_hash"`
+			Copies        int         `json:"copies"`
+			Extra         interface{} `json:"extra"`
+			Reference     string      `json:"reference"`
+			ReferenceHash interface{} `json:"reference_hash"`
+		} `json:"metadata"`
+	} `json:"nfts"`
+	ContractMetadata struct {
+		Spec          string      `json:"spec"`
+		Name          string      `json:"name"`
+		Symbol        string      `json:"symbol"`
+		Icon          string      `json:"icon"`
+		BaseURI       string      `json:"base_uri"`
+		Reference     interface{} `json:"reference"`
+		ReferenceHash interface{} `json:"reference_hash"`
+	} `json:"contract_metadata"`
+	BlockTimestampNanos string `json:"block_timestamp_nanos"`
+	BlockHeight         string `json:"block_height"`
 }
 
 type NFTPortNftContract struct {
