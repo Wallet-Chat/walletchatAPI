@@ -405,6 +405,9 @@ func ValidateMessageSignatureSequenceWallet(chainID string, walletAddress string
 	seqAPI := api.NewAPIClient("https://api.sequence.app", http.DefaultClient)
 
 	isValid, err := seqAPI.IsValidMessageSignature(context.Background(), chainID, walletAddress, message, signature)
+	if !isValid {
+		fmt.Println("Invalid Sequence Wallet Signature!", chainID, walletAddress, message, signature)
+	}
 	if err != nil {
 		fmt.Println("Failed to Verify Sequence Wallet Signature?", err)
 		isValid = false
