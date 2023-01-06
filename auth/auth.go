@@ -480,7 +480,8 @@ func Authenticate(walletName string, address string, nonce string, message strin
 		address = pk.Address().String()
 	}
 	//Massage data for NEAR wallets.  They have a common name and pub key natively
-	if strings.HasSuffix(walletName, ".near") || strings.HasSuffix(walletName, ".testnet") {
+	if strings.HasSuffix(walletName, ".near") || strings.HasSuffix(walletName, ".testnet") ||
+		(len(walletName) == 64 && !strings.HasPrefix(walletName, "0x")) {
 		pubKey = address
 		address = walletName
 	}
@@ -507,7 +508,8 @@ func Authenticate(walletName string, address string, nonce string, message strin
 			recoveredAddr = address
 			fmt.Println("Smart Contract Wallet Signature Valid!")
 		}
-	} else if strings.HasSuffix(walletName, ".near") || strings.HasSuffix(walletName, ".testnet") { //NEAR wallet
+	} else if strings.HasSuffix(walletName, ".near") || strings.HasSuffix(walletName, ".testnet") ||
+		(len(walletName) == 64 && !strings.HasPrefix(walletName, "0x")) { //NEAR wallet
 		fmt.Println("Using NEAR Wallet Signature")
 		isValidNearWalletSig := ValidateMessageSignatureNearWallet(pubKey, sigHex, message)
 		if isValidNearWalletSig {
