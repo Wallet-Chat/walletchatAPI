@@ -533,7 +533,7 @@ func Authenticate(walletName string, address string, nonce string, message strin
 		msg := accounts.TextHash([]byte(message))
 		recovered, err := crypto.SigToPub(msg, sig)
 		if err != nil {
-			fmt.Println("failed to recover EVM signature ")
+			fmt.Println("failed to recover EVM signature ", err)
 			return Authuser, err
 		}
 

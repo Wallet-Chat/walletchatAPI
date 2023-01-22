@@ -19,6 +19,9 @@ import (
 
 	_ "rest-go-demo/docs"
 
+	delegatecash "rest-go-demo/contracts" // for demo
+
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	ens "github.com/wealdtech/go-ens/v3"
 
@@ -2500,6 +2503,34 @@ func IsOwner(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(result)
+}
+
+//call DelegateCash function
+func GetDelegationsByDelegate(addressDelegateWallet string) {
+	// Connect to an ethereum node
+	client, err := ethclient.Dial("https://mainnet.infura.io/v3/" + os.Getenv("INFURA_V3"))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// Create an instance of the contract
+	contractAddress := common.HexToAddress("0x00000000000076A84feF008CDAbe6409d2FE638B")
+	instance, err := delegatecash.NewDelegatecash(contractAddress, client)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	delegateAddress := common.HexToAddress(addressDelegateWallet)
+	// Call the contract method
+	result, err := instance.GetDelegationsByDelegate(nil, delegateAddress)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Println(result)
 }
 
 //internal

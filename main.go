@@ -89,7 +89,7 @@ func main() {
 	wsRouter.HandleFunc("/welcome", auth.WelcomeHandler()).Methods("GET")
 
 	initaliseHandlers(wsRouter)
-	go sendPeriodicNotifications() //run concurrently
+	//go sendPeriodicNotifications() //run concurrently
 	controllers.InitRandom()
 
 	//handler := cors.Default().Handler(router) //cors.AllowAll().Handler(router)
