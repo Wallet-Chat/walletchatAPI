@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"math/big"
 	"net/http"
+	"os"
 	"regexp"
 	"rest-go-demo/database"
 	"strings"
@@ -22,6 +23,11 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/mux"
+
+	delegatecash "rest-go-demo/contracts" // for demo
+
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 
 	_ "rest-go-demo/docs"
 
@@ -294,6 +300,21 @@ func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+
+		//Not sure yet if this is the best way, but lets try it
+		delegates := GetDelegationsByDelegate(Authuser.Address)
+		if delegates != nil {
+			fmt.Println("Wallet Delegates in OwnerOfNFT: ", delegates)
+
+			for _, delegateWallet := range delegates {
+				if delegateWallet.Type == 1 {
+					fmt.Println("Wallet Full Delegate Authorized: ", delegateWallet.Vault.Hex())
+					Authuser.Address = delegateWallet.Vault.Hex()
+					break
+				}
+			}
+		}
+
 		signedToken, err := jwtProvider.CreateStandard(Authuser.Address)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -586,6 +607,39 @@ func renderJson(r *http.Request, w http.ResponseWriter, statusCode int, res inte
 	if len(body) > 0 {
 		w.Write(body)
 	}
+}
+
+//call DelegateCash function
+func GetDelegationsByDelegate(addressDelegateWallet string) []delegatecash.IDelegationRegistryDelegationInfo {
+	// Connect to an ethereum node
+	client, err := ethclient.Dial("https://mainnet.infura.io/v3/" + os.Getenv("INFURA_V3"))
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+
+	// Create an instance of the contract
+	contractAddress := common.HexToAddress("0x00000000000076A84feF008CDAbe6409d2FE638B")
+	instance, err := delegatecash.NewDelegatecash(contractAddress, client)
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+
+	delegateAddress := common.HexToAddress(addressDelegateWallet)
+	// Call the contract method
+	var result []delegatecash.IDelegationRegistryDelegationInfo
+	result, err = instance.GetDelegationsByDelegate(nil, delegateAddress)
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+
+	//[{x x x x}, {x x x x}]
+	//{1 <cold_addr> <delegate_addr> 0 0} //delegate full wallet
+	//{3 <cold_addr> <delegate_addr> <nft_addr> <nft_id>} //Delegate for single NFT
+	//fmt.Println(result)
+	return result
 }
 
 // func renderJsonWithCookie(r *http.Request, w http.ResponseWriter, statusCode int, cookie http.Cookie, res interface{}) {

@@ -94,7 +94,7 @@ func main() {
 
 	//handler := cors.Default().Handler(router) //cors.AllowAll().Handler(router)
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"https://app.walletchat.fun", "http://localhost:3000", "http://localhost:8080", "https://v1.walletchat.fun", "https://api.opensea.io"},
+		AllowedOrigins:   []string{"https://app.walletchat.fun", "http://localhost:8010", "http://localhost:3000", "http://localhost:8080", "https://v1.walletchat.fun", "https://api.opensea.io"},
 		AllowCredentials: true,
 		// Enable Debugging for testing, consider disabling in production
 		//Debug: true,

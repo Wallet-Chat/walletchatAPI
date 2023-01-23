@@ -19,9 +19,6 @@ import (
 
 	_ "rest-go-demo/docs"
 
-	delegatecash "rest-go-demo/contracts" // for demo
-
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	ens "github.com/wealdtech/go-ens/v3"
 
@@ -144,8 +141,8 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 	//TODO: need to throttle these 2 calls to auto-join?
 	//should auto-join them to the community chat
 	if strings.HasPrefix(key, "0x") || strings.HasSuffix(key, ".eth") {
-		AutoJoinCommunitiesByChain(key, "ethereum") //Moralis uses "eth" instead of "ethereum" but we change this at lower level
-		//AutoJoinCommunitiesByChain(key, "polygon")
+		AutoJoinCommunitiesByChainWithDelegates(key, "ethereum") //Moralis uses "eth" instead of "ethereum" but we change this at lower level
+		//AutoJoinCommunitiesByChainWithDelegates(key, "polygon")
 		AutoJoinPoapChats(key)
 	}
 
@@ -2505,36 +2502,9 @@ func IsOwner(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(result)
 }
 
-//call DelegateCash function
-func GetDelegationsByDelegate(addressDelegateWallet string) {
-	// Connect to an ethereum node
-	client, err := ethclient.Dial("https://mainnet.infura.io/v3/" + os.Getenv("INFURA_V3"))
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	// Create an instance of the contract
-	contractAddress := common.HexToAddress("0x00000000000076A84feF008CDAbe6409d2FE638B")
-	instance, err := delegatecash.NewDelegatecash(contractAddress, client)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	delegateAddress := common.HexToAddress(addressDelegateWallet)
-	// Call the contract method
-	result, err := instance.GetDelegationsByDelegate(nil, delegateAddress)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	fmt.Println(result)
-}
-
 //internal
 func GetOwnerNFTs(walletAddr string, chain string) MoralisOwnerOf {
+
 	//url := "https://eth-mainnet.alchemyapi.io/v2/${process.env.REACT_APP_ALCHEMY_API_KEY}/getOwnersForToken" + contractAddr
 	//url := "https://api.nftport.xyz/v0/accounts/" + walletAddr + "?chain=" + chain
 	url := "https://deep-index.moralis.io/api/v2/" + walletAddr + "/nft?chain=" + chain + "&format=decimal&normalizeMetadata=false"
@@ -2601,8 +2571,29 @@ func GetOwnerNFTs(walletAddr string, chain string) MoralisOwnerOf {
 // 	return result.Total > 0
 // }
 
-//internal
 func IsOwnerOfNFT(contractAddr string, walletAddr string, chain string) bool {
+
+	result := IsOwnerOfNftLocal(contractAddr, walletAddr, chain)
+
+	if !result && (chain == "ethereum" || chain == "polygon") {
+		delegates := auth.GetDelegationsByDelegate(walletAddr)
+		if delegates != nil {
+			fmt.Println("Wallet Delegates in OwnerOfNFT: ", delegates)
+
+			for _, delegateWallet := range delegates {
+				result = IsOwnerOfNftLocal(contractAddr, delegateWallet.Vault.Hex(), chain)
+				if result {
+					break
+				} //if we find an NFT, can stop here
+			}
+		}
+	}
+
+	return result
+}
+
+//internal - called from wrapper which checks DelegateCash as well
+func IsOwnerOfNftLocal(contractAddr string, walletAddr string, chain string) bool {
 	//For now if we use Moralis, ethereum needs to be "eth"
 	if chain == "ethereum" {
 		chain = "eth"
@@ -2780,24 +2771,48 @@ func FixUpBookmarks(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//internal use only
 func AutoJoinCommunities(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	walletAddr := vars["wallet"]
-	AutoJoinCommunitiesByChain(walletAddr, "ethereum")
-	//AutoJoinCommunitiesByChain(walletAddr, "polygon")
+	AutoJoinCommunitiesByChainWithDelegates(walletAddr, "ethereum")
+	//AutoJoinCommunitiesByChainWithDelegates(walletAddr, "polygon")
 	AutoJoinPoapChats(walletAddr)
 }
 
 //internal use only
-func AutoJoinCommunitiesByChain(walletAddr string, chain string) {
+func AutoJoinCommunitiesByChainWithDelegates(walletAddr string, chain string) {
+	AutoJoinCommunitiesByChain(walletAddr, "", chain, walletAddr)
+
+	//Check DelegateCash for NFTs owned
+	delegates := auth.GetDelegationsByDelegate(walletAddr)
+	if delegates != nil {
+		fmt.Println("Wallet Delegates: ", delegates)
+
+		for _, delegateWallet := range delegates {
+			//DelegateCash type 1 is a full wallet delegation
+			//if so, lets allow delegate to to be part of all NFTs in Vault/Cold wallet
+			if delegateWallet.Type == 1 {
+				fmt.Println("Wallet Full Delegate: ", delegateWallet.Vault.Hex())
+				AutoJoinCommunitiesByChain(delegateWallet.Vault.Hex(), "", chain, walletAddr)
+			} else {
+				AutoJoinCommunitiesByChain(delegateWallet.Vault.Hex(), delegateWallet.Contract.Hex(), chain, walletAddr)
+			}
+		}
+	}
+}
+
+//internal use only
+func AutoJoinCommunitiesByChain(walletAddr string, nftAddr string, chain string, delegateAddr string) {
 	//For now if we use Moralis, ethereum needs to be "eth"
 	if chain == "ethereum" {
 		chain = "eth"
 	}
 
-	//url := "https://api.nftport.xyz/v0/accounts/" + walletAddr + "?chain=" + chain
 	url := "https://deep-index.moralis.io/api/v2/" + walletAddr + "/nft?chain=" + chain + "&format=decimal&normalizeMetadata=false"
+	if nftAddr != "" {
+		fmt.Println("Auto join by Contract: ", nftAddr)
+		url = "https://deep-index.moralis.io/api/v2/" + walletAddr + "/nft?chain=" + chain + "&format=decimal&normalizeMetadata=false&token_addresses%5B0%5D=" + nftAddr
+	}
 
 	req, _ := http.NewRequest("GET", url, nil)
 
@@ -2827,12 +2842,12 @@ func AutoJoinCommunitiesByChain(walletAddr string, chain string) {
 	for _, nft := range result.Result {
 		//TODO: could be optimized, good enough for now
 		var bookmarkExists entity.Bookmarkitem
-		var dbResult = database.Connector.Where("nftaddr = ?", nft.TokenAddress).Where("walletaddr = ?", walletAddr).Find(&bookmarkExists)
+		var dbResult = database.Connector.Where("nftaddr = ?", nft.TokenAddress).Where("walletaddr = ?", delegateAddr).Find(&bookmarkExists)
 
 		if dbResult.RowsAffected == 0 {
 			//check if the user already manually unjoined, if so don't auto rejoin them
 			var userUnjoined entity.Userunjoined
-			var dbUnjoined = database.Connector.Where("nftaddr = ?", nft.TokenAddress).Where("walletaddr = ?", walletAddr).Find(&userUnjoined)
+			var dbUnjoined = database.Connector.Where("nftaddr = ?", nft.TokenAddress).Where("walletaddr = ?", delegateAddr).Find(&userUnjoined)
 			userAlreadyUnjoined := false
 			if dbUnjoined.RowsAffected > 0 {
 				userAlreadyUnjoined = userUnjoined.Unjoined
@@ -2843,7 +2858,7 @@ func AutoJoinCommunitiesByChain(walletAddr string, chain string) {
 				var bookmark entity.Bookmarkitem
 
 				bookmark.Nftaddr = nft.TokenAddress
-				bookmark.Walletaddr = walletAddr
+				bookmark.Walletaddr = delegateAddr //for normal cases delegate=walletAddr
 
 				//For now if we use Moralis, ethereum needs to be "eth" (NFTPort on client side and LIT uses "ethereum")
 				if chain == "eth" {
