@@ -2785,18 +2785,15 @@ func AutoJoinCommunitiesByChainWithDelegates(walletAddr string, chain string) {
 
 	//Check DelegateCash for NFTs owned
 	delegates := auth.GetDelegationsByDelegate(walletAddr)
-	if delegates != nil {
-		fmt.Println("Wallet Delegates: ", delegates)
-
-		for _, delegateWallet := range delegates {
-			//DelegateCash type 1 is a full wallet delegation
-			//if so, lets allow delegate to to be part of all NFTs in Vault/Cold wallet
-			if delegateWallet.Type == 1 {
-				fmt.Println("Wallet Full Delegate: ", delegateWallet.Vault.Hex())
-				AutoJoinCommunitiesByChain(delegateWallet.Vault.Hex(), "", chain, walletAddr)
-			} else {
-				AutoJoinCommunitiesByChain(delegateWallet.Vault.Hex(), delegateWallet.Contract.Hex(), chain, walletAddr)
-			}
+	for _, delegateWallet := range delegates {
+		fmt.Println("Wallet Delegate Found: ", delegateWallet)
+		//DelegateCash type 1 is a full wallet delegation
+		//if so, lets allow delegate to to be part of all NFTs in Vault/Cold wallet
+		if delegateWallet.Type == 1 {
+			fmt.Println("Wallet Full Delegate: ", delegateWallet.Vault.Hex())
+			AutoJoinCommunitiesByChain(delegateWallet.Vault.Hex(), "", chain, walletAddr)
+		} else {
+			AutoJoinCommunitiesByChain(delegateWallet.Vault.Hex(), delegateWallet.Contract.Hex(), chain, walletAddr)
 		}
 	}
 }
