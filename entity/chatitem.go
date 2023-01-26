@@ -30,14 +30,6 @@ type Unreadcountitem struct {
 	Community int `json:"community"`
 }
 
-//secondary table to help only load new messages for each user (not reload whole chat history)
-type Communitysocial struct {
-	Id        int    `gorm:"primaryKey;autoIncrement"`
-	Community string `json:"community"`
-	Type      string `json:"type"`
-	Name      string `json:"name"`
-}
-
 type Chatitem struct {
 	Id            int       `gorm:"primary_key"`                 //AUTO-GENERATED (PRIMARY KEY)
 	Fromaddr      string    `json:"fromaddr" binding:"required"` //*** REQUIRED INPUT ***
@@ -124,11 +116,21 @@ type Bookmarkitem struct {
 	Chain      string `json:"chain"`
 }
 
+type Communitysocial struct {
+	Id        int    `gorm:"primaryKey;autoIncrement"`
+	Community string `json:"community"`
+	Type      string `json:"type"`
+	Name      string `json:"name"`
+}
+
+type CommunitySocialStruct struct {
+	Type string `json:"type"`
+	Name string `json:"name"`
+}
+
 type Createcommunityitem struct {
-	Community  string `json:"community"`
-	Title      string `json:"title"`
-	Socialtype string `json:"socialtype"`
-	Socialname string `json:"socialname"`
+	Community string                  `json:"community"`
+	Social    []CommunitySocialStruct `json:"social"`
 }
 
 type BookmarkReturnItem struct {

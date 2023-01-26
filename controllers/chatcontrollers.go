@@ -1059,27 +1059,39 @@ func CreateCommunity(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Can not unmarshal JSON in CreateCommunityChat", requestBody)
 	}
 
-	fmt.Println("input data: ", communityInfo)
-
-	var social entity.Communitysocial
-	social.Community = communityInfo.Community
-	social.Type = communityInfo.Socialtype
-	social.Name = communityInfo.Socialname
+	fmt.Println("input data create community: ", communityInfo)
 
 	var addrname entity.Addrnameitem
 	addrname.Address = communityInfo.Community
-	addrname.Name = communityInfo.Title
+	addrname.Name = communityInfo.Community //communityInfo.Title
 
 	var mappings []entity.Addrnameitem
 	//currently, community chat is in the addrname mapping table in the DB
 	dbQuery := database.Connector.Where("address = ?", addrname.Address).Find(&mappings)
+	if dbQuery.RowsAffected == 0 {
+		dbQuery = database.Connector.Create(&addrname)
+	}
+	//todo if we add Title back in - else case should update
+
+	//delete all communitysocials and just add back in what is passsed in, this allows for deletion
+	var socialsToDelete []entity.Communitysocial
+	database.Connector.Where("community = ?", addrname.Address).Find(&socialsToDelete)
+	for i := 0; i < len(socialsToDelete); i++ {
+		dbQuery = database.Connector.Delete(&socialsToDelete[i])
+	}
+
+	for i := 0; i < len(communityInfo.Social); i++ {
+		var social entity.Communitysocial
+		social.Community = communityInfo.Community
+		social.Type = communityInfo.Social[i].Type
+		social.Name = communityInfo.Social[i].Name
+		dbQuery = database.Connector.Create(&social)
+	}
 
 	//TODO: do we need to limit the people that can create community chat groups?
 	//Authuser := auth.GetUserFromReqContext(r)
 	//if strings.EqualFold(chat.Fromaddr, Authuser.Address) {
-	if dbQuery.RowsAffected == 0 {
-		database.Connector.Create(&social)
-		database.Connector.Create(&addrname)
+	if dbQuery.RowsAffected != 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 	} else {
@@ -2441,31 +2453,22 @@ func GetCommunityChat(w http.ResponseWriter, r *http.Request) {
 	landingData.Messages = groupchat
 
 	//get social media info
-	var socialmedia entity.Communitysocial
-	dbResult := database.Connector.Where("community = ?", community).Where("type = ?", "twitter").Find(&socialmedia)
-	if dbResult.RowsAffected > 0 {
-		//fmt.Println("adding Twitter social: ", socialmedia.Name)
-		//get twitter data
-		twitterID := GetTwitterID(socialmedia.Name)
-		tweets := GetTweetsFromAPI(twitterID)
-		formatted := FormatTwitterData(tweets)
-		landingData.Tweets = formatted
-
+	var socialMediaMatches []entity.Communitysocial
+	database.Connector.Where("community = ?", community).Where("type = ?", "twitter").Find(&socialMediaMatches)
+	for i := 0; i < len(socialMediaMatches); i++ {
+		if socialMediaMatches[i].Type == "twitter" {
+			//fmt.Println("adding Twitter social: ", socialmedia.Name)
+			//get twitter data
+			twitterID := GetTwitterID(socialMediaMatches[i].Name)
+			tweets := GetTweetsFromAPI(twitterID)
+			formatted := FormatTwitterData(tweets)
+			landingData.Tweets = formatted
+		}
 		//social data
-		var twitterSocial SocialMsg
-		twitterSocial.Type = socialmedia.Type
-		twitterSocial.Username = socialmedia.Name
-		landingData.Social = append(landingData.Social, twitterSocial)
-	}
-
-	var socialdiscord entity.Communitysocial
-	dbResult = database.Connector.Where("community = ?", community).Where("type = ?", "discord").Find(&socialdiscord)
-	if dbResult.RowsAffected > 0 {
-		//fmt.Println("adding Discord social: ", socialdiscord.Name)
-		var discordSocial SocialMsg
-		discordSocial.Type = socialdiscord.Type
-		discordSocial.Username = socialdiscord.Name
-		landingData.Social = append(landingData.Social, discordSocial)
+		var insertSocial SocialMsg
+		insertSocial.Type = socialMediaMatches[i].Type
+		insertSocial.Username = socialMediaMatches[i].Name
+		landingData.Social = append(landingData.Social, insertSocial)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
