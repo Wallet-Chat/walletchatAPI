@@ -2454,7 +2454,7 @@ func GetCommunityChat(w http.ResponseWriter, r *http.Request) {
 
 	//get social media info
 	var socialMediaMatches []entity.Communitysocial
-	database.Connector.Where("community = ?", community).Where("type = ?", "twitter").Find(&socialMediaMatches)
+	database.Connector.Where("community = ?", community).Find(&socialMediaMatches)
 	for i := 0; i < len(socialMediaMatches); i++ {
 		if socialMediaMatches[i].Type == "twitter" {
 			//fmt.Println("adding Twitter social: ", socialmedia.Name)
