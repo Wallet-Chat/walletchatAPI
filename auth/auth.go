@@ -550,14 +550,16 @@ func Authenticate(walletName string, address string, nonce string, message strin
 		sig := hexutil.MustDecode(sigHex)
 		// https://github.com/ethereum/go-ethereum/blob/master/internal/ethapi/api.go#L516
 		// check here why I am subtracting 27 from the last byte
-		sigForLedgerMetamaskBug := sig
 		sig[crypto.RecoveryIDOffset] -= 27
 		msg := accounts.TextHash([]byte(message))
 		recovered, err := crypto.SigToPub(msg, sig)
+		fmt.Println("EVM signature ", sig)
 		if err != nil {
 			err = nil //reset error
 			//this is a workaround for Ledger+Metamask - which has a known implementation difference to Ledger Live alone.
-			recovered, err = crypto.SigToPub(msg, sigForLedgerMetamaskBug)
+			sig[crypto.RecoveryIDOffset] += 27
+			recovered, err = crypto.SigToPub(msg, sig)
+			fmt.Println("EVM signature (mod)", sig)
 			if err != nil {
 				fmt.Println("failed to recover EVM signature ", err)
 				return Authuser, err
