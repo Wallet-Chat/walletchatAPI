@@ -31,6 +31,8 @@ import (
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
+var throttleInboxCounterPerUser = make(map[string]int)
+
 func stringInSlice(a string, list []string) bool {
 	for _, b := range list {
 		if b == a {
@@ -51,6 +53,7 @@ func stringInSlice(a string, list []string) bool {
 // @Success 200 {array} entity.Chatiteminbox
 // @Router /v1/get_inbox/{address} [get]
 func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
+
 	//GetInboxByID returns the latest message for each unique conversation
 	//vars := mux.Vars(r)
 	Authuser := auth.GetUserFromReqContext(r)
@@ -141,9 +144,12 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 	//TODO: need to throttle these 2 calls to auto-join?
 	//should auto-join them to the community chat
 	if strings.HasPrefix(key, "0x") || strings.HasSuffix(key, ".eth") {
-		AutoJoinCommunitiesByChainWithDelegates(key, "ethereum") //Moralis uses "eth" instead of "ethereum" but we change this at lower level
-		//AutoJoinCommunitiesByChainWithDelegates(key, "polygon")
-		AutoJoinPoapChats(key)
+		throttleInboxCounterPerUser[key]++
+		if throttleInboxCounterPerUser[key]%25 == 0 {
+			AutoJoinCommunitiesByChainWithDelegates(key, "ethereum") //Moralis uses "eth" instead of "ethereum" but we change this at lower level
+			//AutoJoinCommunitiesByChainWithDelegates(key, "polygon")
+			AutoJoinPoapChats(key)
+		}
 	}
 
 	//now add last message from group chat this bookmark is for
