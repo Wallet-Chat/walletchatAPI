@@ -555,6 +555,7 @@ func Authenticate(walletName string, address string, nonce string, message strin
 		msg := accounts.TextHash([]byte(message))
 		recovered, err := crypto.SigToPub(msg, sig)
 		if err != nil {
+			err = nil //reset error
 			//this is a workaround for Ledger+Metamask - which has a known implementation difference to Ledger Live alone.
 			recovered, err = crypto.SigToPub(msg, sigForLedgerMetamaskBug)
 			if err != nil {
