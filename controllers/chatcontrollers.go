@@ -1055,7 +1055,7 @@ func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 // @Accept  json
 // @Produce  json
 // @Security BearerAuth
-// @Param message body entity.Createcommunityitem true "Community Message Creation"
+// @Param message body entity.Createcommunityitem true "Community/Group Creation"
 // @Success 200 {array} entity.Createcommunityitem
 // @Router /v1/create_community [post]
 func CreateCommunity(w http.ResponseWriter, r *http.Request) {
