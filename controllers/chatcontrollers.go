@@ -2693,9 +2693,9 @@ func IsOwnerOfNftLocal(contractAddr string, walletAddr string, chain string) boo
 		if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
 			fmt.Println("Can not unmarshal JSON - IsOwnerOfNFT", body)
 		}
-		fmt.Printf("IsOwner: %#v\n", result.Total)
+		//fmt.Printf("IsOwner: %#v\n", result.Total)
 
-		return result.Total > 0
+		return len(result.Result) > 0
 	}
 }
 
