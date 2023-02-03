@@ -2684,6 +2684,8 @@ func IsOwnerOfNftLocal(contractAddr string, walletAddr string, chain string) boo
 		}
 		defer resp.Body.Close()
 
+		fmt.Println("OwnerOf: ", req, resp)
+
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			log.Println("Error while reading the response bytes:", err)
