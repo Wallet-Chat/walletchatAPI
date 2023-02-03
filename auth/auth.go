@@ -14,6 +14,7 @@ import (
 	"os"
 	"regexp"
 	"rest-go-demo/database"
+	"rest-go-demo/entity"
 	"strings"
 	"sync"
 	"time"
@@ -356,6 +357,12 @@ func WelcomeHandler() http.HandlerFunc {
 		}{
 			Msg: "Congrats " + Authuser.Address + " you made it",
 		}
+		var addrnameDB entity.Addrnameitem
+		var dbQuery = database.Connector.Where("address = ?", Authuser.Address).Find(&addrnameDB)
+		if dbQuery.RowsAffected > 0 {
+			resp.Msg = "Welcome:" + addrnameDB.Name + ":Addr:" + Authuser.Address
+		}
+
 		renderJson(r, w, http.StatusOK, resp)
 	}
 }
