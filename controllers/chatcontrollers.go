@@ -1071,7 +1071,9 @@ func CreateCommunity(w http.ResponseWriter, r *http.Request) {
 	addrname.Name = communityInfo.Name //communityInfo.Title
 	//auto-generate the slug (unique URL safe group name)
 	slug := url.QueryEscape(addrname.Name)
-	addrname.Address = slug //Slug
+	fmt.Println("Slug: ", slug)
+	addrname.Address = slug   //Slug
+	communityInfo.Slug = slug //for use later in this function
 
 	var mappings []entity.Addrnameitem
 	dbQuery := database.Connector.Where("address = ?", addrname.Address).Find(&mappings)
