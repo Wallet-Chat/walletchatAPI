@@ -21,7 +21,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/ethclient"
 	ens "github.com/wealdtech/go-ens/v3"
-	"gorm.io/gorm"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -1074,16 +1073,16 @@ func CreateCommunity(w http.ResponseWriter, r *http.Request) {
 	slug := url.QueryEscape(addrname.Name)
 	addrname.Address = slug //Slug
 
-	var dbQuery *gorm.DB
 	var mappings []entity.Addrnameitem
+	dbQuery := database.Connector.Where("address = ?", addrname.Address).Find(&mappings)
 	//currently, community chat is in the addrname mapping table in the DB
 	for i := 0; i < 100; i++ {
-		addrname.Address = addrname.Address + "_" + strconv.Itoa(i)
-		dbQuery = database.Connector.Where("address = ?", addrname.Address).Find(&mappings)
 		if dbQuery.RowsAffected == 0 {
 			dbQuery = database.Connector.Create(&addrname)
 			break
 		}
+		addrname.Address = addrname.Address + "_" + strconv.Itoa(i)
+		dbQuery = database.Connector.Where("address = ?", addrname.Address).Find(&mappings)
 	}
 
 	//delete all communitysocials and just add back in what is passsed in, this allows for deletion
