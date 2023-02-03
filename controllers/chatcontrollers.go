@@ -2684,8 +2684,6 @@ func IsOwnerOfNftLocal(contractAddr string, walletAddr string, chain string) boo
 		}
 		defer resp.Body.Close()
 
-		fmt.Println("OwnerOf: ", req, resp)
-
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			log.Println("Error while reading the response bytes:", err)
@@ -2695,7 +2693,7 @@ func IsOwnerOfNftLocal(contractAddr string, walletAddr string, chain string) boo
 		if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
 			fmt.Println("Can not unmarshal JSON - IsOwnerOfNFT", body)
 		}
-		//fmt.Printf("IsOwner: %#v\n", result.Total)
+		fmt.Printf("IsOwner: %#v\n", result.Total)
 
 		return result.Total > 0
 	}
