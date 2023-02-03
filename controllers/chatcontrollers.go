@@ -21,6 +21,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/ethclient"
 	ens "github.com/wealdtech/go-ens/v3"
+	"gorm.io/gorm"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -1068,16 +1069,22 @@ func CreateCommunity(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("input data create community: ", communityInfo)
 
 	var addrname entity.Addrnameitem
-	addrname.Address = communityInfo.Community
-	addrname.Name = communityInfo.Community //communityInfo.Title
+	addrname.Name = communityInfo.Name //communityInfo.Title
+	//auto-generate the slug (unique URL safe group name)
+	slug := url.QueryEscape(addrname.Name)
+	addrname.Address = slug //Slug
 
+	var dbQuery *gorm.DB
 	var mappings []entity.Addrnameitem
 	//currently, community chat is in the addrname mapping table in the DB
-	dbQuery := database.Connector.Where("address = ?", addrname.Address).Find(&mappings)
-	if dbQuery.RowsAffected == 0 {
-		dbQuery = database.Connector.Create(&addrname)
+	for i := 0; i < 100; i++ {
+		addrname.Address = addrname.Address + "_" + strconv.Itoa(i)
+		dbQuery = database.Connector.Where("address = ?", addrname.Address).Find(&mappings)
+		if dbQuery.RowsAffected == 0 {
+			dbQuery = database.Connector.Create(&addrname)
+			break
+		}
 	}
-	//todo if we add Title back in - else case should update
 
 	//delete all communitysocials and just add back in what is passsed in, this allows for deletion
 	var socialsToDelete []entity.Communitysocial
@@ -1088,7 +1095,7 @@ func CreateCommunity(w http.ResponseWriter, r *http.Request) {
 
 	for i := 0; i < len(communityInfo.Social); i++ {
 		var social entity.Communitysocial
-		social.Community = communityInfo.Community
+		social.Community = communityInfo.Slug
 		social.Type = communityInfo.Social[i].Type
 		social.Name = communityInfo.Social[i].Name
 		dbQuery = database.Connector.Create(&social)
@@ -2684,6 +2691,8 @@ func IsOwnerOfNftLocal(contractAddr string, walletAddr string, chain string) boo
 		}
 		defer resp.Body.Close()
 
+		fmt.Println("OwnerOf: ", req, resp)
+
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			log.Println("Error while reading the response bytes:", err)
@@ -2695,7 +2704,7 @@ func IsOwnerOfNftLocal(contractAddr string, walletAddr string, chain string) boo
 		}
 		//fmt.Printf("IsOwner: %#v\n", result.Total)
 
-		return result.Total > 0
+		return len(result.Result) > 0
 	}
 }
 

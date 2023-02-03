@@ -116,9 +116,10 @@ type Bookmarkitem struct {
 	Chain      string `json:"chain"`
 }
 
+//this is a DB entry for each social entry
 type Communitysocial struct {
 	Id        int    `gorm:"primaryKey;autoIncrement"`
-	Community string `json:"community"`
+	Community string `json:"slug"`
 	Type      string `json:"type"`
 	Name      string `json:"name"`
 }
@@ -129,8 +130,11 @@ type CommunitySocialStruct struct {
 }
 
 type Createcommunityitem struct {
-	Community string                  `json:"community"`
-	Social    []CommunitySocialStruct `json:"social"`
+	Id     int                     `gorm:"primaryKey;autoIncrement"`
+	Name   string                  `json:"name"`
+	Slug   string                  `json:"slug"`
+	Image  string                  `json:"image"` //base64
+	Social []CommunitySocialStruct `json:"social"`
 }
 
 type BookmarkReturnItem struct {
