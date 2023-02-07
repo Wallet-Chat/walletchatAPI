@@ -1063,34 +1063,47 @@ func ChangeCommunityConditions(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var accessCondition entity.Communityaccesscondition
 	json.Unmarshal(requestBody, &accessCondition)
+	fmt.Println("ChangeCommunityConditions", accessCondition)
 
 	Authuser := auth.GetUserFromReqContext(r)
 
 	//ensure the caller is an admin for the group
-	var adminForCommunity entity.Communityadmin
+	var adminForCommunity []entity.Communityadmin
 	dbQuery := database.Connector.Where("adminaddr = ?", Authuser.Address).Find(&adminForCommunity)
-	if dbQuery.RowsAffected == 0 || adminForCommunity.Slug != accessCondition.Slug {
-		fmt.Println("failed ChangeCommunityConditions", dbQuery.RowsAffected, adminForCommunity.Slug, accessCondition.Slug)
+	isAdmin := false
+	for i := 0; i < int(dbQuery.RowsAffected); i++ {
+		if adminForCommunity[i].Slug == accessCondition.Slug {
+			isAdmin = true
+			break
+		}
+	}
+	if !isAdmin {
+		fmt.Println("ChangeCommunityConditions not an admin", accessCondition.Slug)
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
 
-	dbQuery = database.Connector.Find(&accessCondition)
+	var accessConditionToUpdate entity.Communityaccesscondition
+	dbQuery = database.Connector.Where("slug = ?", accessCondition.Slug).Find(&accessConditionToUpdate)
+	resultCnt := 0
 	if dbQuery.RowsAffected == 0 {
 		dbQuery = database.Connector.Create(&accessCondition)
+		resultCnt += int(dbQuery.RowsAffected)
 	} else {
 		dbQuery = database.Connector.Model(&entity.Communityaccesscondition{}).
 			Where("slug = ?", accessCondition.Slug).
-			Update("address", accessCondition.Nftaddr)
-		fmt.Println("failed ChangeCommunityConditions 1", accessCondition, dbQuery.RowsAffected)
+			Update("nftaddr", accessCondition.Nftaddr)
+		//fmt.Println("ChangeCommunityConditions 1", accessCondition, dbQuery.RowsAffected)
+		resultCnt += int(dbQuery.RowsAffected)
 
 		dbQuery = database.Connector.Model(&entity.Communityaccesscondition{}).
 			Where("slug = ?", accessCondition.Slug).
 			Update("count", accessCondition.Count)
-		fmt.Println("failed ChangeCommunityConditions 2", accessCondition, dbQuery.RowsAffected)
+		//fmt.Println("ChangeCommunityConditions 2", accessCondition, dbQuery.RowsAffected)
+		resultCnt += int(dbQuery.RowsAffected)
 	}
 
-	if dbQuery.RowsAffected != 0 {
+	if resultCnt > 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 	} else {
