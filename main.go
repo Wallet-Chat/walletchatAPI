@@ -144,6 +144,7 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/community/{community}/{address}", controllers.GetCommunityChat).Methods("GET") //TODO: make common
 	router.HandleFunc("/community", controllers.CreateCommunityChatItem).Methods("POST")
 	router.HandleFunc("/create_community", controllers.CreateCommunity).Methods("POST")
+	router.HandleFunc("/community/conditions", controllers.ChangeCommunityConditions).Methods("POST")
 
 	//bookmarks
 	router.HandleFunc("/create_bookmark", controllers.CreateBookmarkItem).Methods("POST")
