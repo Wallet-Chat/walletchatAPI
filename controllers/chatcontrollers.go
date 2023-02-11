@@ -3322,7 +3322,7 @@ type CommunityMember struct {
 
 type LandingPageItems struct {
 	Name        string                 `json:"name"`
-	MemberCount int                    `json:"memebercount"`
+	MemberCount int                    `json:"member_count"`
 	Members     []CommunityMember      `json:"members"`
 	Logo        string                 `json:"logo"`         // logo url, stored in backend
 	Verified    bool                   `json:"is_verified"`  // is this group verified? WalletChat's group is verified by default
