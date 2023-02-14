@@ -2471,13 +2471,16 @@ func GetCommunityChat(w http.ResponseWriter, r *http.Request) {
 	database.Connector.Where("nftaddr = ?", community).Find(&memberCount)
 	landingData.MemberCount = len(memberCount)
 
-	//need to re-architect this - will be slow
+	//need to re-architect this - will be very slow
 	for i := 0; i < landingData.MemberCount; i++ {
 		var localMember CommunityMember
 		localMember.Address = memberCount[i].Walletaddr
 		var localAddrName entity.Addrnameitem
 		database.Connector.Where("address = ?", localMember.Address).Find(&localAddrName)
 		localMember.Name = localAddrName.Name
+		var localImage entity.Imageitem
+		database.Connector.Where("addr = ?", localMember.Address).Find(&localImage)
+		localMember.Image = localImage.Base64data
 		landingData.Members = append(landingData.Members, localMember)
 	}
 
@@ -3318,6 +3321,7 @@ type SocialMsg struct {
 type CommunityMember struct {
 	Name    string `json:"name"`
 	Address string `json:"address"`
+	Image   string `json:"image"`
 }
 
 type LandingPageItems struct {
