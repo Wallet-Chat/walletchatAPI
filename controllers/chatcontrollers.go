@@ -1150,14 +1150,29 @@ func CreateCommunity(w http.ResponseWriter, r *http.Request) {
 
 	var mappings []entity.Addrnameitem
 	dbQuery := database.Connector.Where("address = ?", addrname.Address).Find(&mappings)
-	//currently, community chat is in the addrname mapping table in the DB
-	for i := 0; i < 100; i++ {
-		if dbQuery.RowsAffected == 0 {
-			database.Connector.Create(&addrname)
-			break
+
+	//if a chat already exists, and the requester is an admin, then this is an update
+	isUpdate := false
+	if dbQuery.RowsAffected > 0 {
+		var groupadmin entity.Communityadmin
+		groupadmin.Adminaddr = Authuser.Address
+		groupadmin.Slug = addrname.Address
+		dbQuery = database.Connector.Where("accesslevel = ?", "admin").Find(&groupadmin)
+		if dbQuery.RowsAffected > 0 {
+			isUpdate = true
 		}
-		addrname.Address = addrname.Address + "_" + strconv.Itoa(i)
-		dbQuery = database.Connector.Where("address = ?", addrname.Address).Find(&mappings)
+	}
+
+	//currently, community chat is in the addrname mapping table in the DB
+	if !isUpdate {
+		for i := 0; i < 100; i++ {
+			if dbQuery.RowsAffected == 0 {
+				database.Connector.Create(&addrname)
+				break
+			}
+			addrname.Address = addrname.Address + "_" + strconv.Itoa(i)
+			dbQuery = database.Connector.Where("address = ?", addrname.Address).Find(&mappings)
+		}
 	}
 
 	//delete all communitysocials and just add back in what is passsed in, this allows for deletion
