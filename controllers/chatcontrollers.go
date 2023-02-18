@@ -1182,6 +1182,7 @@ func CreateCommunity(w http.ResponseWriter, r *http.Request) {
 
 	if dbQuery.RowsAffected != 0 {
 		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(slug)
 		w.WriteHeader(http.StatusCreated)
 	} else {
 		w.WriteHeader(http.StatusForbidden)
@@ -2531,21 +2532,24 @@ func GetCommunityChat(w http.ResponseWriter, r *http.Request) {
 	//need to re-architect this - will be very slow
 	for i := 0; i < landingData.MemberCount; i++ {
 		var localMember CommunityMember
+
 		localMember.Address = memberCount[i].Walletaddr
 		var localAddrName entity.Addrnameitem
 		database.Connector.Where("address = ?", localMember.Address).Find(&localAddrName)
 		localMember.Name = localAddrName.Name
+
 		var localImage entity.Imageitem
 		database.Connector.Where("addr = ?", localMember.Address).Find(&localImage)
 		localMember.Image = localImage.Base64data
-		landingData.Members = append(landingData.Members, localMember)
-	}
 
-	landingData.Admin = false
-	var isAdmin entity.Communityadmin
-	database.Connector.Where("slug = ?", community).Find(&isAdmin)
-	if strings.EqualFold(key, isAdmin.Adminaddr) {
-		landingData.Admin = true
+		localMember.Admin = false
+		var isAdmin entity.Communityadmin
+		database.Connector.Where("slug = ?", community).Find(&isAdmin)
+		if strings.EqualFold(localMember.Address, isAdmin.Adminaddr) {
+			localMember.Admin = true
+		}
+
+		landingData.Members = append(landingData.Members, localMember)
 	}
 
 	//name (this might be better moved to a different table someday)
@@ -3386,6 +3390,7 @@ type CommunityMember struct {
 	Name    string `json:"name"`
 	Address string `json:"address"`
 	Image   string `json:"image"`
+	Admin   bool   `json:"admin"`
 }
 
 type LandingPageItems struct {
@@ -3399,7 +3404,6 @@ type LandingPageItems struct {
 	Messages    []entity.Groupchatitem `json:"messages"`
 	Tweets      []TweetType            `json:"tweets"` // follow format of GET /get_twitter/{nftAddr}
 	Social      []SocialMsg            `json:"social"`
-	Admin       bool                   `json:"admin"`
 }
 
 type OpenseaData struct {
