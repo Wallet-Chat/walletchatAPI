@@ -1151,35 +1151,14 @@ func CreateCommunity(w http.ResponseWriter, r *http.Request) {
 	var mappings []entity.Addrnameitem
 	dbQuery := database.Connector.Where("address = ?", addrname.Address).Find(&mappings)
 
-	//if a chat already exists, and the requester is an admin, then this is an update
-	isUpdate := false
-	if dbQuery.RowsAffected > 0 {
-		var groupadmin entity.Communityadmin
-		groupadmin.Adminaddr = Authuser.Address
-		groupadmin.Slug = addrname.Address
-		dbQuery = database.Connector.Where("accesslevel = ?", "admin").Find(&groupadmin)
-		if dbQuery.RowsAffected > 0 {
-			isUpdate = true
-		}
-	}
-
 	//currently, community chat is in the addrname mapping table in the DB
-	if !isUpdate {
-		for i := 0; i < 100; i++ {
-			if dbQuery.RowsAffected == 0 {
-				database.Connector.Create(&addrname)
-				break
-			}
-			addrname.Address = addrname.Address + "_" + strconv.Itoa(i)
-			dbQuery = database.Connector.Where("address = ?", addrname.Address).Find(&mappings)
+	for i := 0; i < 100; i++ {
+		if dbQuery.RowsAffected == 0 {
+			database.Connector.Create(&addrname)
+			break
 		}
-	}
-
-	//delete all communitysocials and just add back in what is passsed in, this allows for deletion
-	var socialsToDelete []entity.Communitysocial
-	database.Connector.Where("community = ?", addrname.Address).Find(&socialsToDelete)
-	for i := 0; i < len(socialsToDelete); i++ {
-		database.Connector.Delete(&socialsToDelete[i])
+		addrname.Address = addrname.Address + "_" + strconv.Itoa(i)
+		dbQuery = database.Connector.Where("address = ?", addrname.Address).Find(&mappings)
 	}
 
 	for i := 0; i < len(communityInfo.Social); i++ {
@@ -1202,6 +1181,69 @@ func CreateCommunity(w http.ResponseWriter, r *http.Request) {
 	//if strings.EqualFold(chat.Fromaddr, Authuser.Address) {
 
 	if dbQuery.RowsAffected != 0 {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+	} else {
+		w.WriteHeader(http.StatusForbidden)
+	}
+}
+
+// UpdateCommunity godoc
+// @Summary UpdateCommunity updates  custom community chat
+// @Description Community Chat Update - input slug, and any updates to Name, Socials
+// @Tags GroupChat
+// @Accept  json
+// @Produce  json
+// @Security BearerAuth
+// @Param message body entity.Createcommunityitem true "Community/Group Update"
+// @Success 200 {array} entity.Createcommunityitem
+// @Router /v1/update_community [post]
+func UpdateCommunity(w http.ResponseWriter, r *http.Request) {
+	requestBody, _ := ioutil.ReadAll(r.Body)
+	var communityInfo entity.CreateCommunityItem
+
+	if err := json.Unmarshal(requestBody, &communityInfo); err != nil { // Parse []byte to the go struct pointer
+		fmt.Println("Can not unmarshal JSON in CreateCommunityChat", requestBody)
+	}
+
+	Authuser := auth.GetUserFromReqContext(r)
+
+	//don't want groups named "new" as that is the path for creating new groups
+	if strings.EqualFold(communityInfo.Slug, "new") {
+		fmt.Println("blacklisted community name", communityInfo.Name)
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
+	fmt.Println("input data update community: ", communityInfo)
+
+	var groupadmin entity.Communityadmin
+	database.Connector.Where("slug = ?", communityInfo.Slug).Find(&groupadmin)
+
+	if groupadmin.Accesslevel == "admin" && strings.EqualFold(groupadmin.Adminaddr, Authuser.Address) {
+		var mappings []entity.Addrnameitem
+		database.Connector.Where("address = ?", communityInfo.Slug).Find(&mappings)
+
+		//for update we modify the common name if its different
+		database.Connector.Model(&entity.Addrnameitem{}).
+			Where("address = ?", communityInfo.Slug).
+			Update("name", communityInfo.Name)
+
+		//delete all communitysocials and just add back in what is passsed in, this allows for deletion
+		var socialsToDelete []entity.Communitysocial
+		database.Connector.Where("community = ?", communityInfo.Slug).Find(&socialsToDelete)
+		for i := 0; i < len(socialsToDelete); i++ {
+			database.Connector.Delete(&socialsToDelete[i])
+		}
+
+		for i := 0; i < len(communityInfo.Social); i++ {
+			var social entity.Communitysocial
+			social.Community = communityInfo.Slug
+			social.Type = communityInfo.Social[i].Type
+			social.Name = communityInfo.Social[i].Name
+			database.Connector.Create(&social)
+		}
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 	} else {
