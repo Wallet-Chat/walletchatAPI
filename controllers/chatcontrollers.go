@@ -2541,6 +2541,13 @@ func GetCommunityChat(w http.ResponseWriter, r *http.Request) {
 		landingData.Members = append(landingData.Members, localMember)
 	}
 
+	landingData.Admin = false
+	var isAdmin entity.Communityadmin
+	database.Connector.Where("slug = ?", community).Find(&isAdmin)
+	if strings.EqualFold(key, isAdmin.Adminaddr) {
+		landingData.Admin = true
+	}
+
 	//name (this might be better moved to a different table someday)
 	var addrname entity.Addrnameitem
 	database.Connector.Where("address = ?", community).Find(&addrname)
@@ -3392,6 +3399,7 @@ type LandingPageItems struct {
 	Messages    []entity.Groupchatitem `json:"messages"`
 	Tweets      []TweetType            `json:"tweets"` // follow format of GET /get_twitter/{nftAddr}
 	Social      []SocialMsg            `json:"social"`
+	Admin       bool                   `json:"admin"`
 }
 
 type OpenseaData struct {
