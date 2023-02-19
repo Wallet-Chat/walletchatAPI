@@ -22,6 +22,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/crypto/secp256k1"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/mux"
 
@@ -103,7 +104,10 @@ func CreateIfNotExists(u Authuser) error {
 	}
 
 	//create the item in the database
-	database.Connector.Create(&u)
+	dbQuery = database.Connector.Create(&u)
+	if dbQuery.RowsAffected == 0 {
+		fmt.Println("error creating user / nonce for user: ", u.Address)
+	}
 	return nil
 }
 
@@ -194,14 +198,13 @@ func UserNonceHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		address := vars["address"]
-		//fmt.Println("getting nonce for user: ", address)
 
 		// if !hexRegexEVM.MatchString(address) {
 		// 	w.WriteHeader(http.StatusBadRequest)
 		// 	return
 		// }
 
-		if !strings.HasPrefix(address, "tz") { //Tezos accounts are case senstive
+		if !strings.HasPrefix(address, "tz") && !strings.HasPrefix(address, "SP") { //Tezos accounts are case senstive
 			address = strings.ToLower(address)
 		}
 
@@ -495,7 +498,7 @@ func ValidateMessageSignatureNearWallet(key, sig, msg string) bool {
 }
 
 func Authenticate(walletName string, address string, nonce string, message string, sigHex string) (Authuser, error) {
-	//fmt.Println("Authenticate: " + address + "\r\n msg: " + message + " sig: " + sigHex)
+	//fmt.Println("Authenticate: walletname: " + walletName + " \r\n address" + address + "\r\n msg: " + message + " sig: " + sigHex)
 
 	pubKey := " "
 	if strings.HasPrefix(address, "edpk") {
@@ -509,16 +512,19 @@ func Authenticate(walletName string, address string, nonce string, message strin
 	}
 	//Massage data for NEAR wallets.  They have a common name and pub key natively
 	if strings.HasSuffix(walletName, ".near") || strings.HasSuffix(walletName, ".testnet") ||
-		(len(walletName) == 64 && !strings.HasPrefix(walletName, "0x")) {
+		(len(walletName) == 64 && !strings.HasPrefix(walletName, "0x")) ||
+		strings.HasPrefix(walletName, "SP") {
 		pubKey = address
 		address = walletName
 	}
 
 	Authuser, err := Get(address)
 	if err != nil {
+		fmt.Println("Get Address Validate Error: ", address, err)
 		return Authuser, err
 	}
 	if Authuser.Nonce != nonce {
+		fmt.Println("Invalid Nonce Error: ", err)
 		return Authuser, ErrAuthError
 	}
 
@@ -553,6 +559,29 @@ func Authenticate(walletName string, address string, nonce string, message strin
 		}
 		recoveredAddr = returnsKeyForSuccess
 		fmt.Println("Tezos Wallet Signature Valid!", returnsKeyForSuccess)
+	} else if strings.HasPrefix(walletName, "SP") || strings.HasSuffix(walletName, ".btc") { //Stacks/BTC Wallet
+		fmt.Println("Using Stacks/BTC Wallet Signature")
+		// Decode hex-encoded serialized signature
+		sigBytes, err := hex.DecodeString(sigHex)
+		if err != nil {
+			fmt.Println("sig err", err)
+			return Authuser, err
+		}
+		keyBytes, err := hex.DecodeString(pubKey)
+		if err != nil {
+			fmt.Println("key err", err)
+			return Authuser, err
+		}
+		msgBytes := []byte(message)
+		fmt.Println("sig verify: ", pubKey, message, sigHex)
+		isValid := secp256k1.VerifySignature(keyBytes, msgBytes, sigBytes)
+		if !isValid {
+			fmt.Println("sig verify failed!")
+			error := errors.New("stacks/btc sig verify failed")
+			return Authuser, error
+		}
+		recoveredAddr = walletName
+		fmt.Println("Stacks/BTC Wallet Signature Valid!", recoveredAddr)
 	} else {
 		sig := hexutil.MustDecode(sigHex)
 		// https://github.com/ethereum/go-ethereum/blob/master/internal/ethapi/api.go#L516
