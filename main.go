@@ -80,6 +80,7 @@ func main() {
 
 	router.HandleFunc("/register", auth.RegisterHandler()).Methods("POST")
 	router.HandleFunc("/users/{address}/nonce", auth.UserNonceHandler()).Methods("GET")
+	router.HandleFunc("/verify_email/{email}/{code}", controllers.VerifyEmail).Methods("GET")
 	router.HandleFunc("/signin", auth.SigninHandler(jwtProvider)).Methods("POST")
 	router.PathPrefix("/docs").Handler(httpSwagger.WrapHandler)
 
