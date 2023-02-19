@@ -1886,7 +1886,7 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 				if settingsRX.Signupsite == "" {
 					settingsRX.Signupsite = settingsRX.Domain //from the main webapp, domain and signup site is the same
 				}
-				plainTextContent := "Please verify your email entered at " + settingsRX.Signupsite + " by clicking here: " + settingsRX.Domain + "/verify_email/" + settings.Email + "/" + verificationCode
+				plainTextContent := "Please verify your email entered at " + settingsRX.Signupsite + " by clicking here: " + settingsRX.Domain + "/verify-email?email=" + settings.Email + "&code=" + verificationCode
 				htmlContent := email.NotificationEmailVerify(toAddrname.Name, "Email Verification", settingsRX.Email, verificationCode, settingsRX.Signupsite, settingsRX.Domain)
 				message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
 				client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
