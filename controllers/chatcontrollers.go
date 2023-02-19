@@ -1918,7 +1918,7 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 					}
 					subject := "Please Verify Email for " + settings.Signupsite
 					to := mail.NewEmail(toAddrname.Name, settingsRX.Email)
-					plainTextContent := "Please verify your email entered at " + settings.Signupsite + " by clicking here: " + settings.Domain + "/verify_email?email=" + settings.Email + "&code=" + verificationCode
+					plainTextContent := "Please verify your email entered at " + settings.Signupsite + " by clicking here: " + settings.Domain + "/verify-email?email=" + settings.Email + "&code=" + verificationCode
 					htmlContent := email.NotificationEmailVerify(toAddrname.Name, "Email Verification", settingsRX.Email, verificationCode, settingsRX.Signupsite, settingsRX.Domain)
 					message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
 					client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
