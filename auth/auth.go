@@ -22,9 +22,11 @@ import (
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/crypto/secp256k1"
+
+	//"github.com/ethereum/go-ethereum/crypto/secp256k1"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/mux"
+	"github.com/haltingstate/secp256k1-go"
 
 	delegatecash "rest-go-demo/contracts" // for demo
 
@@ -498,7 +500,7 @@ func ValidateMessageSignatureNearWallet(key, sig, msg string) bool {
 }
 
 func Authenticate(walletName string, address string, nonce string, message string, sigHex string) (Authuser, error) {
-	//fmt.Println("Authenticate: walletname: " + walletName + " \r\n address" + address + "\r\n msg: " + message + " sig: " + sigHex)
+	fmt.Println("Authenticate: walletname: " + walletName + " \r\n address" + address + "\r\n msg: " + message + " sig: " + sigHex)
 
 	pubKey := " "
 	if strings.HasPrefix(address, "edpk") {
@@ -572,10 +574,16 @@ func Authenticate(walletName string, address string, nonce string, message strin
 			fmt.Println("key err", err)
 			return Authuser, err
 		}
-		msgBytes := []byte(message)
-		fmt.Println("sig verify: ", pubKey, message, sigHex)
-		isValid := secp256k1.VerifySignature(keyBytes, msgBytes, sigBytes)
-		if !isValid {
+		hashMsgBytes, err := hex.DecodeString(message) //for STX this actually is the msg hash as input
+		if err != nil {
+			fmt.Println("hash err", err)
+			return Authuser, err
+		}
+
+		//isValid := secp256k1.VerifySignature(keyBytes, msgBytes, sigBytes)
+		isValid := secp256k1.VerifySignature(hashMsgBytes, sigBytes, keyBytes)
+		if isValid == 0 {
+			fmt.Println("sig error code: ", secp256k1.SignatureErrorString(hashMsgBytes, sigBytes, keyBytes), keyBytes) //hex.EncodeToString(secp256k1.RecoverPubkey(msgBytes, sigBytes)))
 			fmt.Println("sig verify failed!")
 			error := errors.New("stacks/btc sig verify failed")
 			return Authuser, error
@@ -605,7 +613,7 @@ func Authenticate(walletName string, address string, nonce string, message strin
 		recoveredAddr = strings.ToLower(crypto.PubkeyToAddress(*recovered).Hex())
 	}
 
-	if Authuser.Address != recoveredAddr {
+	if !strings.EqualFold(Authuser.Address, recoveredAddr) {
 		return Authuser, ErrAuthError
 	}
 
