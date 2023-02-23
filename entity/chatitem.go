@@ -116,9 +116,10 @@ type Bookmarkitem struct {
 	Chain      string `json:"chain"`
 }
 
+//this is a DB entry for each social entry
 type Communitysocial struct {
 	Id        int    `gorm:"primaryKey;autoIncrement"`
-	Community string `json:"community"`
+	Community string `json:"slug"` //change community to slug in DB table too
 	Type      string `json:"type"`
 	Name      string `json:"name"`
 }
@@ -128,9 +129,25 @@ type CommunitySocialStruct struct {
 	Name string `json:"name"`
 }
 
+//cant use camel notation because gorm adds "_" for any subsequent capital letter
+type Communityaccesscondition struct {
+	Id      int    `gorm:"primaryKey;autoIncrement"`
+	Slug    string `json:"slug"` //change community to slug in DB table too
+	Nftaddr string `json:"address"`
+	Count   string `json:"count"`
+}
 type Createcommunityitem struct {
-	Community string                  `json:"community"`
+	Id     int                     `gorm:"primaryKey;autoIncrement"`
+	Name   string                  `json:"name"`
+	Slug   string                  `json:"slug"`
+	Image  string                  `json:"image"` //base64
 	Social    []CommunitySocialStruct `json:"social"`
+}
+type Communityadmin struct {
+	Id          int    `gorm:"primaryKey;autoIncrement"`
+	Slug        string `json:"slug"`
+	Adminaddr   string `json:"adminaddr"`   //wallet addr
+	Accesslevel string `json:"accesslevel"` //admin, moderator, ?
 }
 
 type BookmarkReturnItem struct {

@@ -1048,6 +1048,64 @@ func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// ChangeCommunityConditions godoc
+// @Summary Change community access conditions
+// @Description Change community access conditions
+// @Tags GroupChat
+// @Accept  json
+// @Produce  json
+// @Security BearerAuth
+// @Param message body entity.CommunityAccessCondition true "Create/Edit Community/Group Access Conditions"
+// @Success 200 {array} entity.CommunityAccessCondition
+// @Router /v1/community/conditions [post]
+func ChangeCommunityConditions(w http.ResponseWriter, r *http.Request) {
+	//todo - should maybe just accept JSON and process later.
+	requestBody, _ := ioutil.ReadAll(r.Body)
+	var accessCondition entity.Communityaccesscondition
+	json.Unmarshal(requestBody, &accessCondition)
+	fmt.Println("ChangeCommunityConditions", accessCondition)
+	Authuser := auth.GetUserFromReqContext(r)
+	//ensure the caller is an admin for the group
+	var adminForCommunity []entity.Communityadmin
+	dbQuery := database.Connector.Where("adminaddr = ?", Authuser.Address).Find(&adminForCommunity)
+	isAdmin := false
+	for i := 0; i < int(dbQuery.RowsAffected); i++ {
+		if adminForCommunity[i].Slug == accessCondition.Slug {
+			isAdmin = true
+			break
+		}
+	}
+	if !isAdmin {
+		fmt.Println("ChangeCommunityConditions not an admin", accessCondition.Slug)
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+	var accessConditionToUpdate entity.Communityaccesscondition
+	dbQuery = database.Connector.Where("slug = ?", accessCondition.Slug).Find(&accessConditionToUpdate)
+	resultCnt := 0
+	if dbQuery.RowsAffected == 0 {
+		dbQuery = database.Connector.Create(&accessCondition)
+		resultCnt += int(dbQuery.RowsAffected)
+	} else {
+		dbQuery = database.Connector.Model(&entity.Communityaccesscondition{}).
+			Where("slug = ?", accessCondition.Slug).
+			Update("nftaddr", accessCondition.Nftaddr)
+		//fmt.Println("ChangeCommunityConditions 1", accessCondition, dbQuery.RowsAffected)
+		resultCnt += int(dbQuery.RowsAffected)
+		dbQuery = database.Connector.Model(&entity.Communityaccesscondition{}).
+			Where("slug = ?", accessCondition.Slug).
+			Update("count", accessCondition.Count)
+		//fmt.Println("ChangeCommunityConditions 2", accessCondition, dbQuery.RowsAffected)
+		resultCnt += int(dbQuery.RowsAffected)
+	}
+	if resultCnt > 0 {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+	} else {
+		fmt.Println("failed ChangeCommunityConditions", dbQuery.RowsAffected)
+		w.WriteHeader(http.StatusForbidden)
+	}
+}
 // CreateCommunity godoc
 // @Summary CreateCommunity creates new custom community chat
 // @Description Community Chat Creation
@@ -1055,7 +1113,7 @@ func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 // @Accept  json
 // @Produce  json
 // @Security BearerAuth
-// @Param message body entity.Createcommunityitem true "Community Message Creation"
+// @Param message body entity.Createcommunityitem true "Community/Group Creation"
 // @Success 200 {array} entity.Createcommunityitem
 // @Router /v1/create_community [post]
 func CreateCommunity(w http.ResponseWriter, r *http.Request) {
@@ -1065,39 +1123,114 @@ func CreateCommunity(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Can not unmarshal JSON in CreateCommunityChat", requestBody)
 	}
 
+	Authuser := auth.GetUserFromReqContext(r)
+	//don't want groups named "new" as that is the path for creating new groups
+	if strings.EqualFold(communityInfo.Name, "new") {
+		fmt.Println("blacklisted community name", communityInfo.Name)
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
 	fmt.Println("input data create community: ", communityInfo)
 
 	var addrname entity.Addrnameitem
-	addrname.Address = communityInfo.Community
-	addrname.Name = communityInfo.Community //communityInfo.Title
+	addrname.Name = communityInfo.Name //communityInfo.Title
+	//auto-generate the slug (unique URL safe group name)
+	slug := url.QueryEscape(addrname.Name)
+	fmt.Println("Slug: ", slug)
+	addrname.Address = slug //Slug
 
 	var mappings []entity.Addrnameitem
-	//currently, community chat is in the addrname mapping table in the DB
 	dbQuery := database.Connector.Where("address = ?", addrname.Address).Find(&mappings)
+	//currently, community chat is in the addrname mapping table in the DB
+	for i := 0; i < 100; i++ {
 	if dbQuery.RowsAffected == 0 {
-		dbQuery = database.Connector.Create(&addrname)
+			database.Connector.Create(&addrname)
+			break
 	}
-	//todo if we add Title back in - else case should update
+		addrname.Address = addrname.Address + "_" + strconv.Itoa(i)
 
-	//delete all communitysocials and just add back in what is passsed in, this allows for deletion
-	var socialsToDelete []entity.Communitysocial
-	database.Connector.Where("community = ?", addrname.Address).Find(&socialsToDelete)
-	for i := 0; i < len(socialsToDelete); i++ {
-		dbQuery = database.Connector.Delete(&socialsToDelete[i])
+		dbQuery = database.Connector.Where("address = ?", addrname.Address).Find(&mappings)
 	}
 
 	for i := 0; i < len(communityInfo.Social); i++ {
 		var social entity.Communitysocial
-		social.Community = communityInfo.Community
+		social.Community = addrname.Address //slug
 		social.Type = communityInfo.Social[i].Type
 		social.Name = communityInfo.Social[i].Name
-		dbQuery = database.Connector.Create(&social)
+		database.Connector.Create(&social)
 	}
 
+	//currently the community creator is admin (lots of room for progress)
+	var groupadmin entity.Communityadmin
+	groupadmin.Adminaddr = Authuser.Address
+	groupadmin.Slug = addrname.Address //slug
+	groupadmin.Accesslevel = "admin"   //eventually an enum - admin/moderator/?
+	dbQuery = database.Connector.Create(&groupadmin)
 	//TODO: do we need to limit the people that can create community chat groups?
 	//Authuser := auth.GetUserFromReqContext(r)
 	//if strings.EqualFold(chat.Fromaddr, Authuser.Address) {
 	if dbQuery.RowsAffected != 0 {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(slug)
+		w.WriteHeader(http.StatusCreated)
+	} else {
+		w.WriteHeader(http.StatusForbidden)
+	}
+}
+// UpdateCommunity godoc
+// @Summary UpdateCommunity updates  custom community chat
+// @Description Community Chat Update - input slug, and any updates to Name, Socials
+// @Tags GroupChat
+// @Accept  json
+// @Produce  json
+// @Security BearerAuth
+// @Param message body entity.Createcommunityitem true "Community/Group Update"
+// @Success 200 {array} entity.Createcommunityitem
+// @Router /v1/update_community [post]
+func UpdateCommunity(w http.ResponseWriter, r *http.Request) {
+	requestBody, _ := ioutil.ReadAll(r.Body)
+	var communityInfo entity.CreateCommunityItem
+	if err := json.Unmarshal(requestBody, &communityInfo); err != nil { // Parse []byte to the go struct pointer
+		fmt.Println("Can not unmarshal JSON in CreateCommunityChat", requestBody)
+	}
+
+	Authuser := auth.GetUserFromReqContext(r)
+
+	//don't want groups named "new" as that is the path for creating new groups
+	if strings.EqualFold(communityInfo.Slug, "new") {
+		fmt.Println("blacklisted community name", communityInfo.Name)
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
+	fmt.Println("input data update community: ", communityInfo)
+
+	var groupadmin entity.Communityadmin
+	database.Connector.Where("slug = ?", communityInfo.Slug).Find(&groupadmin)
+
+	if groupadmin.Accesslevel == "admin" && strings.EqualFold(groupadmin.Adminaddr, Authuser.Address) {
+		var mappings []entity.Addrnameitem
+		database.Connector.Where("address = ?", communityInfo.Slug).Find(&mappings)
+
+		//for update we modify the common name if its different
+		database.Connector.Model(&entity.Addrnameitem{}).
+			Where("address = ?", communityInfo.Slug).
+			Update("name", communityInfo.Name)
+
+		//delete all communitysocials and just add back in what is passsed in, this allows for deletion
+		var socialsToDelete []entity.Communitysocial
+		database.Connector.Where("community = ?", communityInfo.Slug).Find(&socialsToDelete)
+		for i := 0; i < len(socialsToDelete); i++ {
+			database.Connector.Delete(&socialsToDelete[i])
+		}
+
+		for i := 0; i < len(communityInfo.Social); i++ {
+			var social entity.Communitysocial
+			social.Community = communityInfo.Slug
+			social.Type = communityInfo.Social[i].Type
+			social.Name = communityInfo.Social[i].Name
+			database.Connector.Create(&social)
+		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 	} else {
@@ -2378,9 +2511,27 @@ func GetCommunityChat(w http.ResponseWriter, r *http.Request) {
 	var landingData LandingPageItems
 
 	//for now, the walletchat living room is all users by default
-	var members []entity.Bookmarkitem
-	database.Connector.Where("nftaddr = ?", community).Find(&members)
-	landingData.Members = len(members)
+	var memberCount []entity.Bookmarkitem
+	database.Connector.Where("nftaddr = ?", community).Find(&memberCount)
+	landingData.MemberCount = len(memberCount)
+	//need to re-architect this - will be very slow
+	for i := 0; i < landingData.MemberCount; i++ {
+		var localMember CommunityMember
+		localMember.Address = memberCount[i].Walletaddr
+		var localAddrName entity.Addrnameitem
+		database.Connector.Where("address = ?", localMember.Address).Find(&localAddrName)
+		localMember.Name = localAddrName.Name
+		var localImage entity.Imageitem
+		database.Connector.Where("addr = ?", localMember.Address).Find(&localImage)
+		localMember.Image = localImage.Base64data
+		localMember.Admin = false
+		var isAdmin entity.Communityadmin
+		database.Connector.Where("slug = ?", community).Find(&isAdmin)
+		if strings.EqualFold(localMember.Address, isAdmin.Adminaddr) {
+			localMember.Admin = true
+		}
+		landingData.Members = append(landingData.Members, localMember)
+	}
 
 	//name (this might be better moved to a different table someday)
 	var addrname entity.Addrnameitem
@@ -2684,6 +2835,7 @@ func IsOwnerOfNftLocal(contractAddr string, walletAddr string, chain string) boo
 		}
 		defer resp.Body.Close()
 
+		fmt.Println("OwnerOf: ", req, resp)
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			log.Println("Error while reading the response bytes:", err)
@@ -3214,9 +3366,16 @@ type SocialMsg struct {
 	Username string `json:"username"`
 }
 
+type CommunityMember struct {
+	Name    string `json:"name"`
+	Address string `json:"address"`
+	Image   string `json:"image"`
+	Admin   bool   `json:"admin"`
+}
 type LandingPageItems struct {
 	Name     string                 `json:"name"`
-	Members  int                    `json:"members"`
+	MemberCount int                    `json:"member_count"`
+	Members     []CommunityMember      `json:"members"`
 	Logo     string                 `json:"logo"`         // logo url, stored in backend
 	Verified bool                   `json:"is_verified"`  // is this group verified? WalletChat's group is verified by default
 	Joined   bool                   `json:"joined"`       //number of members of the group
