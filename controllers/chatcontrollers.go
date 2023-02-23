@@ -1106,7 +1106,6 @@ func ChangeCommunityConditions(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
 	}
 }
-
 // CreateCommunity godoc
 // @Summary CreateCommunity creates new custom community chat
 // @Description Community Chat Creation
@@ -1144,10 +1143,10 @@ func CreateCommunity(w http.ResponseWriter, r *http.Request) {
 	dbQuery := database.Connector.Where("address = ?", addrname.Address).Find(&mappings)
 	//currently, community chat is in the addrname mapping table in the DB
 	for i := 0; i < 100; i++ {
-		if dbQuery.RowsAffected == 0 {
+	if dbQuery.RowsAffected == 0 {
 			database.Connector.Create(&addrname)
 			break
-		}
+	}
 		addrname.Address = addrname.Address + "_" + strconv.Itoa(i)
 
 		dbQuery = database.Connector.Where("address = ?", addrname.Address).Find(&mappings)
@@ -1178,7 +1177,6 @@ func CreateCommunity(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
 	}
 }
-
 // UpdateCommunity godoc
 // @Summary UpdateCommunity updates  custom community chat
 // @Description Community Chat Update - input slug, and any updates to Name, Socials
@@ -1191,7 +1189,7 @@ func CreateCommunity(w http.ResponseWriter, r *http.Request) {
 // @Router /v1/update_community [post]
 func UpdateCommunity(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
-	var communityInfo entity.Createcommunityitem
+	var communityInfo entity.CreateCommunityItem
 	if err := json.Unmarshal(requestBody, &communityInfo); err != nil { // Parse []byte to the go struct pointer
 		fmt.Println("Can not unmarshal JSON in CreateCommunityChat", requestBody)
 	}
@@ -3375,16 +3373,16 @@ type CommunityMember struct {
 	Admin   bool   `json:"admin"`
 }
 type LandingPageItems struct {
-	Name        string                 `json:"name"`
+	Name     string                 `json:"name"`
 	MemberCount int                    `json:"member_count"`
 	Members     []CommunityMember      `json:"members"`
-	Logo        string                 `json:"logo"`         // logo url, stored in backend
-	Verified    bool                   `json:"is_verified"`  // is this group verified? WalletChat's group is verified by default
-	Joined      bool                   `json:"joined"`       //number of members of the group
-	Messaged    bool                   `json:"has_messaged"` // has user messaged in this group chat before? if not show "Say hi" button
-	Messages    []entity.Groupchatitem `json:"messages"`
-	Tweets      []TweetType            `json:"tweets"` // follow format of GET /get_twitter/{nftAddr}
-	Social      []SocialMsg            `json:"social"`
+	Logo     string                 `json:"logo"`         // logo url, stored in backend
+	Verified bool                   `json:"is_verified"`  // is this group verified? WalletChat's group is verified by default
+	Joined   bool                   `json:"joined"`       //number of members of the group
+	Messaged bool                   `json:"has_messaged"` // has user messaged in this group chat before? if not show "Say hi" button
+	Messages []entity.Groupchatitem `json:"messages"`
+	Tweets   []TweetType            `json:"tweets"` // follow format of GET /get_twitter/{nftAddr}
+	Social   []SocialMsg            `json:"social"`
 }
 
 type OpenseaData struct {
