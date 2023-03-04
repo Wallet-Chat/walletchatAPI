@@ -15,6 +15,7 @@ import (
 
 	httpSwagger "github.com/swaggo/http-swagger"
 
+	"github.com/go-co-op/gocron"
 	"github.com/gorilla/mux"
 	_ "github.com/jinzhu/gorm/dialects/mysql" //Required for MySQL dialect
 
@@ -90,7 +91,15 @@ func main() {
 	wsRouter.HandleFunc("/welcome", auth.WelcomeHandler()).Methods("GET")
 
 	initaliseHandlers(wsRouter)
-	go sendPeriodicNotifications() //run concurrently
+
+	//schedule daily notifications
+	s := gocron.NewScheduler(time.UTC)
+	// set time
+	s.Every(1).Day().At("10:30").Do(func() { sendPeriodicNotifications() })
+	// starts the scheduler asynchronously
+	s.StartAsync()
+	//go sendPeriodicNotifications() //run concurrently
+
 	controllers.InitRandom()
 
 	//handler := cors.Default().Handler(router) //cors.AllowAll().Handler(router)
@@ -111,7 +120,7 @@ func sendPeriodicNotifications() {
 func initaliseHandlers(router *mux.Router) {
 	//1-to-1 chats (both general and NFT related)
 	router.HandleFunc("/get_unread_cnt/{address}", controllers.GetUnreadMsgCntTotal).Methods("GET")
-	
+
 	router.HandleFunc("/get_unread_cnt_by_type/{address}/{type}", controllers.GetUnreadMsgCntTotalByType).Methods("GET")
 	router.HandleFunc("/get_unread_cnt/{fromaddr}/{toaddr}", controllers.GetUnreadMsgCnt).Methods("GET")
 	router.HandleFunc("/get_unread_cnt/{address}/{nftaddr}/{nftid}", controllers.GetUnreadMsgCntNft).Methods("GET")

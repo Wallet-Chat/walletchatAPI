@@ -1025,7 +1025,7 @@ func SendNotificationEmails() {
 				}
 			}
 		}
-		time.Sleep(time.Minute * 60 * 24)
+		//time.Sleep(time.Minute * 60 * 24)  - previous way of getting daily notification out (now using cron)
 	}
 }
 

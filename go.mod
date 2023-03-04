@@ -36,12 +36,14 @@ require (
 	github.com/multiformats/go-varint v0.0.6 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rjeczalik/notify v0.9.2 // indirect
+	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/sendgrid/rest v2.6.9+incompatible // indirect
 	github.com/shirou/gopsutil v3.21.4-0.20210419000835-c7a38de76ee5+incompatible // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.5 // indirect
 	github.com/tklauser/numcpus v0.2.2 // indirect
 	github.com/wealdtech/go-multicodec v1.4.0 // indirect
+	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/text v0.4.0 // indirect
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
 	lukechampine.com/blake3 v1.1.6 // indirect
@@ -54,6 +56,7 @@ require (
 	github.com/aws/aws-sdk-go v1.44.157
 	github.com/btcsuite/btcd/btcec/v2 v2.2.1 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.1.0 // indirect
+	github.com/go-co-op/gocron v1.18.1
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.20.0 // indirect
 	github.com/go-openapi/spec v0.20.6 // indirect
