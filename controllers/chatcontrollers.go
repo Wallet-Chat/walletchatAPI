@@ -1004,7 +1004,7 @@ func SendNotificationEmails() {
 	database.Connector.Find(&settings)
 	for i := 0; i < len(settings); i++ {
 		config := LocalGetUnread(settings[i].Walletaddr)
-		if config.Community > 0 || config.Nft > 0 || config.Dm > 0 {
+		if config.Nft > 0 || config.Dm > 0 {
 			var addrnameDB entity.Addrnameitem
 			var dbQuery = database.Connector.Where("address = ?", settings[i].Walletaddr).Find(&addrnameDB)
 
