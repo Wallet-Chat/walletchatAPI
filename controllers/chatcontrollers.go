@@ -998,35 +998,35 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 }
 
 func SendNotificationEmails() {
-	for {
-		fmt.Println("** Sending Daily Notifications **")
-		var settings []entity.Settings
-		database.Connector.Find(&settings)
-		for i := 0; i < len(settings); i++ {
-			config := LocalGetUnread(settings[i].Walletaddr)
-			if config.Community > 0 || config.Nft > 0 || config.Dm > 0 {
-				var addrnameDB entity.Addrnameitem
-				var dbQuery = database.Connector.Where("address = ?", settings[i].Walletaddr).Find(&addrnameDB)
+	//for {
+	fmt.Println("** Sending Daily Notifications **")
+	var settings []entity.Settings
+	database.Connector.Find(&settings)
+	for i := 0; i < len(settings); i++ {
+		config := LocalGetUnread(settings[i].Walletaddr)
+		if config.Community > 0 || config.Nft > 0 || config.Dm > 0 {
+			var addrnameDB entity.Addrnameitem
+			var dbQuery = database.Connector.Where("address = ?", settings[i].Walletaddr).Find(&addrnameDB)
 
-				if dbQuery.RowsAffected > 0 && strings.EqualFold(settings[i].Notify24, "true") && strings.EqualFold("true", settings[i].Verified) {
-					from := mail.NewEmail("WalletChat Notifications", "contact@walletchat.fun")
-					subject := "Message Waiting In WalletChat"
-					to := mail.NewEmail(addrnameDB.Name, settings[i].Email)
-					plainTextContent := "You have " + strconv.Itoa(config.Dm) + " unread DM(s), " + strconv.Itoa(config.Nft) + " unread NFT group chat messages, and " + strconv.Itoa(config.Community) + " unread custom community chat messages waiting in WalletChat. Please login via the app at https://app.walletchat.fun to read!"
-					htmlContent := email.NotificationEmail24(addrnameDB.Name, strconv.Itoa(config.Dm), strconv.Itoa(config.Nft), strconv.Itoa(config.Community))
-					message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
-					client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
-					response, err := client.Send(message)
-					if err != nil {
-						log.Println(err)
-					} else {
-						_ = response
-					}
+			if dbQuery.RowsAffected > 0 && strings.EqualFold(settings[i].Notify24, "true") && strings.EqualFold("true", settings[i].Verified) {
+				from := mail.NewEmail("WalletChat Notifications", "contact@walletchat.fun")
+				subject := "Message Waiting In WalletChat"
+				to := mail.NewEmail(addrnameDB.Name, settings[i].Email)
+				plainTextContent := "You have " + strconv.Itoa(config.Dm) + " unread DM(s), " + strconv.Itoa(config.Nft) + " unread NFT group chat messages, and " + strconv.Itoa(config.Community) + " unread custom community chat messages waiting in WalletChat. Please login via the app at https://app.walletchat.fun to read!"
+				htmlContent := email.NotificationEmail24(addrnameDB.Name, strconv.Itoa(config.Dm), strconv.Itoa(config.Nft), strconv.Itoa(config.Community))
+				message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
+				client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
+				response, err := client.Send(message)
+				if err != nil {
+					log.Println(err)
+				} else {
+					_ = response
 				}
 			}
 		}
-		//time.Sleep(time.Minute * 60 * 24)  - previous way of getting daily notification out (now using cron)
 	}
+	//time.Sleep(time.Minute * 60 * 24)  - previous way of getting daily notification out (now using cron)
+	//}
 }
 
 // CreateGroupChatitem godoc
