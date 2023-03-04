@@ -356,7 +356,7 @@ func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 func WelcomeHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		Authuser := GetUserFromReqContext(r)
-		fmt.Println("getting Authuser: ", Authuser)
+		//fmt.Println("getting Authuser: ", Authuser)
 		resp := struct {
 			Msg string `json:"msg"`
 		}{
@@ -500,7 +500,7 @@ func ValidateMessageSignatureNearWallet(key, sig, msg string) bool {
 }
 
 func Authenticate(walletName string, address string, nonce string, message string, sigHex string) (Authuser, error) {
-	fmt.Println("Authenticate: walletname: " + walletName + " \r\n address" + address + "\r\n msg: " + message + " sig: " + sigHex)
+	//fmt.Println("Authenticate: walletname: " + walletName + " \r\n address" + address + "\r\n msg: " + message + " sig: " + sigHex)
 
 	pubKey := " "
 	if strings.HasPrefix(address, "edpk") {

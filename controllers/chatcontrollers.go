@@ -931,6 +931,39 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusCreated)
 			json.NewEncoder(w).Encode(chat)
 
+			//manage support messages
+			if strings.EqualFold(os.Getenv("SUPPORT_WALLET"), chat.Toaddr) {
+				url := os.Getenv("SUPPORT_WEBOOK_URL")
+				messageToWebhook := "From: " + chat.Fromaddr + " Messge: " + chat.Message
+				method := "POST"
+
+				jsonBody := `{"content":"` + messageToWebhook + `"}`
+				payload := strings.NewReader(jsonBody)
+
+				client := &http.Client{}
+				req, err := http.NewRequest(method, url, payload)
+
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				req.Header.Add("Content-Type", "application/json")
+
+				res, err := client.Do(req)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				defer res.Body.Close()
+
+				body, err := ioutil.ReadAll(res.Body)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				fmt.Println(string(body))
+			}
+
 			//also notify the TO user of a new message (need to throttle this somehow)
 			var settings entity.Settings
 			var dbResult = database.Connector.Where("walletaddr = ?", chat.Toaddr).Find(&settings)
@@ -2299,7 +2332,7 @@ func GetTweetsFromAPI(twitterID string) TwitterTweetsData {
 
 	var result TwitterTweetsData
 	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
-		fmt.Println("Can not unmarshal JSON - GetTweetsFromAPI", body)
+		fmt.Println("Can not unmarshal JSON - GetTweetsFromAPI: ", twitterID)
 	}
 	//fmt.Println("length twitter: ", len(result.Data))
 

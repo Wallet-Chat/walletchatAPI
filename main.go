@@ -90,7 +90,7 @@ func main() {
 	wsRouter.HandleFunc("/welcome", auth.WelcomeHandler()).Methods("GET")
 
 	initaliseHandlers(wsRouter)
-	//go sendPeriodicNotifications() //run concurrently
+	go sendPeriodicNotifications() //run concurrently
 	controllers.InitRandom()
 
 	//handler := cors.Default().Handler(router) //cors.AllowAll().Handler(router)
@@ -111,6 +111,7 @@ func sendPeriodicNotifications() {
 func initaliseHandlers(router *mux.Router) {
 	//1-to-1 chats (both general and NFT related)
 	router.HandleFunc("/get_unread_cnt/{address}", controllers.GetUnreadMsgCntTotal).Methods("GET")
+	
 	router.HandleFunc("/get_unread_cnt_by_type/{address}/{type}", controllers.GetUnreadMsgCntTotalByType).Methods("GET")
 	router.HandleFunc("/get_unread_cnt/{fromaddr}/{toaddr}", controllers.GetUnreadMsgCnt).Methods("GET")
 	router.HandleFunc("/get_unread_cnt/{address}/{nftaddr}/{nftid}", controllers.GetUnreadMsgCntNft).Methods("GET")
