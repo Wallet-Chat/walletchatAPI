@@ -13,6 +13,8 @@ import (
 	"rest-go-demo/database"
 	"rest-go-demo/email"
 	"rest-go-demo/entity"
+	"rest-go-demo/wc_analytics"
+
 	"strconv"
 	"strings"
 	"time"
@@ -27,6 +29,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gorilla/mux"
+	"github.com/segmentio/analytics-go/v3"
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
@@ -1929,6 +1932,25 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 				} else {
 					_ = response
 				}
+
+				wc_analytics.GetAnalyticsClient().Enqueue(analytics.Identify{
+					UserId: Authuser.Address,
+					Traits: analytics.NewTraits().
+						SetName(toAddrname.Name).
+						SetEmail(settingsRX.Email).
+						Set("SignupSite", settingsRX.Signupsite),
+					// Set("friends", 42),
+				})
+			} else {
+				//else case just to save the sign-in data if user doesn't provide email details
+				var SegmentClient = analytics.New(os.Getenv("SEGMENT_API_KEY"))
+				SegmentClient.Enqueue(analytics.Identify{
+					UserId: Authuser.Address,
+					Traits: analytics.NewTraits().
+						Set("SignupSite", settingsRX.Signupsite),
+					// Set("friends", 42),
+				})
+				SegmentClient.Close()
 			}
 		} else {
 			if settingsRX.Email != "" {

@@ -38,6 +38,7 @@ import (
 	"github.com/0xsequence/go-sequence/api"
 
 	"blockwatch.cc/tzgo/tezos"
+	"github.com/segmentio/analytics-go/v3"
 )
 
 var (
@@ -320,6 +321,16 @@ func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 				}
 			}
 		}
+
+		fmt.Println("WC Analytics SignIn")
+		var SegmentClient = analytics.New(os.Getenv("SEGMENT_API_KEY"))
+		SegmentClient.Enqueue(analytics.Track{
+			Event:  "Signed In",
+			UserId: Authuser.Address,
+			Properties: analytics.NewProperties().
+				Set("time", time.Now()), //TODO fix this time to something standard?
+		})
+		SegmentClient.Close()
 
 		signedToken, err := jwtProvider.CreateStandard(Authuser.Address)
 		if err != nil {

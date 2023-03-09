@@ -148,6 +148,10 @@ github.com/robfig/cron/v3 v3.0.1/go.mod h1:eQICP3HwyT7UooqI/z+Ov+PtYAWygg1TEWWzG
 github.com/rs/cors v1.8.2 h1:KCooALfAYGs415Cwu5ABvv9n9509fSiG5SQJn/AQo4U=
 github.com/rs/cors v1.8.2/go.mod h1:XyqrcTp5zjWr1wsJ8PIRZssZ8b/WMcMf71DJnit4EMU=
 github.com/russross/blackfriday/v2 v2.1.0 h1:JIOH55/0cWyOuilr9/qlrm0BSXldqnqwMsf35Ld67mk=
+github.com/segmentio/analytics-go/v3 v3.2.1 h1:G+f90zxtc1p9G+WigVyTR0xNfOghOGs/PYAlljLOyeg=
+github.com/segmentio/analytics-go/v3 v3.2.1/go.mod h1:p8owAF8X+5o27jmvUognuXxdtqvSGtD0ZrfY2kcS9bE=
+github.com/segmentio/backo-go v1.0.0 h1:kbOAtGJY2DqOR0jfRkYEorx/b18RgtepGtY3+Cpe6qA=
+github.com/segmentio/backo-go v1.0.0/go.mod h1:kJ9mm9YmoWSkk+oQ+5Cj8DEoRCX2JT6As4kEtIIOp1M=
 github.com/sendgrid/rest v2.6.9+incompatible h1:1EyIcsNdn9KIisLW50MKwmSRSK+ekueiEMJ7NEoxJo0=
 github.com/sendgrid/rest v2.6.9+incompatible/go.mod h1:kXX7q3jZtJXK5c5qK83bSGMdV6tsOE70KbHoqJls4lE=
 github.com/sendgrid/sendgrid-go v3.12.0+incompatible h1:/N2vx18Fg1KmQOh6zESc5FJB8pYwt5QFBDflYPh1KVg=
