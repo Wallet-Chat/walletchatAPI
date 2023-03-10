@@ -377,6 +377,15 @@ func WelcomeHandler() http.HandlerFunc {
 		var dbQuery = database.Connector.Where("address = ?", Authuser.Address).Find(&addrnameDB)
 		if dbQuery.RowsAffected > 0 {
 			resp.Msg = "Welcome:" + addrnameDB.Name + ":Addr:" + Authuser.Address
+			var SegmentClient = analytics.New(os.Getenv("SEGMENT_API_KEY"))
+			SegmentClient.Enqueue(analytics.Track{
+				Event:  "Signed In",
+				UserId: Authuser.Address,
+				Properties: analytics.NewProperties().
+					Set("time", time.Now()).    //TODO fix this time to something standard?
+					Set("returningUser", true), //TODO fix this time to something standard?
+			})
+			SegmentClient.Close()
 		}
 
 		renderJson(r, w, http.StatusOK, resp)

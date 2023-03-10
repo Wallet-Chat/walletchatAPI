@@ -13,7 +13,6 @@ import (
 	"rest-go-demo/database"
 	"rest-go-demo/email"
 	"rest-go-demo/entity"
-	"rest-go-demo/wc_analytics"
 
 	"strconv"
 	"strings"
@@ -1933,7 +1932,8 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 					_ = response
 				}
 
-				wc_analytics.GetAnalyticsClient().Enqueue(analytics.Identify{
+				var SegmentClient = analytics.New(os.Getenv("SEGMENT_API_KEY"))
+				SegmentClient.Enqueue(analytics.Identify{
 					UserId: Authuser.Address,
 					Traits: analytics.NewTraits().
 						SetName(toAddrname.Name).
@@ -1941,6 +1941,7 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 						Set("SignupSite", settingsRX.Signupsite),
 					// Set("friends", 42),
 				})
+				SegmentClient.Close()
 			} else {
 				//else case just to save the sign-in data if user doesn't provide email details
 				var SegmentClient = analytics.New(os.Getenv("SEGMENT_API_KEY"))
