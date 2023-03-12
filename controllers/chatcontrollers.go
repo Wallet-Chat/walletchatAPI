@@ -1557,6 +1557,14 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 			var result = database.Connector.Create(&addrname)
 			affectedRows = int(result.RowsAffected)
 			fmt.Printf("creating addr->name item: %s <-> %s\n", addrname.Address, addrname.Name)
+			var SegmentClient = analytics.New(os.Getenv("SEGMENT_API_KEY"))
+			SegmentClient.Enqueue(analytics.Track{
+				Event:  "NewSignup",
+				UserId: Authuser.Address,
+				Properties: analytics.NewProperties().
+					Set("time", time.Now()), //TODO fix this time to something standard?
+			})
+			SegmentClient.Close()
 		} else {
 			var result = database.Connector.Model(&entity.Addrnameitem{}).
 				Where("address = ?", addrname.Address).
@@ -1934,7 +1942,7 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 			}
 			var SegmentClient = analytics.New(os.Getenv("SEGMENT_API_KEY"))
 			SegmentClient.Enqueue(analytics.Track{
-				Event:  "NewSignup",
+				Event:  "SetSetting",
 				UserId: Authuser.Address,
 				Properties: analytics.NewProperties().
 					Set("time", time.Now()). //TODO fix this time to something standard?
