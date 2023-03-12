@@ -1931,28 +1931,16 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 				} else {
 					_ = response
 				}
-
-				var SegmentClient = analytics.New(os.Getenv("SEGMENT_API_KEY"))
-				SegmentClient.Enqueue(analytics.Identify{
-					UserId: Authuser.Address,
-					Traits: analytics.NewTraits().
-						SetName(toAddrname.Name).
-						SetEmail(settingsRX.Email).
-						Set("SignupSite", settingsRX.Signupsite),
-					// Set("friends", 42),
-				})
-				SegmentClient.Close()
-			} else {
-				//else case just to save the sign-in data if user doesn't provide email details
-				var SegmentClient = analytics.New(os.Getenv("SEGMENT_API_KEY"))
-				SegmentClient.Enqueue(analytics.Identify{
-					UserId: Authuser.Address,
-					Traits: analytics.NewTraits().
-						Set("SignupSite", settingsRX.Signupsite),
-					// Set("friends", 42),
-				})
-				SegmentClient.Close()
 			}
+			var SegmentClient = analytics.New(os.Getenv("SEGMENT_API_KEY"))
+			SegmentClient.Enqueue(analytics.Track{
+				Event:  "NewSignup",
+				UserId: Authuser.Address,
+				Properties: analytics.NewProperties().
+					Set("time", time.Now()). //TODO fix this time to something standard?
+					Set("SignupSite", settingsRX.Signupsite),
+			})
+			SegmentClient.Close()
 		} else {
 			if settingsRX.Email != "" {
 				log.Println("Updating Email", settingsRX.Email)
