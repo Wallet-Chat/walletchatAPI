@@ -1749,7 +1749,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/entity.Addrnameitem"
+                            "$ref": "#/definitions/entity.Addrnamesignupitem"
                         }
                     }
                 ],
@@ -1757,10 +1757,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Bookmarkitem"
-                            }
+                            "type": "integer"
                         }
                     }
                 }
@@ -2121,6 +2118,30 @@ const docTemplate = `{
                 }
             }
         },
+        "entity.Addrnamesignupitem": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "description": "ADDRESS",
+                    "type": "string"
+                },
+                "domain": {
+                    "description": "DOMAIN",
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "description": "NAME",
+                    "type": "string"
+                },
+                "signupsite": {
+                    "description": "SITE USER SIGNED UP FROM",
+                    "type": "string"
+                }
+            }
+        },
         "entity.Bookmarkitem": {
             "type": "object",
             "properties": {
@@ -2282,20 +2303,28 @@ const docTemplate = `{
                 }
             }
         },
+        "entity.CommunitySocialStruct": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
         "entity.Createcommunityitem": {
             "type": "object",
             "properties": {
                 "community": {
                     "type": "string"
                 },
-                "socialname": {
-                    "type": "string"
-                },
-                "socialtype": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
+                "social": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.CommunitySocialStruct"
+                    }
                 }
             }
         },

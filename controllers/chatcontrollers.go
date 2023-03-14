@@ -1516,13 +1516,17 @@ func GetImageItem(w http.ResponseWriter, r *http.Request) {
 // @Accept  json
 // @Produce  json
 // @Security BearerAuth
-// @Param message body entity.Addrnameitem true "Address and Name to map together"
-// @Success 200 {array} entity.Bookmarkitem
+// @Param message body entity.Addrnamesignupitem true "Address and Name to map together"
+// @Success 200 {integer} int
 // @Router /v1/name [post]
 func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
+	var addrnameSignup entity.Addrnamesignupitem
+	json.Unmarshal(requestBody, &addrnameSignup)
+
 	var addrname entity.Addrnameitem
-	json.Unmarshal(requestBody, &addrname)
+	addrname.Address = addrnameSignup.Address
+	addrname.Name = addrnameSignup.Name
 
 	//ensure if user is trying to use .eth that they own it
 	if strings.HasSuffix(addrname.Name, ".eth") {
@@ -1557,6 +1561,7 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 			var result = database.Connector.Create(&addrname)
 			affectedRows = int(result.RowsAffected)
 			fmt.Printf("creating addr->name item: %s <-> %s\n", addrname.Address, addrname.Name)
+
 			var SegmentClient = analytics.New(os.Getenv("SEGMENT_API_KEY"))
 			SegmentClient.Enqueue(analytics.Track{
 				Event:  "NewSignup",
@@ -1565,6 +1570,17 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 					Set("time", time.Now()), //TODO fix this time to something standard?
 			})
 			SegmentClient.Close()
+
+			//create a settings entry as well to save signupsite, could be combined upon redesign
+			fmt.Printf("Signup Site: %s \n", addrnameSignup.Signupsite)
+			var settings entity.Settings
+			var dbResults = database.Connector.Where("walletaddr = ?", addrname.Address).Find(&settings)
+			if dbResults.RowsAffected == 0 {
+				settings.Domain = addrnameSignup.Domain
+				settings.Signupsite = addrnameSignup.Signupsite
+				settings.Walletaddr = addrname.Address
+				database.Connector.Create(&settings)
+			}
 		} else {
 			var result = database.Connector.Model(&entity.Addrnameitem{}).
 				Where("address = ?", addrname.Address).

@@ -89,6 +89,14 @@ type Logintime struct {
 	Timestamp time.Time `json:"timestamp"`
 }
 
+type Addrnamesignupitem struct {
+	Id         int    `gorm:"primaryKey;autoIncrement"`
+	Address    string `json:"address"`    //ADDRESS
+	Name       string `json:"name"`       //NAME
+	Signupsite string `json:"signupsite"` //SITE USER SIGNED UP FROM
+	Domain     string `json:"domain"`     //DOMAIN
+}
+
 type Addrnameitem struct {
 	Id      int    `gorm:"primaryKey;autoIncrement"`
 	Address string `json:"address"`

@@ -99,6 +99,23 @@ definitions:
       name:
         type: string
     type: object
+  entity.Addrnamesignupitem:
+    properties:
+      address:
+        description: ADDRESS
+        type: string
+      domain:
+        description: DOMAIN
+        type: string
+      id:
+        type: integer
+      name:
+        description: NAME
+        type: string
+      signupsite:
+        description: SITE USER SIGNED UP FROM
+        type: string
+    type: object
   entity.Bookmarkitem:
     properties:
       chain:
@@ -210,16 +227,21 @@ definitions:
       timestamp:
         type: string
     type: object
+  entity.CommunitySocialStruct:
+    properties:
+      name:
+        type: string
+      type:
+        type: string
+    type: object
   entity.Createcommunityitem:
     properties:
       community:
         type: string
-      socialname:
-        type: string
-      socialtype:
-        type: string
-      title:
-        type: string
+      social:
+        items:
+          $ref: '#/definitions/entity.CommunitySocialStruct'
+        type: array
     type: object
   entity.Groupchatitem:
     properties:
@@ -1432,16 +1454,14 @@ paths:
         name: message
         required: true
         schema:
-          $ref: '#/definitions/entity.Addrnameitem'
+          $ref: '#/definitions/entity.Addrnamesignupitem'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/entity.Bookmarkitem'
-            type: array
+            type: integer
       security:
       - BearerAuth: []
       summary: give a common name to a user address, or NFT collection
