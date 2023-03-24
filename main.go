@@ -223,10 +223,10 @@ func initDB() {
 	}
 
 	// SetMaxIdleConns sets the maximum number of connections in the idle connection pool.
-	database.Connector.DB().SetMaxIdleConns(10)
+	database.Connector.DB().SetMaxIdleConns(75)
 
 	// SetMaxOpenConns sets the maximum number of open connections to the database.
-	database.Connector.DB().SetMaxOpenConns(100)
+	database.Connector.DB().SetMaxOpenConns(500)
 
 	// SetConnMaxLifetime sets the maximum amount of time a connection may be reused.
 	database.Connector.DB().SetConnMaxLifetime(time.Hour)
