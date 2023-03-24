@@ -223,13 +223,13 @@ func initDB() {
 	}
 
 	// SetMaxIdleConns sets the maximum number of connections in the idle connection pool.
-	database.Connector.DB().SetMaxIdleConns(75)
+	// database.Connector.DB().SetMaxIdleConns(10)
 
-	// SetMaxOpenConns sets the maximum number of open connections to the database.
-	database.Connector.DB().SetMaxOpenConns(500)
+	// // SetMaxOpenConns sets the maximum number of open connections to the database.
+	// database.Connector.DB().SetMaxOpenConns(100)
 
-	// SetConnMaxLifetime sets the maximum amount of time a connection may be reused.
-	database.Connector.DB().SetConnMaxLifetime(time.Hour)
+	// // SetConnMaxLifetime sets the maximum amount of time a connection may be reused.
+	// database.Connector.DB().SetConnMaxLifetime(time.Hour)
 	//These are supposed to help create the proper DB based on the data struct if it doesn't already exist
 	//had some issues with it and just created the tables directly in MySQL (still have to match data structs)
 	// database.Migrate(&entity.Settings{})
