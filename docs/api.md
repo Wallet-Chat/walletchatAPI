@@ -21,3 +21,7 @@ Another easy way to obtain a JWT for use here is to grab it from the web app:
 3) Go to the `Application` tab
 4) Find local storage, and select https://app.walletchat.fun 
 5) Select the value of `jwt` or `jwt_*` variable, this is your JWT for the signed in wallet
+
+#Software Stack
+
+![WC_SW_Stack drawio](https://user-images.githubusercontent.com/19207330/227810284-83324964-58b3-4335-bb7b-0d2128a3d62c.svg)
