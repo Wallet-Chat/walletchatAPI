@@ -24,30 +24,14 @@ import (
 
 // @title WalletChat API
 // @version 1.0
-// @description Wecome to the WalletChat API Documentation
-// @description
-// @description Please make note that some JSON data structures are shared for both input/output.
-// @description Required input parameters will have a red * next to them in the data type outline at
-// @description the bottom of the page, along with a comment.  This means when executing API functionality
-// @description from this API page, some fields may need to be removed from the JSON struct before submitting.
-// @description Please email the developers with any issues.
-// @description Some JSON data structures are output only, and will be marked as such as well.
-// @description
-// @description v1 includes JWT Authentication
-// @description except for AUTH functions, all /v1 endpoints must include "Bearer <JWT>" in all requests showing the Lock Icon"
-// @description For this API Doc, use the "Authorize" button on the right hand side to ender "Bearer <JWT>" where the JWT will
-// @description come from the return value of the /signin endpoint.  Please read the /users/<>/nonce, and /signin
-// @description descriptions to understand the login workflow via JWT Auth.
-// @description
-// @description v2 includes encryption for DMs, using LIT Protocol for encryption
-// @description
+// @description.markdown
 // @wallet_chat API Support via Twitter
 // @contact.url https://walletchat.fun
 // @contact.email contact@walletchat.fun
 // @securityDefinitions.apikey BearerAuth
 // @in header
 // @name Authorization
-// @host restwalletchat-app-sey3k.ondigitalocean.app
+// @host app.walletchat.fun
 // @BasePath
 func main() {
 	godotenv.Load(".env")
