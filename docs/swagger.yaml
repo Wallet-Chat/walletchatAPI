@@ -323,7 +323,8 @@ info:
     with the wallet address desired to act on behalf of\n2) Right click the web page
     and select `inspect`\n3) Go to the `Application` tab\n4) Find local storage, and
     select https://app.walletchat.fun \n5) Select the value of `jwt` or `jwt_*` variable,
-    this is your JWT for the signed in wallet\n"
+    this is your JWT for the signed in wallet\n\n# Software Stack\n\n![WC_SW_Stack
+    drawio](https://user-images.githubusercontent.com/19207330/227810284-83324964-58b3-4335-bb7b-0d2128a3d62c.svg)\n"
   title: WalletChat API
   version: "1.0"
 paths:
