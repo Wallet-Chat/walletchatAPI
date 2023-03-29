@@ -618,6 +618,7 @@ func Authenticate(walletName string, address string, nonce string, message strin
 		recovered, err := crypto.SigToPub(msg, sig)
 		fmt.Println("EVM signature ", sig)
 		if err != nil {
+			fmt.Println("EVM signature initial error: ", err)
 			err = nil //reset error
 			//this is a workaround for Ledger+Metamask - which has a known implementation difference to Ledger Live alone.
 			sig[crypto.RecoveryIDOffset] += 27
