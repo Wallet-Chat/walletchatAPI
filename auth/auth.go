@@ -300,6 +300,7 @@ func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 		switch err {
 		case nil:
 		case ErrAuthError:
+			fmt.Println("Auth Error: ", address, err)
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		default:
@@ -519,7 +520,7 @@ func ValidateMessageSignatureNearWallet(key, sig, msg string) bool {
 }
 
 func Authenticate(walletName string, address string, nonce string, message string, sigHex string) (Authuser, error) {
-	//fmt.Println("Authenticate: walletname: " + walletName + " \r\n address" + address + "\r\n msg: " + message + " sig: " + sigHex)
+	fmt.Println("Authenticate: walletname: " + walletName + " \r\n address" + address + "\r\n msg: " + message + " sig: " + sigHex)
 
 	pubKey := " "
 	if strings.HasPrefix(address, "edpk") {
@@ -634,6 +635,7 @@ func Authenticate(walletName string, address string, nonce string, message strin
 	}
 
 	if !strings.EqualFold(Authuser.Address, recoveredAddr) {
+		fmt.Println("Authuser (JWT Token) vs. Recovered Addr ", Authuser.Address, recoveredAddr)
 		return Authuser, ErrAuthError
 	}
 
