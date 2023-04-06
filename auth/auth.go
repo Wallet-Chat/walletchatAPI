@@ -205,12 +205,11 @@ func UserNonceHandler() http.HandlerFunc {
 		}
 
 		//combining /register and /users (no need to call both and check each time)
-		// nonce, err := GetNonce()
-		// if err != nil {
-		// 	w.WriteHeader(http.StatusInternalServerError)
-		// 	return
-		// }
-		nonce := "staging_test"
+		nonce, err := GetNonce()
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		user := Authuser{
 			Address: address, // let's only store lower case
 			Nonce:   nonce,
@@ -575,11 +574,10 @@ func Authenticate(walletName string, address string, nonce string, message strin
 	}
 
 	// update the nonce here so that the signature cannot be resused
-	// nonce, err = GetNonce()
-	// if err != nil {
-	// 	return Authuser, err
-	// }
-	nonce = "staging_test"
+	nonce, err = GetNonce()
+	if err != nil {
+		return Authuser, err
+	}
 	Authuser.Nonce = nonce
 	Update(Authuser)
 
