@@ -276,12 +276,14 @@ func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		if err := p.Validate(); err != nil {
-			fmt.Println("Some fields were invalid")
-			fmt.Println(err)
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
+
+		//disabled for "staging_test" static nonce testing
+		// if err := p.Validate(); err != nil {
+		// 	fmt.Println("Some fields were invalid")
+		// 	fmt.Println(err)
+		// 	w.WriteHeader(http.StatusBadRequest)
+		// 	return
+		// }
 
 		//Tezos addresses are case sensitive (here address is the full public key)
 		address := p.Address
