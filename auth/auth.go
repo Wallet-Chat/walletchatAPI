@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"crypto/ed25519"
+	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -204,11 +205,12 @@ func UserNonceHandler() http.HandlerFunc {
 		}
 
 		//combining /register and /users (no need to call both and check each time)
-		nonce, err := GetNonce()
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+		// nonce, err := GetNonce()
+		// if err != nil {
+		// 	w.WriteHeader(http.StatusInternalServerError)
+		// 	return
+		// }
+		nonce := "staging_test"
 		user := Authuser{
 			Address: address, // let's only store lower case
 			Nonce:   nonce,
@@ -573,10 +575,11 @@ func Authenticate(walletName string, address string, nonce string, message strin
 	}
 
 	// update the nonce here so that the signature cannot be resused
-	nonce, err = GetNonce()
-	if err != nil {
-		return Authuser, err
-	}
+	// nonce, err = GetNonce()
+	// if err != nil {
+	// 	return Authuser, err
+	// }
+	nonce = "staging_test"
 	Authuser.Nonce = nonce
 	Update(Authuser)
 
@@ -589,16 +592,15 @@ var (
 )
 
 func GetNonce() (string, error) {
-	// once.Do(func() {
-	// 	max = new(big.Int)
-	// 	max.Exp(big.NewInt(2), big.NewInt(130), nil).Sub(max, big.NewInt(1))
-	// })
-	// n, err := rand.Int(rand.Reader, max)
-	// if err != nil {
-	// 	return "", err
-	// }
-	// return n.Text(10), nil
-	return "staging_test", nil
+	once.Do(func() {
+		max = new(big.Int)
+		max.Exp(big.NewInt(2), big.NewInt(130), nil).Sub(max, big.NewInt(1))
+	})
+	n, err := rand.Int(rand.Reader, max)
+	if err != nil {
+		return "", err
+	}
+	return n.Text(10), nil
 }
 
 func renderJson(r *http.Request, w http.ResponseWriter, statusCode int, res interface{}) {
