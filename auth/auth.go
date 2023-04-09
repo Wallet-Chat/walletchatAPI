@@ -427,7 +427,8 @@ func AuthMiddleware(jwtProvider *JwtHmacProvider) func(next http.Handler) http.H
 			// fmt.Println("headerValue: ", r.Header)
 
 			tokenString := headerValue //headerValue[len(prefix):]
-			if len(tokenString) == 0 {
+			if len(tokenString) < 32 {
+				fmt.Println("auth.go - Invalid Bearer Token - too short")
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
