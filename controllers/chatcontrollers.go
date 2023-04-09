@@ -980,7 +980,7 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 					subject := "Message Waiting In WalletChat"
 					to := mail.NewEmail(toAddrname.Name, settings.Email)
 					plainTextContent := "You have a message from" + fromAddrname.Name + " waiting in WalletChat, please login via the app at https://app.walletchat.fun to read!"
-					htmlContent := email.NotificationEmailDM(toAddrname.Name, fromAddrname.Name)
+					htmlContent := email.NotificationEmailDM(toAddrname.Address, fromAddrname.Address, toAddrname.Name, fromAddrname.Name)
 					message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
 					client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
 					response, err := client.Send(message)
@@ -2012,7 +2012,7 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 						settingsRX.Signupsite = settingsRX.Domain //from the main webapp, domain and signup site is the same
 					}
 					plainTextContent := "Please verify your email entered at " + settingsRX.Signupsite + " by clicking here: " + settingsRX.Domain + "/verify-email?email=" + settings.Email + "&code=" + verificationCode
-					htmlContent := email.NotificationEmailVerify(toAddrname.Name, "Email Verification", settingsRX.Email, verificationCode, settingsRX.Signupsite, settingsRX.Domain)
+					htmlContent := email.NotificationEmailVerify(toAddrname.Address, toAddrname.Name, "Email Verification", settingsRX.Email, verificationCode, settingsRX.Signupsite, settingsRX.Domain)
 					message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
 					client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
 					response, err := client.Send(message)
@@ -2055,7 +2055,7 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 						subject := "Please Verify Email for " + settings.Signupsite
 						to := mail.NewEmail(toAddrname.Name, settingsRX.Email)
 						plainTextContent := "Please verify your email entered at " + settings.Signupsite + " by clicking here: " + settings.Domain + "/verify-email?email=" + settings.Email + "&code=" + verificationCode
-						htmlContent := email.NotificationEmailVerify(toAddrname.Name, "Email Verification", settingsRX.Email, verificationCode, settingsRX.Signupsite, settingsRX.Domain)
+						htmlContent := email.NotificationEmailVerify(toAddrname.Address, toAddrname.Name, "Email Verification", settingsRX.Email, verificationCode, settingsRX.Signupsite, settingsRX.Domain)
 						message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
 						client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
 						response, err := client.Send(message)

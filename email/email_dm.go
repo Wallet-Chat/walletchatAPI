@@ -1,6 +1,6 @@
 package email
 
-func NotificationEmailDM(toname string, fromname string) string {
+func NotificationEmailDM(toAddress string, fromAddress string, toname string, fromname string) string {
 	return `<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
   <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
   
@@ -294,9 +294,10 @@ func NotificationEmailDM(toname string, fromname string) string {
                               <td style="overflow-wrap:break-word;word-break:break-word;padding:33px 55px;font-family:'Cabin',sans-serif;" align="left">
   
                                 <div style="line-height: 160%; text-align: center; word-wrap: break-word;">
-                                  <p style="line-height: 160%; font-size: 14px;"><span style="font-size: 22px; line-height: 35.2px;">Hi ` + toname + `, you have a new message from ` + fromname + `</span></p>
+                                  <p style="line-height: 160%; font-size: 14px;"><span style="font-size: 22px; line-height: 35.2px;">Hi ` + toname + `<a rel="noopener" href="https://etherscan.io/address/` + toAddress +
+		`" target="_blank">(` + toAddress[0:5] + `...` + toAddress[len(toAddress)-4:] + `)</a>, you have a new message from ` + fromname +
+		`<a rel="noopener" href="https://etherscan.io/address/` + fromAddress + `" target="_blank">(` + fromAddress[0:5] + `...` + fromAddress[len(fromAddress)-4:] + `)</a></span></p>
                                 </div>
-  
                               </td>
                             </tr>
                           </tbody>
