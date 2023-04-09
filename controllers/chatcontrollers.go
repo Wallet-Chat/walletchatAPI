@@ -1593,7 +1593,8 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 				Event:  "NewSignup",
 				UserId: Authuser.Address,
 				Properties: analytics.NewProperties().
-					Set("time", time.Now()), //TODO fix this time to something standard?
+					Set("time", time.Now()). //TODO fix this time to something standard?
+					Set("address", addrname.Address),
 			})
 			SegmentClient.Close()
 

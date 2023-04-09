@@ -428,7 +428,7 @@ func AuthMiddleware(jwtProvider *JwtHmacProvider) func(next http.Handler) http.H
 
 			tokenString := headerValue //headerValue[len(prefix):]
 			if len(tokenString) < 32 {
-				fmt.Println("auth.go - Invalid Bearer Token - too short")
+				//fmt.Println("auth.go - Invalid Bearer Token - too short")
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
@@ -451,7 +451,7 @@ func AuthMiddleware(jwtProvider *JwtHmacProvider) func(next http.Handler) http.H
 			}
 			claims, err := jwtProvider.Verify(tokenString)
 			if err != nil {
-				//w.WriteHeader(http.StatusUnauthorized)
+				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
 
@@ -467,7 +467,6 @@ func AuthMiddleware(jwtProvider *JwtHmacProvider) func(next http.Handler) http.H
 
 			ctx := context.WithValue(r.Context(), "Authuser", Authuser)
 			next.ServeHTTP(w, r.WithContext(ctx))
-
 		})
 	}
 }
