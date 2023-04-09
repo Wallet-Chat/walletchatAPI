@@ -22,6 +22,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/segmentio/analytics-go"
 
 	//"github.com/ethereum/go-ethereum/crypto/secp256k1"
 	"github.com/golang-jwt/jwt/v4"
@@ -431,9 +432,25 @@ func AuthMiddleware(jwtProvider *JwtHmacProvider) func(next http.Handler) http.H
 				return
 			}
 
+			if strings.Contains(os.Getenv("ADMIN_API_KEY_LIST"), tokenString) {
+				var authAdmin Authuser
+				authAdmin.Address = "Administrator"
+				authAdmin.Nonce = "none"
+				ctx := context.WithValue(r.Context(), "Authuser", authAdmin)
+				next.ServeHTTP(w, r.WithContext(ctx))
+
+				var SegmentClient = analytics.New(os.Getenv("SEGMENT_API_KEY"))
+				SegmentClient.Enqueue(analytics.Track{
+					Event:  "ADMIN API AUTH",
+					UserId: authAdmin.Address,
+					Properties: analytics.NewProperties().
+						Set("time", time.Now()), //TODO fix this time to something standard?
+				})
+				SegmentClient.Close()
+			}
 			claims, err := jwtProvider.Verify(tokenString)
 			if err != nil {
-				w.WriteHeader(http.StatusUnauthorized)
+				//w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
 

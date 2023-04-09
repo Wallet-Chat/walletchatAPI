@@ -44,6 +44,7 @@ require (
 	github.com/tklauser/go-sysconf v0.3.5 // indirect
 	github.com/tklauser/numcpus v0.2.2 // indirect
 	github.com/wealdtech/go-multicodec v1.4.0 // indirect
+	github.com/xtgo/uuid v0.0.0-20140804021211-a0b114877d4c // indirect
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/text v0.4.0 // indirect
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
@@ -67,6 +68,7 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
+	github.com/segmentio/analytics-go v3.1.0+incompatible
 	github.com/segmentio/analytics-go/v3 v3.2.1
 	github.com/sendgrid/sendgrid-go v3.12.0+incompatible
 	github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe // indirect

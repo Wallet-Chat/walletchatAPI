@@ -1512,6 +1512,7 @@ func GetImageItem(w http.ResponseWriter, r *http.Request) {
 // CreateAddrNameItem godoc
 // @Summary give a common name to a user address, or NFT collection
 // @Description Give a common name (Kevin.eth, BillyTheKid, etc) to an Address
+// @Description Accepts ADMIN_API_KEY for integrated sign-in
 // @Tags Common
 // @Accept  json
 // @Produce  json
@@ -1523,10 +1524,35 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var addrnameSignup entity.Addrnamesignupitem
 	json.Unmarshal(requestBody, &addrnameSignup)
+	var isAdmin bool = false
 
 	var addrname entity.Addrnameitem
 	addrname.Address = addrnameSignup.Address
 	addrname.Name = addrnameSignup.Name
+	apiKey := r.Header.Get("Authorization")
+	if len(apiKey) > 0 {
+		const prefix = "Bearer "
+		if len(apiKey) < len(prefix) {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		apiKey = apiKey[len(prefix):]
+		if strings.Contains(os.Getenv("ADMIN_API_KEY_LIST"), apiKey) {
+			isAdmin = true
+			fmt.Println("Found API key in Authorization header")
+
+			var SegmentClient = analytics.New(os.Getenv("SEGMENT_API_KEY"))
+			SegmentClient.Enqueue(analytics.Track{
+				Event:  "ADMIN UPDATE NAME",
+				UserId: "ADMIN",
+				Properties: analytics.NewProperties().
+					Set("time", time.Now()).
+					Set("addr", addrname.Address).
+					Set("name", addrname.Name),
+			})
+			SegmentClient.Close()
+		}
+	}
 
 	//ensure if user is trying to use .eth that they own it
 	if strings.HasSuffix(addrname.Name, ".eth") {
@@ -1551,7 +1577,7 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	//end ensuring .eth name is owned by sender
 
 	Authuser := auth.GetUserFromReqContext(r)
-	if strings.EqualFold(Authuser.Address, addrname.Address) {
+	if strings.EqualFold(Authuser.Address, addrname.Address) || isAdmin {
 		//create or update in one function is easier
 		var addrnameDB entity.Addrnameitem
 		var dbQuery = database.Connector.Where("address = ?", addrname.Address).Find(&addrnameDB)
@@ -1905,6 +1931,7 @@ func randSeq(n int) string {
 // UpdateSettings godoc
 // @Summary Settings hold a user address and the email address for notifications if they opt-in
 // @Description Update settings, email address, daily notifications and per DM notifications
+// @Description Accepts ADMIN_API_KEY for integrated sign-in
 // @Tags Common
 // @Accept  json
 // @Produce  json
@@ -1916,44 +1943,83 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var settingsRX entity.Settings
 	json.Unmarshal(requestBody, &settingsRX)
+	var isAdmin bool = false
 
+	//allow for site integration to update email already entered on site via API access
+	apiKey := r.Header.Get("Authorization")
+	if len(apiKey) > 0 {
+		const prefix = "Bearer "
+		if len(apiKey) < len(prefix) {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		apiKey = apiKey[len(prefix):]
+		if strings.Contains(os.Getenv("ADMIN_API_KEY_LIST"), apiKey) {
+			isAdmin = true
+			fmt.Println("Found API key in Authorization header")
+			//force verified = true here
+			settingsRX.Verified = "true"
+			var SegmentClient = analytics.New(os.Getenv("SEGMENT_API_KEY"))
+			SegmentClient.Enqueue(analytics.Track{
+				Event:  "ADMIN UPDATE SETTINGS",
+				UserId: "ADMIN",
+				Properties: analytics.NewProperties().
+					Set("time", time.Now()). //TODO fix this time to something standard?
+					Set("email", settingsRX.Email).
+					Set("walletAddr", settingsRX.Walletaddr).
+					Set("verified", settingsRX.Verified).
+					Set("notifyDM", settingsRX.Notifydm).
+					Set("notify24", settingsRX.Notify24).
+					Set("SignupSite", settingsRX.Signupsite),
+			})
+			SegmentClient.Close()
+		}
+	}
+	//strip HTTPS prefix and trailing /
+	if strings.HasPrefix(settingsRX.Signupsite, "https://") {
+		split := strings.Split(settingsRX.Signupsite, "https://")
+		settingsRX.Signupsite = split[1]
+		settingsRX.Signupsite = strings.TrimSuffix(settingsRX.Signupsite, "/")
+	}
 	log.Println("RX Settings", settingsRX)
 	addr := strings.ToLower(settingsRX.Walletaddr)
 	Authuser := auth.GetUserFromReqContext(r)
-	if strings.EqualFold(Authuser.Address, addr) {
+	if strings.EqualFold(Authuser.Address, addr) || isAdmin {
 		var settings entity.Settings
 		var dbResults = database.Connector.Where("walletaddr = ?", addr).Find(&settings)
 
 		if dbResults.RowsAffected == 0 {
 			dbResults = database.Connector.Create(&settingsRX)
 			log.Println("Created New Settings")
-			//send verification email
-			if strings.Contains(settingsRX.Email, "@") {
-				var toAddrname entity.Addrnameitem
-				dbResults = database.Connector.Where("address = ?", settingsRX.Walletaddr).Find(&toAddrname)
-				if dbResults.RowsAffected == 0 {
-					log.Println("Did not find addrname item for: ", settingsRX.Walletaddr)
-				}
-				var verificationCode = randSeq(10)
-				dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("verified", verificationCode)
-				if dbResults.RowsAffected == 0 {
-					log.Println("Did not update verification code item for: ", addr)
-				}
-				from := mail.NewEmail("WalletChat Notifications", "contact@walletchat.fun")
-				subject := "Please Verify Email for " + settingsRX.Signupsite
-				to := mail.NewEmail(toAddrname.Name, settingsRX.Email)
-				if settingsRX.Signupsite == "" {
-					settingsRX.Signupsite = settingsRX.Domain //from the main webapp, domain and signup site is the same
-				}
-				plainTextContent := "Please verify your email entered at " + settingsRX.Signupsite + " by clicking here: " + settingsRX.Domain + "/verify-email?email=" + settings.Email + "&code=" + verificationCode
-				htmlContent := email.NotificationEmailVerify(toAddrname.Name, "Email Verification", settingsRX.Email, verificationCode, settingsRX.Signupsite, settingsRX.Domain)
-				message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
-				client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
-				response, err := client.Send(message)
-				if err != nil {
-					log.Println(err)
-				} else {
-					_ = response
+			//send verification email (but not when its done via ADMIN API)
+			if !strings.Contains(os.Getenv("ADMIN_API_KEY_LIST"), apiKey) {
+				if strings.Contains(settingsRX.Email, "@") {
+					var toAddrname entity.Addrnameitem
+					dbResults = database.Connector.Where("address = ?", settingsRX.Walletaddr).Find(&toAddrname)
+					if dbResults.RowsAffected == 0 {
+						log.Println("Did not find addrname item for: ", settingsRX.Walletaddr)
+					}
+					var verificationCode = randSeq(10)
+					dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("verified", verificationCode)
+					if dbResults.RowsAffected == 0 {
+						log.Println("Did not update verification code item for: ", addr)
+					}
+					from := mail.NewEmail("WalletChat Notifications", "contact@walletchat.fun")
+					subject := "Please Verify Email for " + settingsRX.Signupsite
+					to := mail.NewEmail(toAddrname.Name, settingsRX.Email)
+					if settingsRX.Signupsite == "" {
+						settingsRX.Signupsite = settingsRX.Domain //from the main webapp, domain and signup site is the same
+					}
+					plainTextContent := "Please verify your email entered at " + settingsRX.Signupsite + " by clicking here: " + settingsRX.Domain + "/verify-email?email=" + settings.Email + "&code=" + verificationCode
+					htmlContent := email.NotificationEmailVerify(toAddrname.Name, "Email Verification", settingsRX.Email, verificationCode, settingsRX.Signupsite, settingsRX.Domain)
+					message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
+					client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
+					response, err := client.Send(message)
+					if err != nil {
+						log.Println(err)
+					} else {
+						_ = response
+					}
 				}
 			}
 			var SegmentClient = analytics.New(os.Getenv("SEGMENT_API_KEY"))
@@ -1969,32 +2035,34 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 			if settingsRX.Email != "" {
 				log.Println("Updating Email", settingsRX.Email)
 				dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("email", settingsRX.Email)
-				//send verification email
-				if strings.Contains(settingsRX.Email, "@") {
-					var toAddrname entity.Addrnameitem
-					database.Connector.Where("address = ?", settingsRX.Walletaddr).Find(&toAddrname)
+				//send verification email (but not when its done via ADMIN API)
+				if !strings.Contains(os.Getenv("ADMIN_API_KEY_LIST"), apiKey) {
+					if strings.Contains(settingsRX.Email, "@") {
+						var toAddrname entity.Addrnameitem
+						database.Connector.Where("address = ?", settingsRX.Walletaddr).Find(&toAddrname)
 
-					var verificationCode = randSeq(10)
-					dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("verified", verificationCode)
+						var verificationCode = randSeq(10)
+						dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("verified", verificationCode)
 
-					from := mail.NewEmail("WalletChat Notifications", "contact@walletchat.fun")
-					if settingsRX.Signupsite == "" {
-						settingsRX.Signupsite = settingsRX.Domain //from the main webapp, domain and signup site is the same
-					}
-					if settingsRX.Signupsite != "" {
-						settings.Signupsite = settingsRX.Signupsite //use the received one over past saved signup site.
-					}
-					subject := "Please Verify Email for " + settings.Signupsite
-					to := mail.NewEmail(toAddrname.Name, settingsRX.Email)
-					plainTextContent := "Please verify your email entered at " + settings.Signupsite + " by clicking here: " + settings.Domain + "/verify-email?email=" + settings.Email + "&code=" + verificationCode
-					htmlContent := email.NotificationEmailVerify(toAddrname.Name, "Email Verification", settingsRX.Email, verificationCode, settingsRX.Signupsite, settingsRX.Domain)
-					message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
-					client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
-					response, err := client.Send(message)
-					if err != nil {
-						log.Println(err)
-					} else {
-						_ = response
+						from := mail.NewEmail("WalletChat Notifications", "contact@walletchat.fun")
+						if settingsRX.Signupsite == "" {
+							settingsRX.Signupsite = settingsRX.Domain //from the main webapp, domain and signup site is the same
+						}
+						if settingsRX.Signupsite != "" {
+							settings.Signupsite = settingsRX.Signupsite //use the received one over past saved signup site.
+						}
+						subject := "Please Verify Email for " + settings.Signupsite
+						to := mail.NewEmail(toAddrname.Name, settingsRX.Email)
+						plainTextContent := "Please verify your email entered at " + settings.Signupsite + " by clicking here: " + settings.Domain + "/verify-email?email=" + settings.Email + "&code=" + verificationCode
+						htmlContent := email.NotificationEmailVerify(toAddrname.Name, "Email Verification", settingsRX.Email, verificationCode, settingsRX.Signupsite, settingsRX.Domain)
+						message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
+						client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
+						response, err := client.Send(message)
+						if err != nil {
+							log.Println(err)
+						} else {
+							_ = response
+						}
 					}
 				}
 			}
@@ -2012,6 +2080,12 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 			}
 			if settingsRX.Signupsite != "" {
 				log.Println("Updating Signup Site", settingsRX.Signupsite)
+				//strip HTTPS prefix and trailing /
+				if strings.HasPrefix(settingsRX.Signupsite, "https://") {
+					split := strings.Split(settingsRX.Signupsite, "https://")
+					settingsRX.Signupsite = split[1]
+					settingsRX.Signupsite = strings.TrimSuffix(settingsRX.Signupsite, "/")
+				}
 				dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("signupsite", settingsRX.Signupsite)
 			}
 			if settingsRX.Domain != "" {
@@ -2876,6 +2950,7 @@ func AutoJoinCommunitiesByChainWithDelegates(walletAddr string, chain string) {
 }
 
 //internal use only
+//database.Connector.Where("walletaddr = ?", delegateAddr).Where("chain = ?", chain).Delete(&entity.Bookmarkitem{})
 func AutoJoinCommunitiesByChain(walletAddr string, nftAddr string, chain string, delegateAddr string) {
 	//For now if we use Moralis, ethereum needs to be "eth"
 	if chain == "ethereum" {
