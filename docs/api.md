@@ -28,9 +28,9 @@ Ethereum based wallets (EVM compatible) have encryption for all DMs, using LIT P
 # Software Stack
 ![WC_SW_Stack drawio](https://user-images.githubusercontent.com/19207330/227810284-83324964-58b3-4335-bb7b-0d2128a3d62c.svg)
 
-# API Key Holders
-ADMIN API KEY functions allow vetted customer integrations to streamline the user experience.
-To authenticate with an API key, the ADMIN_API_KEY must be used in place of the end user JWTs.
+# API Key Holders (Paid Tier)
+ADMIN API KEY functions allow vetted customer integrations to streamline the user experience, enhancing the integrated sign-in process.
+To authenticate with an API key, the ADMIN_API_KEY must be used in place of the end user JWT.
 
 ## Important Note for Security 
 *We ask API key holders to make these requests in a protected manner, mainly from their own API.*
@@ -44,7 +44,7 @@ replace with equivalent functionality as needed.
 Update the wallet address to name mapping:
 
 ```
-curl --location 'https://api-segmint.walletchat.fun/v1/name'
+curl --location 'https://api.v2.walletchat.fun/v1/name'
 --header 'Authorization: Bearer AdminTestKey123'
 --header 'Content-Type: text/plain'
 --data '{
@@ -57,7 +57,7 @@ curl --location 'https://api-segmint.walletchat.fun/v1/name'
 Update the email address to wallet address mapping:
 
 ```
-curl --location 'https://api-segmint.walletchat.fun/v1/update_settings'
+curl --location 'https://api.v2.walletchat.fun/v1/update_settings'
 --header 'Authorization: Bearer MyTestApiKey123'
 --header 'Content-Type: text/plain'
 --data-raw '{

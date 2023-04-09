@@ -326,19 +326,19 @@ info:
     this is your JWT for the signed in wallet\n\n# Encryption\nEthereum based wallets
     (EVM compatible) have encryption for all DMs, using LIT Protocol\n\n# Software
     Stack\n![WC_SW_Stack drawio](https://user-images.githubusercontent.com/19207330/227810284-83324964-58b3-4335-bb7b-0d2128a3d62c.svg)\n\n#
-    API Key Holders\nADMIN API KEY functions allow vetted customer integrations to
-    streamline the user experience.\nTo authenticate with an API key, the ADMIN_API_KEY
-    must be used in place of the end user JWTs.\n\n## Important Note for Security
-    \n*We ask API key holders to make these requests in a protected manner, mainly
-    from their own API.*\n\nIf the ADMIN API key is used in the client browser, it
-    may be misused by malicious actors. \n\nBelow are examples of each API which has
-    an ADMIN API Key overrride. `curl` is just used as example,\nreplace with equivalent
-    functionality as needed.\n\n## Example for <API>/v1/name \nUpdate the wallet address
-    to name mapping:\n\n```\ncurl --location 'https://api-segmint.walletchat.fun/v1/name'\n--header
-    'Authorization: Bearer AdminTestKey123'\n--header 'Content-Type: text/plain'\n--data
-    '{\n\"name\": \"Nftz4Life\",\n\"address\": \"0x14ffE94d2B5Bf47a8d55D713b3d6b35039167cfb\"\n}'\n```\n\n##
-    Example for <API>/v1/update_settings\nUpdate the email address to wallet address
-    mapping:\n\n```\ncurl --location 'https://api-segmint.walletchat.fun/v1/update_settings'\n--header
+    API Key Holders (Paid Tier)\nADMIN API KEY functions allow vetted customer integrations
+    to streamline the user experience, enhancing the integrated sign-in process.\nTo
+    authenticate with an API key, the ADMIN_API_KEY must be used in place of the end
+    user JWT.\n\n## Important Note for Security \n*We ask API key holders to make
+    these requests in a protected manner, mainly from their own API.*\n\nIf the ADMIN
+    API key is used in the client browser, it may be misused by malicious actors.
+    \n\nBelow are examples of each API which has an ADMIN API Key overrride. `curl`
+    is just used as example,\nreplace with equivalent functionality as needed.\n\n##
+    Example for <API>/v1/name \nUpdate the wallet address to name mapping:\n\n```\ncurl
+    --location 'https://api.v2.walletchat.fun/v1/name'\n--header 'Authorization: Bearer
+    AdminTestKey123'\n--header 'Content-Type: text/plain'\n--data '{\n\"name\": \"Nftz4Life\",\n\"address\":
+    \"0x14ffE94d2B5Bf47a8d55D713b3d6b35039167cfb\"\n}'\n```\n\n## Example for <API>/v1/update_settings\nUpdate
+    the email address to wallet address mapping:\n\n```\ncurl --location 'https://api.v2.walletchat.fun/v1/update_settings'\n--header
     'Authorization: Bearer MyTestApiKey123'\n--header 'Content-Type: text/plain'\n--data-raw
     '{\n\"email\": \"savemynft@gmail.com\",\n\"walletaddr\": \"0x14fcE94d2B5Bf47a8d54D713b3d6b35039167cfb\"\n}'\n```"
   title: WalletChat API
