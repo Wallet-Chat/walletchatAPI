@@ -312,7 +312,7 @@ func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 		//Not sure yet if this is the best way, but lets try it
 		delegates := GetDelegationsByDelegate(Authuser.Address)
 		if delegates != nil {
-			fmt.Println("Wallet Delegates in OwnerOfNFT: ", delegates)
+			fmt.Println("Wallet Delegates in Auth: ", delegates)
 
 			for _, delegateWallet := range delegates {
 				if delegateWallet.Type == 1 {
