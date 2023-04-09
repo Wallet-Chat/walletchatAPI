@@ -22,6 +22,46 @@ Another easy way to obtain a JWT for use here is to grab it from the web app:
 4) Find local storage, and select https://app.walletchat.fun 
 5) Select the value of `jwt` or `jwt_*` variable, this is your JWT for the signed in wallet
 
-# Software Stack
+# Encryption
+Ethereum based wallets (EVM compatible) have encryption for all DMs, using LIT Protocol
 
+# Software Stack
 ![WC_SW_Stack drawio](https://user-images.githubusercontent.com/19207330/227810284-83324964-58b3-4335-bb7b-0d2128a3d62c.svg)
+
+# API Key Holders
+ADMIN API KEY functions allow vetted customer integrations to streamline the user experience.
+To authenticate with an API key, the ADMIN_API_KEY must be used in place of the end user JWTs.
+
+## Important Note for Security 
+*We ask API key holders to make these requests in a protected manner, mainly from their own API.*
+
+If the ADMIN API key is used in the client browser, it may be misused by malicious actors. 
+
+Below are examples of each API which has an ADMIN API Key overrride. `curl` is just used as example,
+replace with equivalent functionality as needed.
+
+## Example for <API>/v1/name 
+Update the wallet address to name mapping:
+
+```
+curl --location 'https://api-segmint.walletchat.fun/v1/name'
+--header 'Authorization: Bearer AdminTestKey123'
+--header 'Content-Type: text/plain'
+--data '{
+"name": "Nftz4Life",
+"address": "0x14ffE94d2B5Bf47a8d55D713b3d6b35039167cfb"
+}'
+```
+
+## Example for <API>/v1/update_settings
+Update the email address to wallet address mapping:
+
+```
+curl --location 'https://api-segmint.walletchat.fun/v1/update_settings'
+--header 'Authorization: Bearer MyTestApiKey123'
+--header 'Content-Type: text/plain'
+--data-raw '{
+"email": "savemynft@gmail.com",
+"walletaddr": "0x14fcE94d2B5Bf47a8d54D713b3d6b35039167cfb"
+}'
+```

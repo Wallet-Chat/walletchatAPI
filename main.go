@@ -23,7 +23,7 @@ import (
 )
 
 // @title WalletChat API
-// @version 1.0
+// @version 2.0
 // @description.markdown
 // @wallet_chat API Support via Twitter
 // @contact.url https://walletchat.fun
@@ -36,21 +36,6 @@ import (
 func main() {
 	godotenv.Load(".env")
 
-	// from := mail.NewEmail("NF3 Notifications", "contact@walletchat.fun")
-	// subject := "Message Waiting In WalletChat"
-	// to := mail.NewEmail("xrpMaxi", "savemynft@gmail.com")
-	// plainTextContent := "You have message from vitalik.eth waiting in WalletChat, please login via the app direct to read!"
-	// htmlContent := "<strong>You have message from vitalik.eth waiting in WalletChat, please login via the app direct to read!</strong>"
-	// message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
-	// client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
-	// response, err := client.Send(message)
-	// if err != nil {
-	// 	log.Println(err)
-	// } else {
-	// 	fmt.Println(response.StatusCode)
-	// 	fmt.Println(response.Body)
-	// 	fmt.Println(response.Headers)
-	// }
 
 	initDB()
 	log.Println("Starting the HTTP server on port 8080")
