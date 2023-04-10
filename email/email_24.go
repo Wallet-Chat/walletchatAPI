@@ -1,6 +1,6 @@
 package email
 
-func NotificationEmail24(toname string, DMs string, NFTs string, Community string) string {
+func NotificationEmail24(toAddress string, toname string, DMs string, NFTs string, Community string) string {
 	return `<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
   <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
   
@@ -294,7 +294,8 @@ func NotificationEmail24(toname string, DMs string, NFTs string, Community strin
                               <td style="overflow-wrap:break-word;word-break:break-word;padding:33px 55px;font-family:'Cabin',sans-serif;" align="left">
   
                                 <div style="line-height: 160%; text-align: center; word-wrap: break-word;">
-                                  <p style="line-height: 160%; font-size: 14px;"><span style="font-size: 22px; line-height: 35.2px;">Hi ` + toname + `, you have unread messages:</span></p>
+                                <p style="line-height: 160%; font-size: 14px;"><span style="font-size: 22px; line-height: 35.2px;">Hi  ` + toname + `<a rel="noopener" href="https://etherscan.io/address/` + toAddress +
+		`" target="_blank">(` + toAddress[0:5] + `...` + toAddress[len(toAddress)-4:] + `)</a>, you have unread messages:</span></p>
                                   <p style="line-height: 160%; font-size: 14px;"><span style="font-size: 22px; line-height: 35.2px;">` + DMs + ` new DMs</span></p>
                                   <p style="line-height: 160%; font-size: 14px;"><span style="font-size: 22px; line-height: 35.2px;">` + NFTs + ` new NFT group chat messages</span></p>
                                   <p style="line-height: 160%; font-size: 14px;"><span style="font-size: 22px; line-height: 35.2px;">` + Community + ` new Community chat messages</span></p>
