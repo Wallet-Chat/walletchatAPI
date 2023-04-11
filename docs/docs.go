@@ -349,7 +349,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Currently used for all messages outside of DMs",
+                "description": "Currently used for NFT Gated Chats",
                 "consumes": [
                     "application/json"
                 ],
@@ -359,10 +359,10 @@ const docTemplate = `{
                 "tags": [
                     "GroupChat"
                 ],
-                "summary": "Create/Insert chat message for Community/NFT/Group Messaging",
+                "summary": "Create/Insert chat message for NFT Group Messaging",
                 "parameters": [
                     {
-                        "description": "Group Message Chat Data",
+                        "description": "NFT Group Message Chat Data",
                         "name": "message",
                         "in": "body",
                         "required": true,

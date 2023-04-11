@@ -566,9 +566,9 @@ paths:
     post:
       consumes:
       - application/json
-      description: Currently used for all messages outside of DMs
+      description: Currently used for NFT Gated Chats
       parameters:
-      - description: Group Message Chat Data
+      - description: NFT Group Message Chat Data
         in: body
         name: message
         required: true
@@ -585,7 +585,7 @@ paths:
             type: array
       security:
       - BearerAuth: []
-      summary: Create/Insert chat message for Community/NFT/Group Messaging
+      summary: Create/Insert chat message for NFT Group Messaging
       tags:
       - GroupChat
   /v1/delete_bookmark:

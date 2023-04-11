@@ -20,6 +20,7 @@ import (
 
 	_ "rest-go-demo/docs"
 
+	goaway "github.com/TwiN/go-away"
 	"github.com/ethereum/go-ethereum/ethclient"
 	ens "github.com/wealdtech/go-ens/v3"
 
@@ -1032,13 +1033,13 @@ func SendNotificationEmails() {
 }
 
 // CreateGroupChatitem godoc
-// @Summary Create/Insert chat message for Community/NFT/Group Messaging
-// @Description Currently used for all messages outside of DMs
+// @Summary Create/Insert chat message for NFT Group Messaging
+// @Description Currently used for NFT Gated Chats
 // @Tags GroupChat
 // @Accept  json
 // @Produce  json
 // @Security BearerAuth
-// @Param message body entity.Groupchatitem true "Group Message Chat Data"
+// @Param message body entity.Groupchatitem true "NFT Group Message Chat Data"
 // @Success 200 {array} entity.Groupchatitem
 // @Router /v1/create_groupchatitem [post]
 func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
@@ -1074,6 +1075,10 @@ func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if strings.EqualFold(chat.Fromaddr, Authuser.Address) && isHolder {
+		//public chats are not encrpyted and we implement a basic censor
+		cleanMessage := goaway.Censor(chat.Message)
+		chat.Message = cleanMessage
+
 		database.Connector.Create(&chat)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
@@ -1167,6 +1172,9 @@ func CreateCommunityChatItem(w http.ResponseWriter, r *http.Request) {
 
 	Authuser := auth.GetUserFromReqContext(r)
 	if strings.EqualFold(chat.Fromaddr, Authuser.Address) {
+		cleanMessage := goaway.Censor(chat.Message)
+		chat.Message = cleanMessage
+
 		database.Connector.Create(&chat)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
