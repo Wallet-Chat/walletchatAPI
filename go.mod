@@ -22,6 +22,7 @@ require (
 	github.com/decred/dcrd/dcrec/secp256k1 v1.0.3 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v2 v2.0.0 // indirect
 	github.com/go-ole/go-ole v1.2.1 // indirect
+	github.com/go-pkgz/expirable-cache v0.1.0 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
@@ -59,6 +60,7 @@ require (
 	github.com/aws/aws-sdk-go v1.44.157
 	github.com/btcsuite/btcd/btcec/v2 v2.2.1 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.1.0 // indirect
+	github.com/didip/tollbooth/v7 v7.0.1
 	github.com/go-co-op/gocron v1.18.1
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.20.0 // indirect

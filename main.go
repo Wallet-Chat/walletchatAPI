@@ -15,6 +15,8 @@ import (
 
 	httpSwagger "github.com/swaggo/http-swagger"
 
+	"github.com/didip/tollbooth/v7"
+
 	"github.com/go-co-op/gocron"
 	"github.com/gorilla/mux"
 	_ "github.com/jinzhu/gorm/dialects/mysql" //Required for MySQL dialect
@@ -35,7 +37,6 @@ import (
 // @BasePath
 func main() {
 	godotenv.Load(".env")
-
 
 	initDB()
 	log.Println("Starting the HTTP server on port 8080")
@@ -79,7 +80,12 @@ func main() {
 		//Debug: true,
 	})
 	handler := c.Handler(router)
-	log.Fatal(http.ListenAndServe(":8080", handler))
+
+	//rate limit POST/PUT requests (We still use GET for polling, so we can't rate limit this yet)
+	lmt := tollbooth.NewLimiter(float64(3), nil)
+	lmt.SetIPLookups([]string{"RemoteAddr", "X-Forwarded-For", "X-Real-IP"}).SetMethods([]string{"POST"})
+
+	log.Fatal(http.ListenAndServe(":8080", tollbooth.LimitHandler(lmt, handler)))
 }
 
 func sendPeriodicNotifications() {
