@@ -401,6 +401,8 @@ func GetUserFromReqContext(r *http.Request) Authuser {
 	return key
 }
 
+var apiTrackerCnt = make(map[string]int32)
+
 func AuthMiddleware(jwtProvider *JwtHmacProvider) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -435,8 +437,32 @@ func AuthMiddleware(jwtProvider *JwtHmacProvider) func(next http.Handler) http.H
 
 			if strings.Contains(os.Getenv("ADMIN_API_KEY_LIST"), tokenString) {
 				var authAdmin Authuser
-				authAdmin.Address = "Administrator"
+				authAdmin.Address = tokenString[0:16]
 				authAdmin.Nonce = "none"
+
+				//count POST requests per user
+				if r.Method == "POST" {
+					SHORT_API_ID := authAdmin.Address //lets only grab the first 16 so any log doesn't contain full API keys
+					val, ok := apiTrackerCnt[SHORT_API_ID]
+					// If the key exists
+					if ok {
+						apiTrackerCnt[SHORT_API_ID] = val + 1
+					} else {
+						apiTrackerCnt[SHORT_API_ID] = 1
+					}
+
+					//fmt.Println("POST Count Update for Addr: ", SHORT_API_ID, apiTrackerCnt[SHORT_API_ID])
+					var SegmentClient = analytics.New(os.Getenv("SEGMENT_API_KEY"))
+					SegmentClient.Enqueue(analytics.Track{
+						Event:  "POST COUNT",
+						UserId: authAdmin.Address,
+						Properties: analytics.NewProperties().
+							Set("time", time.Now()). //TODO fix this time to something standard?
+							Set("API_ID", authAdmin.Address),
+					})
+					SegmentClient.Close()
+				}
+
 				ctx := context.WithValue(r.Context(), "Authuser", authAdmin)
 				next.ServeHTTP(w, r.WithContext(ctx))
 
@@ -445,13 +471,14 @@ func AuthMiddleware(jwtProvider *JwtHmacProvider) func(next http.Handler) http.H
 					Event:  "ADMIN API AUTH",
 					UserId: authAdmin.Address,
 					Properties: analytics.NewProperties().
-						Set("time", time.Now()), //TODO fix this time to something standard?
+						Set("time", time.Now()). //TODO fix this time to something standard?
+						Set("API_ID", tokenString[0:16]),
 				})
 				SegmentClient.Close()
 			}
 			claims, err := jwtProvider.Verify(tokenString)
 			if err != nil {
-				w.WriteHeader(http.StatusUnauthorized)
+				//w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
 
@@ -465,9 +492,43 @@ func AuthMiddleware(jwtProvider *JwtHmacProvider) func(next http.Handler) http.H
 				return
 			}
 
+			//count POST requests per user
+			if r.Method == "POST" {
+				apiTrackerCnt[Authuser.Address] = apiTrackerCnt[Authuser.Address] + 1
+				//fmt.Println("POST Count Update for Addr: ", Authuser.Address, apiTrackerCnt[Authuser.Address])
+
+				var SegmentClient = analytics.New(os.Getenv("SEGMENT_API_KEY"))
+				SegmentClient.Enqueue(analytics.Track{
+					Event:  "POST COUNT",
+					UserId: Authuser.Address,
+					Properties: analytics.NewProperties().
+						Set("time", time.Now()). //TODO fix this time to something standard?
+						Set("API_ID", Authuser.Address),
+				})
+				SegmentClient.Close()
+			}
+
 			ctx := context.WithValue(r.Context(), "Authuser", Authuser)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
+	}
+}
+
+func GetCountsAPI() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		apiKey := r.Header.Get("Authorization")
+		if len(apiKey) > 0 {
+			const prefix = "Bearer "
+			if len(apiKey) < len(prefix) {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+			apiKey = apiKey[len(prefix):]
+		}
+
+		if strings.Contains(os.Getenv("WALLETCHAT_KEY_LIST"), apiKey) {
+			renderJson(r, w, http.StatusOK, apiTrackerCnt)
+		}
 	}
 }
 

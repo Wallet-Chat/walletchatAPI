@@ -92,7 +92,20 @@ func sendPeriodicNotifications() {
 	controllers.SendNotificationEmails()
 }
 
+// var count int32 = 0
+
+// func trackApiRequests(fn http.HandlerFunc) http.HandlerFunc {
+// 	return func(w http.ResponseWriter, r *http.Request) {
+// 		atomic.AddInt32(&count, 1)
+// 		log.Println(count)
+// 		fn(w, r)
+// 	}
+// }
+
+//these endpoints are protected by JWTs
 func initaliseHandlers(router *mux.Router) {
+	router.HandleFunc("/apicount", auth.GetCountsAPI()).Methods("GET")
+
 	//1-to-1 chats (both general and NFT related)
 	router.HandleFunc("/get_unread_cnt/{address}", controllers.GetUnreadMsgCntTotal).Methods("GET")
 
