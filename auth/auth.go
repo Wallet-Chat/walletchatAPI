@@ -457,8 +457,9 @@ func AuthMiddleware(jwtProvider *JwtHmacProvider) func(next http.Handler) http.H
 						Event:  "POST COUNT",
 						UserId: authAdmin.Address,
 						Properties: analytics.NewProperties().
-							Set("time", time.Now()). //TODO fix this time to something standard?
-							Set("API_ID", authAdmin.Address),
+							Set("category", "API_COUNT").
+							Set("label", authAdmin.Address),
+						//Set("value", r.URL.Path),
 					})
 					SegmentClient.Close()
 				}
@@ -471,8 +472,9 @@ func AuthMiddleware(jwtProvider *JwtHmacProvider) func(next http.Handler) http.H
 					Event:  "ADMIN API AUTH",
 					UserId: authAdmin.Address,
 					Properties: analytics.NewProperties().
-						Set("time", time.Now()). //TODO fix this time to something standard?
-						Set("API_ID", tokenString[0:16]),
+						Set("category", "API_ADMIN").
+						Set("label", authAdmin.Address),
+					//Set("value", r.URL.Path),
 				})
 				SegmentClient.Close()
 			}
@@ -502,8 +504,9 @@ func AuthMiddleware(jwtProvider *JwtHmacProvider) func(next http.Handler) http.H
 					Event:  "POST COUNT",
 					UserId: Authuser.Address,
 					Properties: analytics.NewProperties().
-						Set("time", time.Now()). //TODO fix this time to something standard?
-						Set("API_ID", Authuser.Address),
+						Set("category", "API_COUNT").
+						Set("label", Authuser.Address),
+					//Set("value", ),
 				})
 				SegmentClient.Close()
 			}

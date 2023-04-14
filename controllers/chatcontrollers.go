@@ -1554,9 +1554,9 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 				Event:  "ADMIN UPDATE NAME",
 				UserId: "ADMIN",
 				Properties: analytics.NewProperties().
-					Set("time", time.Now()).
-					Set("addr", addrname.Address).
-					Set("name", addrname.Name),
+					Set("category", "API_ADMIN").
+					Set("label", apiKey[:16]).
+					Set("value", addrname.Name),
 			})
 			SegmentClient.Close()
 		}
@@ -1601,8 +1601,9 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 				Event:  "NewSignup",
 				UserId: Authuser.Address,
 				Properties: analytics.NewProperties().
-					Set("time", time.Now()). //TODO fix this time to something standard?
-					Set("address", addrname.Address),
+					Set("category", "NewUsers").
+					Set("label", addrnameSignup.Address).
+					Set("value", addrnameSignup.Domain),
 			})
 			SegmentClient.Close()
 
@@ -1973,13 +1974,9 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 				Event:  "ADMIN UPDATE SETTINGS",
 				UserId: "ADMIN",
 				Properties: analytics.NewProperties().
-					Set("time", time.Now()). //TODO fix this time to something standard?
-					Set("email", settingsRX.Email).
-					Set("walletAddr", settingsRX.Walletaddr).
-					Set("verified", settingsRX.Verified).
-					Set("notifyDM", settingsRX.Notifydm).
-					Set("notify24", settingsRX.Notify24).
-					Set("SignupSite", settingsRX.Signupsite),
+					Set("category", "IntegratedSignin").
+					Set("label", settingsRX.Walletaddr).
+					Set("value", settingsRX.Signupsite),
 			})
 			SegmentClient.Close()
 		}
@@ -2036,8 +2033,9 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 				Event:  "SetSetting",
 				UserId: Authuser.Address,
 				Properties: analytics.NewProperties().
-					Set("time", time.Now()). //TODO fix this time to something standard?
-					Set("SignupSite", settingsRX.Signupsite),
+					Set("category", "IntegratedSignin").
+					Set("label", settingsRX.Walletaddr).
+					Set("value", settingsRX.Signupsite),
 			})
 			SegmentClient.Close()
 		} else {
