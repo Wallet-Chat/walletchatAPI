@@ -519,6 +519,7 @@ func AuthMiddleware(jwtProvider *JwtHmacProvider) func(next http.Handler) http.H
 
 func GetCountsAPI() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+
 		apiKey := r.Header.Get("Authorization")
 		if len(apiKey) > 0 {
 			const prefix = "Bearer "

@@ -2192,6 +2192,68 @@ func GetSettings(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(settings)
 }
 
+// GetSettings godoc
+// @Summary Generic Resolve Name Service
+// @Description Resolve .ETH, .BNB, .ARB names
+// @Tags
+// @Accept  json
+// @Produce  json
+// @Security BearerAuth
+// @Param address path string true "ENS/BNB/ARB/TEZ/NEAR/BTC Name"
+// @Success 200 {array} entity.Settings
+// @Router /v1/resolve_name/{name} [get]
+func ResolveName(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	nameToResolve := vars["name"]
+	// Authuser := auth.GetUserFromReqContext(r)
+	// key := Authuser.Address
+
+	if strings.HasSuffix(nameToResolve, ".eth") {
+		url := "https://deep-index.moralis.io/api/v2/resolve/ens/" + nameToResolve
+
+		req, _ := http.NewRequest("GET", url, nil)
+
+		req.Header.Add("Accept", "application/json")
+		req.Header.Add("X-API-Key", os.Getenv("MORALIS_NFT_API_KEY"))
+
+		res, _ := http.DefaultClient.Do(req)
+
+		defer res.Body.Close()
+		body, _ := ioutil.ReadAll(res.Body)
+
+		var parsed any
+		json.Unmarshal(body, &parsed)
+
+		json.NewEncoder(w).Encode(parsed)
+	} else if strings.HasSuffix(nameToResolve, ".bnb") {
+		url := "https://api.prd.space.id/v1/getAddress?tld=bnb&domain=" + nameToResolve
+
+		// Create a new request using http
+		req, _ := http.NewRequest("GET", url, nil)
+		req.Header.Add("Content-Type", "application/json")
+
+		// Send req using http Client
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Println("Error on response.\n[ERROR] -", err)
+		}
+		defer resp.Body.Close()
+
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Println("Error while reading the response bytes:", err)
+		}
+
+		var parsed any
+		json.Unmarshal(body, &parsed)
+
+		json.NewEncoder(w).Encode(parsed)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+}
+
 // CreateComments godoc
 // @Summary Comments are used within an NFT community chat
 // @Description Comments are meant to be public, someday having an up/downvote method for auto-moderation
