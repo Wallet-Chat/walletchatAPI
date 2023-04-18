@@ -2226,9 +2226,10 @@ func ResolveName(w http.ResponseWriter, r *http.Request) {
 
 		json.NewEncoder(w).Encode(parsed)
 	} else if strings.HasSuffix(nameToResolve, ".bnb") || strings.HasSuffix(nameToResolve, ".arb") {
+		//https://docs.space.id/developer-guide/web3-name-sdk/sid-api
 		chain := "bnb"
 		if strings.HasSuffix(nameToResolve, ".arb") {
-			chain = "arb"
+			chain = "arb1"
 		}
 		url := "https://api.prd.space.id/v1/getAddress?tld=" + chain + "&domain=" + nameToResolve
 
