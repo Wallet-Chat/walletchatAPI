@@ -1007,7 +1007,7 @@ func SendNotificationEmails() {
 	database.Connector.Find(&settings)
 	for i := 0; i < len(settings); i++ {
 		config := LocalGetUnread(settings[i].Walletaddr)
-		if config.Nft > 0 || config.Dm > 0 {
+		if config.Dm > 0 {
 			var addrnameDB entity.Addrnameitem
 			var dbQuery = database.Connector.Where("address = ?", settings[i].Walletaddr).Find(&addrnameDB)
 
@@ -2225,8 +2225,12 @@ func ResolveName(w http.ResponseWriter, r *http.Request) {
 		json.Unmarshal(body, &parsed)
 
 		json.NewEncoder(w).Encode(parsed)
-	} else if strings.HasSuffix(nameToResolve, ".bnb") {
-		url := "https://api.prd.space.id/v1/getAddress?tld=bnb&domain=" + nameToResolve
+	} else if strings.HasSuffix(nameToResolve, ".bnb") || strings.HasSuffix(nameToResolve, ".arb") {
+		chain := "bnb"
+		if strings.HasSuffix(nameToResolve, ".arb") {
+			chain = "arb"
+		}
+		url := "https://api.prd.space.id/v1/getAddress?tld=" + chain + "&domain=" + nameToResolve
 
 		// Create a new request using http
 		req, _ := http.NewRequest("GET", url, nil)
