@@ -1598,12 +1598,13 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 
 			var SegmentClient = analytics.New(os.Getenv("SEGMENT_API_KEY"))
 			SegmentClient.Enqueue(analytics.Track{
-				Event:  "NewSignup",
+				Event:  "NEW SIGNUP",
 				UserId: Authuser.Address,
 				Properties: analytics.NewProperties().
-					Set("category", "NewUsers").
+					//Set("time", time.Now()).
+					//Set("category", "NewUsers").
 					Set("label", addrnameSignup.Address).
-					Set("value", addrnameSignup.Domain),
+					Set("category", addrnameSignup.Domain),
 			})
 			SegmentClient.Close()
 
