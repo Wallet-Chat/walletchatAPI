@@ -53,6 +53,7 @@ func main() {
 	router.HandleFunc("/users/{address}/nonce", auth.UserNonceHandler()).Methods("GET")
 	router.HandleFunc("/verify_email/{email}/{code}", controllers.VerifyEmail).Methods("GET")
 	router.HandleFunc("/signin", auth.SigninHandler(jwtProvider)).Methods("POST")
+	router.HandleFunc("/resolve_name/{name}", controllers.ResolveName).Methods("GET")
 	router.PathPrefix("/docs").Handler(httpSwagger.WrapHandler)
 
 	wsRouter := router.PathPrefix("/v1").Subrouter()
@@ -105,7 +106,6 @@ func sendPeriodicNotifications() {
 //these endpoints are protected by JWTs
 func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/apicount", auth.GetCountsAPI()).Methods("GET")
-	router.HandleFunc("/resolve_name/{name}", controllers.ResolveName).Methods("GET")
 
 	//1-to-1 chats (both general and NFT related)
 	router.HandleFunc("/get_unread_cnt/{address}", controllers.GetUnreadMsgCntTotal).Methods("GET")
