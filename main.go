@@ -106,6 +106,7 @@ func sendPeriodicNotifications() {
 //these endpoints are protected by JWTs
 func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/apicount", auth.GetCountsAPI()).Methods("GET")
+	router.HandleFunc("/resolve_name/{name}", controllers.ResolveName).Methods("GET")
 
 	//1-to-1 chats (both general and NFT related)
 	router.HandleFunc("/get_unread_cnt/{address}", controllers.GetUnreadMsgCntTotal).Methods("GET")
