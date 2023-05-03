@@ -309,16 +309,18 @@ func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 			return
 		}
 
-		//Not sure yet if this is the best way, but lets try it
-		delegates := GetDelegationsByDelegate(Authuser.Address)
-		if delegates != nil {
-			fmt.Println("Wallet Delegates in Auth: ", delegates)
+		if strings.HasPrefix(Authuser.Address, "0x") {
+			//Not sure yet if this is the best way, but lets try it
+			delegates := GetDelegationsByDelegate(Authuser.Address)
+			if delegates != nil {
+				fmt.Println("Wallet Delegates in Auth: ", delegates)
 
-			for _, delegateWallet := range delegates {
-				if delegateWallet.Type == 1 {
-					fmt.Println("Wallet Full Delegate Authorized: ", delegateWallet.Vault.Hex())
-					Authuser.Address = delegateWallet.Vault.Hex()
-					break
+				for _, delegateWallet := range delegates {
+					if delegateWallet.Type == 1 {
+						fmt.Println("Wallet Full Delegate Authorized: ", delegateWallet.Vault.Hex())
+						Authuser.Address = delegateWallet.Vault.Hex()
+						break
+					}
 				}
 			}
 		}
