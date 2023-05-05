@@ -2092,10 +2092,12 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 			log.Println("Created New Settings")
 
 			//create Telegram Link/Login Code
-			var telegramVerificationCode = randSeq(20)
-			dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("telegramcode", telegramVerificationCode)
-			if dbResults.RowsAffected == 0 {
-				log.Println("Did not update verification code item for: ", addr)
+			if settingsRX.Telegramhandle != "" {
+				var telegramVerificationCode = randSeq(20)
+				dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("telegramcode", telegramVerificationCode)
+				if dbResults.RowsAffected == 0 {
+					log.Println("Did not update verification code item for: ", addr)
+				}
 			}
 
 			//send verification email (but not when its done via ADMIN API)
@@ -2140,6 +2142,19 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 			})
 			SegmentClient.Close()
 		} else {
+			if settingsRX.Telegramhandle != "" {
+				//create Telegram Link/Login Code
+				var telegramVerificationCode = randSeq(20)
+				dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("telegramcode", telegramVerificationCode)
+				if dbResults.RowsAffected == 0 {
+					fmt.Println("Did not update verification code item for: ", addr)
+				}
+
+				log.Println("Updating Telegram Handle ", settingsRX.Telegramhandle)
+
+				//technically we don't need the handle since the chatId is really what is used, but this helps with login flow and double checks
+				dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("telegramhandle", settingsRX.Telegramhandle)
+			}
 			if settingsRX.Email != "" {
 				fmt.Println("Updating Email", settingsRX.Email)
 				dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("email", settingsRX.Email)
@@ -2151,13 +2166,6 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 
 						var verificationCode = randSeq(10)
 						database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("verified", verificationCode)
-
-						//create Telegram Link/Login Code (this one is just for test - need new location for generating code for existing)
-						var telegramVerificationCode = randSeq(20)
-						dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("telegramcode", telegramVerificationCode)
-						if dbResults.RowsAffected == 0 {
-							fmt.Println("Did not update verification code item for: ", addr)
-						}
 
 						from := mail.NewEmail("WalletChat Notifications", "contact@walletchat.fun")
 						if settingsRX.Signupsite == "" {
