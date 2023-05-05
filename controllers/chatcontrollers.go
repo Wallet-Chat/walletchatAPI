@@ -1117,6 +1117,9 @@ func UpdateTelegramNotifications() {
 			fmt.Println("Updating Telegram Chat ID for WalletAddr/chatID: ", settings[0].Walletaddr, strconv.FormatInt(chatId, 10))
 			database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", settings[0].Walletaddr).Update("telegramid", strconv.FormatInt(chatId, 10))
 			database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", settings[0].Walletaddr).Update("telegramcode", "")
+
+			var message string = "You have successfully setup notifications in WalletChat for: " + settings[0].Walletaddr
+			SendTelegramMessage(message, strconv.FormatInt(chatId, 10))
 		}
 	}
 }
