@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -992,6 +993,16 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 					}
 				}
 			}
+			fmt.Println("New message - telegramID for toAddr: ", settings.Telegramid)
+			if dbResult.RowsAffected > 0 && settings.Telegramid != "" {
+				if strings.EqualFold(settings.Notifydm, "true") {
+					var toAddrname entity.Addrnameitem
+					database.Connector.Where("address = ?", chat.Toaddr).Find(&toAddrname)
+
+					var message string = "You have a message waiting in WalletChat from: " + toAddrname.Name + "(" + settings.Walletaddr + ")"
+					SendTelegramMessage(message, settings.Telegramid)
+				}
+			}
 		}
 	} else {
 		fmt.Println("create_chatitem - JWT Address: ", Authuser.Address)
@@ -1030,6 +1041,85 @@ func SendNotificationEmails() {
 	}
 	//time.Sleep(time.Minute * 60 * 24)  - previous way of getting daily notification out (now using cron)
 	//}
+}
+
+func getTelegrameUrl() string {
+	return fmt.Sprintf("https://api.telegram.org/bot%s", os.Getenv("TELEGRAM_BOT_TOKEN"))
+}
+func SendTelegramMessage(text string, chatId string) (bool, error) {
+	// Global variables
+	var err error
+	var response *http.Response
+
+	// Send the message
+	url := fmt.Sprintf("%s/sendMessage", getTelegrameUrl())
+	body, _ := json.Marshal(map[string]string{
+		"chat_id": chatId,
+		"text":    text,
+	})
+	response, err = http.Post(
+		url,
+		"application/json",
+		bytes.NewBuffer(body),
+	)
+	if err != nil {
+		return false, err
+	}
+
+	// Close the request at the end
+	defer response.Body.Close()
+
+	// Body
+	body, err = ioutil.ReadAll(response.Body)
+	if err != nil {
+		return false, err
+	}
+
+	// Return
+	return true, nil
+}
+
+//TODO: should be done by webhook eventually so we don't have to loop, and can do additional verifications
+func UpdateTelegramNotifications() {
+	//poll for new users setting up telegram notifications (can be a webhook someday for better performance)
+	var err error
+	var response *http.Response
+
+	// Send the message
+	url := fmt.Sprintf("%s/getUpdates", getTelegrameUrl())
+	response, err = http.Get(
+		url,
+	)
+	if err != nil {
+		fmt.Println("update telegram error", err)
+	}
+
+	// Close the request at the end
+	defer response.Body.Close()
+
+	// Body
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		fmt.Println("update telegram error", err)
+	}
+
+	var updatedNotifsData TelegramUpdateNotifsData
+	json.Unmarshal(body, &updatedNotifsData)
+
+	for i := 0; i < len(updatedNotifsData.Result); i++ {
+		//fmt.Println("Results For Telegram Check", updatedNotifsData.Result[i])
+		verifCode := updatedNotifsData.Result[i].Message.Text
+		//fmt.Println("Results For Telegram Verification Code: ", verifCode)
+		var settings []entity.Settings
+		dbResult := database.Connector.Where("telegramcode = ?", verifCode).Find(&settings)
+		if dbResult.RowsAffected > 0 && verifCode != "" {
+			chatId := updatedNotifsData.Result[i].Message.Chat.ID
+
+			fmt.Println("Updating Telegram Chat ID for WalletAddr/chatID: ", settings[0].Walletaddr, strconv.FormatInt(chatId, 10))
+			database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", settings[0].Walletaddr).Update("telegramid", strconv.FormatInt(chatId, 10))
+			database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", settings[0].Walletaddr).Update("telegramcode", "")
+		}
+	}
 }
 
 // CreateGroupChatitem godoc
@@ -1988,7 +2078,7 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 		settingsRX.Signupsite = split[1]
 		settingsRX.Signupsite = strings.TrimSuffix(settingsRX.Signupsite, "/")
 	}
-	log.Println("RX Settings", settingsRX)
+	fmt.Println("RX Settings", settingsRX)
 	addr := strings.ToLower(settingsRX.Walletaddr)
 	Authuser := auth.GetUserFromReqContext(r)
 	if strings.EqualFold(Authuser.Address, addr) || isAdmin {
@@ -1998,6 +2088,14 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 		if dbResults.RowsAffected == 0 {
 			dbResults = database.Connector.Create(&settingsRX)
 			log.Println("Created New Settings")
+
+			//create Telegram Link/Login Code
+			var telegramVerificationCode = randSeq(20)
+			dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("telegramcode", telegramVerificationCode)
+			if dbResults.RowsAffected == 0 {
+				log.Println("Did not update verification code item for: ", addr)
+			}
+
 			//send verification email (but not when its done via ADMIN API)
 			if !strings.Contains(os.Getenv("ADMIN_API_KEY_LIST"), apiKey) {
 				if strings.Contains(settingsRX.Email, "@") {
@@ -2041,7 +2139,7 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 			SegmentClient.Close()
 		} else {
 			if settingsRX.Email != "" {
-				log.Println("Updating Email", settingsRX.Email)
+				fmt.Println("Updating Email", settingsRX.Email)
 				dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("email", settingsRX.Email)
 				//send verification email (but not when its done via ADMIN API)
 				if !strings.Contains(os.Getenv("ADMIN_API_KEY_LIST"), apiKey) {
@@ -2050,7 +2148,14 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 						database.Connector.Where("address = ?", settingsRX.Walletaddr).Find(&toAddrname)
 
 						var verificationCode = randSeq(10)
-						dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("verified", verificationCode)
+						database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("verified", verificationCode)
+
+						//create Telegram Link/Login Code (this one is just for test - need new location for generating code for existing)
+						var telegramVerificationCode = randSeq(20)
+						dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("telegramcode", telegramVerificationCode)
+						if dbResults.RowsAffected == 0 {
+							fmt.Println("Did not update verification code item for: ", addr)
+						}
 
 						from := mail.NewEmail("WalletChat Notifications", "contact@walletchat.fun")
 						if settingsRX.Signupsite == "" {
@@ -2897,20 +3002,20 @@ func IsOwnerOfNftLocal(contractAddr string, walletAddr string, chain string) boo
 		client := &http.Client{}
 		resp, err := client.Do(req)
 		if err != nil {
-			log.Println("Error on response.\n[ERROR] -", err)
+			fmt.Printf("Error on response.\n[ERROR] -", err)
 		}
 		defer resp.Body.Close()
 
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			log.Println("Error while reading the response bytes:", err)
+			fmt.Printf("Error while reading the response bytes:", err)
 		}
 
 		var result MoralisOwnerOf
 		if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
 			fmt.Println("Can not unmarshal JSON - IsOwnerOfNFT", body)
 		}
-		//fmt.Printf("IsOwner: %#v\n", result.Total)
+		//fmt.Println("Moralis Returned Data - IsOwnerOfNFT", result)
 
 		return len(result.Result) > 0
 	}
@@ -3502,4 +3607,31 @@ type OpenseaData struct {
 	BuyerFeeBasisPoints         int         `json:"buyer_fee_basis_points"`
 	SellerFeeBasisPoints        int         `json:"seller_fee_basis_points"`
 	PayoutAddress               string      `json:"payout_address"`
+}
+
+type TelegramUpdateNotifsData struct {
+	Ok     bool `json:"ok"`
+	Result []struct {
+		UpdateID int `json:"update_id"`
+		Message  struct {
+			MessageID int `json:"message_id"`
+			From      struct {
+				ID           int64  `json:"id"`
+				IsBot        bool   `json:"is_bot"`
+				FirstName    string `json:"first_name"`
+				LastName     string `json:"last_name"`
+				Username     string `json:"username"`
+				LanguageCode string `json:"language_code"`
+			} `json:"from"`
+			Chat struct {
+				ID        int64  `json:"id"`
+				FirstName string `json:"first_name"`
+				LastName  string `json:"last_name"`
+				Username  string `json:"username"`
+				Type      string `json:"type"`
+			} `json:"chat"`
+			Date int    `json:"date"`
+			Text string `json:"text"`
+		} `json:"message"`
+	} `json:"result"`
 }

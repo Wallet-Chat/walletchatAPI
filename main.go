@@ -69,13 +69,19 @@ func main() {
 	s.Every(1).Day().At("10:30").Do(func() { sendPeriodicNotifications() })
 	// starts the scheduler asynchronously
 	s.StartAsync()
-	//go sendPeriodicNotifications() //run concurrently
+
+	//schedule telegram polling for new verified users (should be webhook someday)
+	t := gocron.NewScheduler(time.UTC)
+	// set time
+	t.Every(5).Minutes().Do(func() { updateTelegramVerifiedUsers() })
+	// starts the scheduler asynchronously
+	t.StartAsync()
 
 	controllers.InitRandom()
 
 	//handler := cors.Default().Handler(router) //cors.AllowAll().Handler(router)
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"https://app.walletchat.fun", "http://localhost:8010", "http://localhost:3000", "http://localhost:8080", "https://v1.walletchat.fun", "https://api.opensea.io"},
+		AllowedOrigins:   []string{"https://app.walletchat.fun", "http://localhost:8010", "http://localhost:5173", "http://localhost:3000", "http://localhost:8080", "https://v1.walletchat.fun", "https://api.opensea.io"},
 		AllowCredentials: true,
 		// Enable Debugging for testing, consider disabling in production
 		//Debug: true,
@@ -91,6 +97,10 @@ func main() {
 
 func sendPeriodicNotifications() {
 	controllers.SendNotificationEmails()
+}
+
+func updateTelegramVerifiedUsers() {
+	controllers.UpdateTelegramNotifications()
 }
 
 // var count int32 = 0
