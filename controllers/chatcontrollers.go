@@ -993,13 +993,12 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 					}
 				}
 			}
-			fmt.Println("New message - telegramID for toAddr: ", settings.Telegramid)
 			if dbResult.RowsAffected > 0 && settings.Telegramid != "" {
 				if strings.EqualFold(settings.Notifydm, "true") {
-					var toAddrname entity.Addrnameitem
-					database.Connector.Where("address = ?", chat.Toaddr).Find(&toAddrname)
+					var fromAddrname entity.Addrnameitem
+					database.Connector.Where("address = ?", chat.Fromaddr).Find(&fromAddrname)
 
-					var message string = "You have a message waiting in WalletChat from: " + toAddrname.Name + "(" + settings.Walletaddr + ")"
+					var message string = "You have a message waiting in WalletChat from: " + fromAddrname.Name + "(" + fromAddrname.Address + ")"
 					SendTelegramMessage(message, settings.Telegramid)
 				}
 			}
