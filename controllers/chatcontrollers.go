@@ -2304,6 +2304,13 @@ func GetSettings(w http.ResponseWriter, r *http.Request) {
 
 	var settings []entity.Settings
 	database.Connector.Where("walletaddr = ?", key).Find(&settings)
+
+	//if there is a verification code, make sure to clear it out
+	//or this would be a vulnerability that people could verify other email addresses
+	if len(settings[0].Verified) > 9 {
+		settings[0].Verified = "false"
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(settings)
 }
