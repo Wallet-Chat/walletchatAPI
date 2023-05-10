@@ -73,7 +73,7 @@ func main() {
 	//schedule telegram polling for new verified users (should be webhook someday)
 	t := gocron.NewScheduler(time.UTC)
 	// set time
-	t.Every(5).Minutes().Do(func() { updateTelegramVerifiedUsers() })
+	t.Every(1).Minutes().Do(func() { updateTelegramVerifiedUsers() })
 	// starts the scheduler asynchronously
 	t.StartAsync()
 
