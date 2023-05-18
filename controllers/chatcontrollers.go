@@ -14,6 +14,7 @@ import (
 	"rest-go-demo/database"
 	"rest-go-demo/email"
 	"rest-go-demo/entity"
+	"rest-go-demo/wc_analytics"
 
 	"strconv"
 	"strings"
@@ -1651,6 +1652,7 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 					Set("value", addrname.Name),
 			})
 			SegmentClient.Close()
+			wc_analytics.SendCustomEvent(apiKey[:16], "ADMIN_UPDATE_NAME")
 		}
 	}
 
@@ -1699,6 +1701,7 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 					Set("category", addrnameSignup.Domain),
 			})
 			SegmentClient.Close()
+			wc_analytics.SendCustomEvent(Authuser.Address, "NEW_SIGNUP")
 
 			//create a settings entry as well to save signupsite, could be combined upon redesign
 			fmt.Printf("Signup Site: %s \n", addrnameSignup.Signupsite)
@@ -2072,6 +2075,8 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 					Set("value", settingsRX.Signupsite),
 			})
 			SegmentClient.Close()
+			fmt.Println("Admin Update Settings")
+			wc_analytics.SendCustomEvent(settingsRX.Walletaddr, "ADMIN_UPDATE_SETTINGS")
 		}
 	}
 	//strip HTTPS prefix and trailing /
@@ -2141,6 +2146,7 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 					Set("value", settingsRX.Signupsite),
 			})
 			SegmentClient.Close()
+			wc_analytics.SendCustomEvent(settingsRX.Walletaddr, "UPDATE_SETTINGS")
 		} else {
 			if settingsRX.Telegramhandle != "" {
 				//create Telegram Link/Login Code

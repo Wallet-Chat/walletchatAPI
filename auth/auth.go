@@ -15,6 +15,7 @@ import (
 	"regexp"
 	"rest-go-demo/database"
 	"rest-go-demo/entity"
+	"rest-go-demo/wc_analytics"
 	"strings"
 	"sync"
 	"time"
@@ -464,6 +465,8 @@ func AuthMiddleware(jwtProvider *JwtHmacProvider) func(next http.Handler) http.H
 						//Set("value", r.URL.Path),
 					})
 					SegmentClient.Close()
+					wc_analytics.SendCustomEvent(authAdmin.Address, "POST_COUNT")
+
 				}
 
 				ctx := context.WithValue(r.Context(), "Authuser", authAdmin)
@@ -479,6 +482,7 @@ func AuthMiddleware(jwtProvider *JwtHmacProvider) func(next http.Handler) http.H
 					//Set("value", r.URL.Path),
 				})
 				SegmentClient.Close()
+				wc_analytics.SendCustomEvent(authAdmin.Address, "ADMIN_API_AUTH")
 			}
 			claims, err := jwtProvider.Verify(tokenString)
 			if err != nil {
@@ -511,6 +515,7 @@ func AuthMiddleware(jwtProvider *JwtHmacProvider) func(next http.Handler) http.H
 					//Set("value", ),
 				})
 				SegmentClient.Close()
+				wc_analytics.SendCustomEvent(Authuser.Address, "POST_COUNT")
 			}
 
 			ctx := context.WithValue(r.Context(), "Authuser", Authuser)
