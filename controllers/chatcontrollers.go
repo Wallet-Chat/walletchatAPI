@@ -2354,6 +2354,20 @@ func ResolveName(w http.ResponseWriter, r *http.Request) {
 		json.Unmarshal(body, &parsed)
 
 		json.NewEncoder(w).Encode(parsed)
+	} else if strings.HasSuffix(nameToResolve, ".btc") {
+		url := "https://stacks-node-api.mainnet.stacks.co/v1/names/" + nameToResolve
+
+		req, _ := http.NewRequest("GET", url, nil)
+		req.Header.Add("Accept", "application/json")
+		res, _ := http.DefaultClient.Do(req)
+
+		defer res.Body.Close()
+		body, _ := ioutil.ReadAll(res.Body)
+
+		var parsed any
+		json.Unmarshal(body, &parsed)
+
+		json.NewEncoder(w).Encode(parsed)
 	} else if strings.HasSuffix(nameToResolve, ".bnb") || strings.HasSuffix(nameToResolve, ".arb") {
 		//https://docs.space.id/developer-guide/web3-name-sdk/sid-api
 		chain := "bnb"
@@ -3384,6 +3398,22 @@ type MoralisContractInfoNFT struct {
 		LastMetadataSync  time.Time   `json:"last_metadata_sync"`
 		MinterAddress     string      `json:"minter_address"`
 	} `json:"result"`
+}
+
+//Address -> Name lookup
+type BtcStacksName struct {
+	Names []string `json:"names"`
+}
+
+//Name -> address lookup
+type BtcStacksAddress struct {
+	Address      string `json:"address"`
+	Blockchain   string `json:"blockchain"`
+	ExpireBlock  int    `json:"expire_block"`
+	LastTxid     string `json:"last_txid"`
+	Status       string `json:"status"`
+	Zonefile     string `json:"zonefile"`
+	ZonefileHash string `json:"zonefile_hash"`
 }
 
 type TezosOwnerOf struct {
