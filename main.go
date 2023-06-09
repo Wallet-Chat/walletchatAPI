@@ -79,20 +79,21 @@ func main() {
 
 	controllers.InitRandom()
 
-	//handler := cors.Default().Handler(router) //cors.AllowAll().Handler(router)
-	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"https://app.walletchat.fun", "http://localhost:8010", "http://localhost:5173", "http://localhost:3000", "http://localhost:8080", "https://v1.walletchat.fun", "https://api.opensea.io"},
-		AllowCredentials: true,
-		// Enable Debugging for testing, consider disabling in production
-		//Debug: true,
-	})
-	handler := c.Handler(router)
+	//handler := cors.Default().Handler(router)
+	handler := cors.AllowAll().Handler(router) //Testing for Metamask Snaps
+	// c := cors.New(cors.Options{
+	// 	AllowedOrigins:   []string{"*"},
+	// 	AllowCredentials: true,
+	// 	// Enable Debugging for testing, consider disabling in production
+	// 	//Debug: true,
+	// })
+	// handler := c.Handler(router)
 
 	//rate limit POST/PUT requests (We still use GET for polling, so we can't rate limit this yet)
 	lmt := tollbooth.NewLimiter(float64(3), nil)
 	lmt.SetIPLookups([]string{"RemoteAddr", "X-Forwarded-For", "X-Real-IP"}).SetMethods([]string{"POST"})
 
-	log.Fatal(http.ListenAndServe(":8080", tollbooth.LimitHandler(lmt, handler)))
+	log.Fatal(http.ListenAndServe(":8088", tollbooth.LimitHandler(lmt, handler)))
 }
 
 func sendPeriodicNotifications() {
@@ -127,6 +128,7 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/get_unread_cnt_nft/{address}", controllers.GetUnreadMsgCntNftAllByAddr).Methods("GET")
 	router.HandleFunc("/getall_chatitems/{address}", controllers.GetChatFromAddress).Methods("GET")
 	router.HandleFunc("/getall_chatitems/{fromaddr}/{toaddr}", controllers.GetAllChatFromAddressToAddr).Methods("GET")
+	router.HandleFunc("/getall_chatitems/{fromaddr}/{toaddr}/{count}", controllers.GetNChatFromAddressToAddr).Methods("GET")
 	router.HandleFunc("/getread_chatitems/{fromaddr}/{toaddr}", controllers.GetReadChatFromAddressToAddr).Methods("GET")
 	router.HandleFunc("/getall_chatitems/{fromaddr}/{toaddr}/{time}", controllers.GetNewChatFromAddressToAddr).Methods("GET")
 	router.HandleFunc("/getnft_chatitems/{fromaddr}/{toaddr}/{nftaddr}/{nftid}", controllers.GetChatNftAllItemsFromAddrAndNFT).Methods("GET")
@@ -137,6 +139,7 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/deleteall_chatitems/{fromaddr}/{toaddr}", controllers.DeleteAllChatitemsToAddressByOwner).Methods("DELETE")
 	router.HandleFunc("/delete_chatitem/{id}", controllers.DeleteChatitem).Methods("DELETE")
 	router.HandleFunc("/get_inbox/{address}", controllers.GetInboxByOwner).Methods("GET")
+	router.HandleFunc("/get_last_unread/{address}", controllers.GetLastMsgToOwner).Methods("GET")
 	router.HandleFunc("/create_chatitem", controllers.CreateChatitem).Methods("POST")
 	//router.HandleFunc("/create_chatitem_tmp", controllers.CreateChatitemTmp).Methods("POST")
 	//router.HandleFunc("/getall_chatitems", controllers.GetAllChatitems).Methods("GET")
