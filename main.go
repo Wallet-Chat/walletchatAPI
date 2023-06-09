@@ -93,7 +93,7 @@ func main() {
 	lmt := tollbooth.NewLimiter(float64(3), nil)
 	lmt.SetIPLookups([]string{"RemoteAddr", "X-Forwarded-For", "X-Real-IP"}).SetMethods([]string{"POST"})
 
-	log.Fatal(http.ListenAndServe(":8088", tollbooth.LimitHandler(lmt, handler)))
+	log.Fatal(http.ListenAndServe(":8080", tollbooth.LimitHandler(lmt, handler)))
 }
 
 func sendPeriodicNotifications() {
