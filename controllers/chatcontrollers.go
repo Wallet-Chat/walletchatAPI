@@ -47,6 +47,24 @@ func stringInSlice(a string, list []string) bool {
 	return false
 }
 
+//This function is used for MM Snaps specifically
+// @Router /v1/get_latest_unread/{address} [get]
+func GetLastMsgToOwner(w http.ResponseWriter, r *http.Request) {
+	Authuser := auth.GetUserFromReqContext(r)
+	key := Authuser.Address
+
+	var chat []entity.Chatitem
+	dbResult := database.Connector.Where("toaddr = ?", key).Where("msgread != ?", true).Find(&chat)
+
+	var chatReturn entity.Chatitem
+	if dbResult.RowsAffected > 0 {
+		chatReturn = chat[0]
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(chatReturn)
+}
+
 // GetInboxByOwner godoc
 // @Summary Get Inbox Summary With Last Message
 // @Description Get Each 1-on-1 Conversation, NFT and Community Chat For Display in Inbox
@@ -621,6 +639,48 @@ func GetNftChatFromAddress(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(chat)
+}
+
+//Could combine this with GetAll of we change FE to send in 0 or something for ALL
+// @Router /v1/getall_chatitems/{fromaddr}/{toaddr}/{count} [get]
+func GetNChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	//from := vars["fromaddr"]
+	to := vars["toaddr"]
+	Authuser := auth.GetUserFromReqContext(r)
+	from := Authuser.Address
+	count, _ := strconv.Atoi(vars["count"])
+
+	var chat []entity.Chatitem
+	database.Connector.Where("fromaddr = ?", from).Where("toaddr = ?", to).Find(&chat)
+
+	var chat2 []entity.Chatitem
+	database.Connector.Where("fromaddr = ?", to).Where("toaddr = ?", from).Find(&chat2)
+
+	for _, chatmember := range chat2 {
+		currTime := chatmember.Timestamp_dtm
+		found := false
+		//both lists are already sorted, so we can use the assumption here
+		for i := 0; i < len(chat); i++ {
+			ret_time := chat[i].Timestamp_dtm
+			if currTime.Before(ret_time) {
+				chat = append(chat[:i+1], chat[i:]...)
+				chat[i] = chatmember
+				found = true
+				break
+			}
+		}
+		if !found {
+			chat = append(chat, chatmember)
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if len(chat) < count {
+		json.NewEncoder(w).Encode(chat)
+	} else {
+		json.NewEncoder(w).Encode(chat[(len(chat) - count):])
+	}
 }
 
 // GetChatFromAddressToAddr godoc
