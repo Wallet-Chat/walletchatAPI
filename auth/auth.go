@@ -335,6 +335,7 @@ func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 		// 		Set("time", time.Now()), //TODO fix this time to something standard?
 		// })
 		// SegmentClient.Close()
+		wc_analytics.SendCustomEvent(Authuser.Address, "CONNECT_WALLET_SIGNIN")
 
 		signedToken, err := jwtProvider.CreateStandard(Authuser.Address)
 		if err != nil {
@@ -390,6 +391,7 @@ func WelcomeHandler() http.HandlerFunc {
 			// 		Set("returningUser", true), //TODO fix this time to something standard?
 			// })
 			// SegmentClient.Close()
+			wc_analytics.SendCustomEvent(Authuser.Address, "CONNECT_WALLET_VALID_JWT")
 		}
 
 		renderJson(r, w, http.StatusOK, resp)

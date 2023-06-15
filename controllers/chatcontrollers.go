@@ -992,6 +992,8 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(dbQuery.Error)
 		} else {
+			wc_analytics.SendCustomEvent(Authuser.Address, "SEND_MESSAGE")
+
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusCreated)
 			json.NewEncoder(w).Encode(chat)
@@ -1072,7 +1074,6 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 }
 
 func SendNotificationEmails() {
-	//for {
 	fmt.Println("** Sending Daily Notifications **")
 	var settings []entity.Settings
 	database.Connector.Find(&settings)
@@ -1099,8 +1100,6 @@ func SendNotificationEmails() {
 			}
 		}
 	}
-	//time.Sleep(time.Minute * 60 * 24)  - previous way of getting daily notification out (now using cron)
-	//}
 }
 
 func getTelegrameUrl() string {
@@ -1233,6 +1232,9 @@ func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 		chat.Message = cleanMessage
 
 		database.Connector.Create(&chat)
+
+		wc_analytics.SendCustomEvent(Authuser.Address, "SEND_MESSAGE_NFTGROUP")
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(chat)
@@ -1329,6 +1331,9 @@ func CreateCommunityChatItem(w http.ResponseWriter, r *http.Request) {
 		chat.Message = cleanMessage
 
 		database.Connector.Create(&chat)
+
+		wc_analytics.SendCustomEvent(Authuser.Address, "SEND_MESSAGE_COMMUNITY")
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(chat)
