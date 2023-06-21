@@ -80,7 +80,7 @@ func main() {
 	controllers.InitRandom()
 
 	//handler := cors.Default().Handler(router)
-	handler := cors.AllowAll().Handler(router) //Testing for Metamask Snaps
+	handler := cors.AllowAll().Handler(router) //Live API overrides this anyway
 	// c := cors.New(cors.Options{
 	// 	AllowedOrigins:   []string{"*"},
 	// 	AllowCredentials: true,
@@ -202,6 +202,12 @@ func initaliseHandlers(router *mux.Router) {
 
 	//POAP related stuff (some could be called client side directly but this protects the API key)
 	router.HandleFunc("/get_poaps/{wallet}", controllers.GetPoapsByAddr).Methods("GET")
+
+	//OpenSea Pass-Thru to prevent CORS error and API key leakage
+	router.HandleFunc("/opensea_asset_contract/{contract}", controllers.GetOpenseaAssetContract).Methods("GET")
+	router.HandleFunc("/opensea_asset/{nftaddr}/{nftid}/{address}", controllers.GetOpenseaAsset).Methods("GET")
+	router.HandleFunc("/opensea_asset_owner/{address}", controllers.GetOpenseaAssetOwner).Methods("GET")
+	router.HandleFunc("/opensea_asset_owner_ens/{address}", controllers.GetOpenseaAssetOwnerENS).Methods("GET")
 }
 
 func initDB() {

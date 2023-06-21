@@ -2594,6 +2594,123 @@ func GetCommentsCount(w http.ResponseWriter, r *http.Request) {
 // 	json.NewEncoder(w).Encode(comment)
 // }
 
+//mainly for internal use - API integrations should get own API key
+func GetOpenseaAssetContract(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	contractAddr := vars["contract"]
+	url := "https://api.opensea.io/api/v1/asset_contract/" + contractAddr
+
+	// Create a new request using http
+	req, _ := http.NewRequest("GET", url, nil)
+	osKey := os.Getenv("OPENSEA_API_KEY")
+	req.Header.Add("X-API-KEY", osKey)
+
+	// Send req using http Client
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println("OSea API CALL - Error on response.\n[ERROR] -", err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	var parsed any
+	json.Unmarshal(body, &parsed)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(parsed)
+}
+
+//mainly for internal use - API integrations should get own API key
+func GetOpenseaAsset(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	nftaddr := vars["nftaddr"]
+	nftid := vars["nftid"]
+	address := vars["address"]
+	//https://api.opensea.io/api/v1/asset/${msg.nftAddr}/${msg.nftId}?account_address=${account}
+	url := "https://api.opensea.io/api/v1/asset/" + nftaddr + "/" + nftid + "/?account_address=" + address
+
+	// Create a new request using http
+	req, _ := http.NewRequest("GET", url, nil)
+	osKey := os.Getenv("OPENSEA_API_KEY")
+	req.Header.Add("X-API-KEY", osKey)
+
+	// Send req using http Client
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println("OSea API CALL asset - Error on response.\n[ERROR] -", err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	var parsed any
+	json.Unmarshal(body, &parsed)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(parsed)
+}
+
+//mainly for internal use - API integrations should get own API key
+func GetOpenseaAssetOwner(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	owner := vars["address"]
+	//https://api.opensea.io/api/v1/assets?owner=${account}
+	url := "https://api.opensea.io/api/v1/assets?owner=" + owner
+
+	// Create a new request using http
+	req, _ := http.NewRequest("GET", url, nil)
+	osKey := os.Getenv("OPENSEA_API_KEY")
+	req.Header.Add("X-API-KEY", osKey)
+
+	// Send req using http Client
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println("OSea API CALL asset - Error on response.\n[ERROR] -", err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	var parsed any
+	json.Unmarshal(body, &parsed)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(parsed)
+}
+
+//mainly for internal use - API integrations should get own API key
+func GetOpenseaAssetOwnerENS(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	owner := vars["address"]
+	//https://api.opensea.io/api/v1/assets?owner=${account}&collection=ens
+	url := "https://api.opensea.io/api/v1/assets?owner=" + owner + "&collection=ens"
+
+	// Create a new request using http
+	req, _ := http.NewRequest("GET", url, nil)
+	osKey := os.Getenv("OPENSEA_API_KEY")
+	req.Header.Add("X-API-KEY", osKey)
+
+	// Send req using http Client
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println("OSea API CALL asset - Error on response.\n[ERROR] -", err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	var parsed any
+	json.Unmarshal(body, &parsed)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(parsed)
+}
+
 func GetTwitter(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	contract := vars["contract"]
