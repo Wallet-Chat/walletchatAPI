@@ -3127,12 +3127,12 @@ func GetOwnerNFTs(walletAddr string, chain string) MoralisOwnerOf {
 func IsOwnerOfNFT(contractAddr string, walletAddr string, chain string) bool {
 
 	result := IsOwnerOfNftLocal(contractAddr, walletAddr, chain)
-	fmt.Println("IsOwnerOfNFT params / holder: ", contractAddr, walletAddr, chain, result)
+	//fmt.Println("IsOwnerOfNFT params / holder: ", contractAddr, walletAddr, chain, result)
 
 	if !result && (chain == "ethereum" || chain == "polygon") {
 		delegates := auth.GetDelegationsByDelegate(walletAddr)
 		if delegates != nil {
-			fmt.Println("Wallet Delegates in OwnerOfNFT: ", delegates)
+			//fmt.Println("Wallet Delegates in OwnerOfNFT: ", delegates)
 
 			for _, delegateWallet := range delegates {
 				result = IsOwnerOfNftLocal(contractAddr, delegateWallet.Vault.Hex(), chain)
