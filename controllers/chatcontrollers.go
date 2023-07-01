@@ -1931,6 +1931,7 @@ func GetGroupChatItemsByAddr(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(chat)
 	} else {
+		fmt.Printf("Not holder....: ")
 		w.WriteHeader(http.StatusForbidden)
 	}
 }
@@ -2840,7 +2841,9 @@ func GetTweetsFromAPI(twitterID string) TwitterTweetsData {
 
 	var result TwitterTweetsData
 	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
-		fmt.Println("Can not unmarshal JSON - GetTweetsFromAPI: ", twitterID)
+		//fmt.Println("Can not unmarshal JSON - GetTweetsFromAPI: ", twitterID)
+		//TODO: data struct has likely changed
+		err = nil
 	}
 	//fmt.Println("length twitter: ", len(result.Data))
 
@@ -3124,6 +3127,7 @@ func GetOwnerNFTs(walletAddr string, chain string) MoralisOwnerOf {
 func IsOwnerOfNFT(contractAddr string, walletAddr string, chain string) bool {
 
 	result := IsOwnerOfNftLocal(contractAddr, walletAddr, chain)
+	fmt.Println("IsOwnerOfNFT params / holder: ", contractAddr, walletAddr, chain, result)
 
 	if !result && (chain == "ethereum" || chain == "polygon") {
 		delegates := auth.GetDelegationsByDelegate(walletAddr)

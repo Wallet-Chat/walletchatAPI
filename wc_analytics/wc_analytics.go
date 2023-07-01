@@ -64,7 +64,7 @@ func SendCustomEvent(clientID string, eventName string) error { //eventParams ma
 		return err
 	}
 
-	fmt.Println("GA4 Called Custom Event - HTTP Repsonse: ", resp)
+	//fmt.Println("GA4 Called Custom Event - HTTP Repsonse: ", resp)
 
 	defer resp.Body.Close()
 
