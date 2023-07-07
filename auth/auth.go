@@ -24,6 +24,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/segmentio/analytics-go"
+	"github.com/spruceid/siwe-go"
 
 	//"github.com/ethereum/go-ethereum/crypto/secp256k1"
 	"github.com/golang-jwt/jwt/v4"
@@ -47,6 +48,7 @@ var (
 	ErrUserExists     = errors.New("Authuser already exists")
 	ErrInvalidAddress = errors.New("invalid address")
 	ErrInvalidNonce   = errors.New("invalid nonce")
+	ErrInvalidDomain  = errors.New("invalid domain in SIWE message")
 	ErrMissingSig     = errors.New("signature is missing")
 	ErrAuthError      = errors.New("authentication error")
 )
@@ -253,9 +255,27 @@ type SigninPayload struct {
 }
 
 func (s SigninPayload) Validate() error {
-	// if !hexRegexEVM.MatchString(s.Address) {
-	// 	return ErrInvalidAddress
-	// }
+	var message *siwe.Message
+	var err error
+
+	message, err = siwe.ParseMessage(s.Msg)
+	if err != nil {
+		return ErrInvalidDomain
+	}
+
+	domainMatch := false
+	domainList := strings.Split(os.Getenv("ALLOWED_DOMAINS"), ",")
+	for _, domain := range domainList {
+		if strings.HasSuffix(domain, message.GetDomain()) {
+			domainMatch = true
+			fmt.Println("Signin From Domain: ", domain)
+			break
+		}
+	}
+	if !domainMatch {
+		return ErrInvalidDomain
+	}
+
 	if !nonceRegex.MatchString(s.Nonce) {
 		return ErrInvalidNonce
 	}
