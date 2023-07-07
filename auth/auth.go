@@ -266,7 +266,7 @@ func (s SigninPayload) Validate() error {
 	domainMatch := false
 	domainList := strings.Split(os.Getenv("ALLOWED_DOMAINS"), ",")
 	for _, domain := range domainList {
-		if strings.HasSuffix(domain, message.GetDomain()) {
+		if strings.HasSuffix(message.GetDomain(), domain) {
 			domainMatch = true
 			fmt.Println("Signin From Domain: ", domain)
 			break
