@@ -62,6 +62,7 @@ func GetLastMsgToOwner(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	json.NewEncoder(w).Encode(chatReturn)
 }
 
@@ -278,6 +279,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	json.NewEncoder(w).Encode(userInbox)
 }
 
@@ -287,6 +289,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 // 	database.Connector.Find(&chat)
 
 // 	w.Header().Set("Content-Type", "application/json")
+//  w.Header().Set("X-Content-Type-Options", "nosniff")
 // 	w.WriteHeader(http.StatusOK)
 // 	json.NewEncoder(w).Encode(chat)
 // }
@@ -312,6 +315,7 @@ func GetUnreadMsgCntTotal(w http.ResponseWriter, r *http.Request) {
 	//get group chat unread items as well
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(len(chat))
 }
@@ -392,6 +396,7 @@ func GetUnreadMsgCntTotalByType(w http.ResponseWriter, r *http.Request) {
 // 	}
 
 // 	w.Header().Set("Content-Type", "application/json")
+//  w.Header().Set("X-Content-Type-Options", "nosniff")
 // 	w.WriteHeader(http.StatusCreated)
 // 	json.NewEncoder(w).Encode(true)
 // }
@@ -456,6 +461,7 @@ func GetUnreadcnt(w http.ResponseWriter, r *http.Request) {
 	config := LocalGetUnread(key)
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(config)
 }
@@ -483,6 +489,7 @@ func GetUnreadMsgCntNft(w http.ResponseWriter, r *http.Request) {
 	var chat []entity.Chatitem
 	database.Connector.Where("toaddr = ?", key).Where("nftaddr = ?", addr).Where("nftid = ?", id).Where("msgread = ?", false).Find(&chat)
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(http.StatusOK)
 
 	json.NewEncoder(w).Encode(len(chat))
@@ -566,6 +573,7 @@ func GetUnreadMsgCntNftAllByAddr(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(nftretval)
 }
@@ -591,6 +599,7 @@ func GetUnreadMsgCnt(w http.ResponseWriter, r *http.Request) {
 	var chat []entity.Chatitem
 	database.Connector.Where("toaddr = ?", to).Where("fromaddr = ?", owner).Where("msgread != ?", true).Find(&chat)
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(http.StatusOK)
 
 	json.NewEncoder(w).Encode(len(chat))
@@ -615,6 +624,7 @@ func GetChatFromAddress(w http.ResponseWriter, r *http.Request) {
 	var chat []entity.Chatitem
 	database.Connector.Where("fromaddr = ?", key).Or("toaddr = ?", key).Find(&chat)
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	json.NewEncoder(w).Encode(chat)
 }
 
@@ -638,6 +648,7 @@ func GetNftChatFromAddress(w http.ResponseWriter, r *http.Request) {
 	database.Connector.Where("fromaddr = ?", key).Where("nftid != ?", 0).Or("toaddr = ?", key).Where("nftid != ?", 0).Find(&chat)
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	json.NewEncoder(w).Encode(chat)
 }
 
@@ -676,6 +687,7 @@ func GetNChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	if len(chat) < count {
 		json.NewEncoder(w).Encode(chat)
 	} else {
@@ -726,6 +738,7 @@ func GetAllChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	json.NewEncoder(w).Encode(chat)
 }
 
@@ -755,6 +768,7 @@ func GetReadChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 	database.Connector.Model(&entity.Chatitem{}).Where("fromaddr = ?", from).Where("toaddr = ?", to).Where("msgread = ?", true).Pluck("id", &readIDs)
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	json.NewEncoder(w).Encode(readIDs)
 }
 
@@ -826,6 +840,7 @@ func GetNewChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	json.NewEncoder(w).Encode(chat)
 }
 
@@ -849,6 +864,7 @@ func GetChatNftContext(w http.ResponseWriter, r *http.Request) {
 	database.Connector.Where("nftaddr = ?", nftaddr).Where("nftid = ?", nftid).Find(&chat)
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	json.NewEncoder(w).Encode(chat)
 }
 
@@ -904,6 +920,7 @@ func GetChatNftAllItemsFromAddrAndNFT(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	json.NewEncoder(w).Encode(chat)
 }
 
@@ -953,6 +970,7 @@ func GetChatNftAllItemsFromAddr(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	json.NewEncoder(w).Encode(chat)
 }
 
@@ -989,12 +1007,14 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 		if dbQuery.RowsAffected == 0 {
 			fmt.Println(dbQuery.Error)
 			w.Header().Set("Content-Type", "application/json")
+			w.Header().Set("X-Content-Type-Options", "nosniff")
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(dbQuery.Error)
 		} else {
 			wc_analytics.SendCustomEvent(Authuser.Address, "SEND_MESSAGE")
 
 			w.Header().Set("Content-Type", "application/json")
+			w.Header().Set("X-Content-Type-Options", "nosniff")
 			w.WriteHeader(http.StatusCreated)
 			json.NewEncoder(w).Encode(chat)
 
@@ -1236,6 +1256,7 @@ func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 		wc_analytics.SendCustomEvent(Authuser.Address, "SEND_MESSAGE_NFTGROUP")
 
 		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(chat)
 	} else {
@@ -1294,6 +1315,7 @@ func CreateCommunity(w http.ResponseWriter, r *http.Request) {
 	//if strings.EqualFold(chat.Fromaddr, Authuser.Address) {
 	if dbQuery.RowsAffected != 0 {
 		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.WriteHeader(http.StatusCreated)
 	} else {
 		w.WriteHeader(http.StatusForbidden)
@@ -1335,6 +1357,7 @@ func CreateCommunityChatItem(w http.ResponseWriter, r *http.Request) {
 		wc_analytics.SendCustomEvent(Authuser.Address, "SEND_MESSAGE_COMMUNITY")
 
 		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(chat)
 	} else {
@@ -1379,6 +1402,7 @@ func CreateBookmarkItem(w http.ResponseWriter, r *http.Request) {
 
 		database.Connector.Create(&bookmark)
 		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(bookmark)
 	} else {
@@ -1428,6 +1452,7 @@ func DeleteBookmarkItem(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(returnval)
 	} else {
@@ -1463,6 +1488,7 @@ func IsBookmarkItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(returnval)
 }
@@ -1526,6 +1552,7 @@ func GetBookmarkItems(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	json.NewEncoder(w).Encode(returnItems)
 }
 
@@ -1549,6 +1576,7 @@ func CreateImageItem(w http.ResponseWriter, r *http.Request) {
 	if strings.EqualFold(Authuser.Address, imageaddr.Addr) {
 		database.Connector.Create(&imageaddr)
 		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(imageaddr)
 	} else {
@@ -1610,6 +1638,7 @@ func CreateImageItemPFP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(imageaddr)
 	} else {
@@ -1649,6 +1678,7 @@ func UpdateImageItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(returnval)
 }
@@ -1671,6 +1701,7 @@ func GetImageItem(w http.ResponseWriter, r *http.Request) {
 
 	database.Connector.Where("addr = ?", addr).Find(&imgaddr)
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(imgaddr)
 }
@@ -1787,6 +1818,7 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(affectedRows)
 	} else {
@@ -1814,6 +1846,7 @@ func GetAddrNameItem(w http.ResponseWriter, r *http.Request) {
 
 	database.Connector.Where("address = ?", address).Find(&addrname)
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(addrname)
 }
@@ -1856,6 +1889,7 @@ func GetAddrNameItem(w http.ResponseWriter, r *http.Request) {
 // 		}
 
 // 		w.Header().Set("Content-Type", "application/json")
+//    w.Header().Set("X-Content-Type-Options", "nosniff")
 // 		w.WriteHeader(http.StatusCreated)
 // 		json.NewEncoder(w).Encode(returnval)
 // 	} else {
@@ -1929,6 +1963,7 @@ func GetGroupChatItemsByAddr(w http.ResponseWriter, r *http.Request) {
 		database.Connector.Where("nftaddr = ?", nftaddr).Find(&chat) //manapixels requests all data for now
 
 		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
 		json.NewEncoder(w).Encode(chat)
 	} else {
 		fmt.Printf("Not holder....: ")
@@ -1968,6 +2003,7 @@ func GetGroupChatItemsByAddrLen(w http.ResponseWriter, r *http.Request) {
 		database.Connector.Where("timestamp_dtm > ?", chatReadTime.Readtimestamp_dtm).Where("nftaddr = ?", nftaddr).Find(&chat)
 	}
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	json.NewEncoder(w).Encode(len(chat))
 }
 
@@ -2004,6 +2040,7 @@ func UpdateChatitemByOwner(w http.ResponseWriter, r *http.Request) {
 			Update("msgread", chat.Msgread)
 
 		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(chat)
 	} else {
@@ -2080,6 +2117,7 @@ func DeleteChatitem(w http.ResponseWriter, r *http.Request) {
 // 	if strings.EqualFold(Authuser.Address, settings.Walletaddr) {
 // 		database.Connector.Create(&settings)
 // 		w.Header().Set("Content-Type", "application/json")
+//    w.Header().Set("X-Content-Type-Options", "nosniff")
 // 		w.WriteHeader(http.StatusCreated)
 // 		json.NewEncoder(w).Encode(settings)
 // 	} else {
@@ -2290,6 +2328,7 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 		}
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
 		json.NewEncoder(w).Encode(dbResults.RowsAffected)
 	} else {
 		fmt.Println("UpdateSettings - JWT Address: ", Authuser.Address)
@@ -2331,6 +2370,7 @@ func VerifyEmail(w http.ResponseWriter, r *http.Request) {
 		} else {
 			w.WriteHeader(http.StatusOK)
 			w.Header().Set("Content-Type", "application/json")
+			w.Header().Set("X-Content-Type-Options", "nosniff")
 			json.NewEncoder(w).Encode(dbResults.RowsAffected)
 		}
 	}
@@ -2384,6 +2424,7 @@ func GetSettings(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	json.NewEncoder(w).Encode(settings)
 }
 
@@ -2466,6 +2507,7 @@ func ResolveName(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 }
 
 // CreateComments godoc
@@ -2487,6 +2529,7 @@ func CreateComments(w http.ResponseWriter, r *http.Request) {
 	if strings.EqualFold(Authuser.Address, comment.Fromaddr) {
 		database.Connector.Create(&comment)
 		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(comment)
 	} else {
@@ -2502,6 +2545,7 @@ func CreateComments(w http.ResponseWriter, r *http.Request) {
 // 	database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", settings.Walletaddr).Update("publickey", settings.Publickey)
 
 // 	w.Header().Set("Content-Type", "application/json")
+//    w.Header().Set("X-Content-Type-Options", "nosniff")
 // 	w.WriteHeader(http.StatusOK)
 // 	json.NewEncoder(w).Encode(comment)
 // }
@@ -2551,6 +2595,7 @@ func GetComments(w http.ResponseWriter, r *http.Request) {
 	database.Connector.Where("nftaddr = ?", addr).Where("nftid = ?", id).Find(&comment)
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	json.NewEncoder(w).Encode(comment)
 }
 
@@ -2573,6 +2618,7 @@ func GetCommentsCount(w http.ResponseWriter, r *http.Request) {
 	var comment []entity.Comments
 	database.Connector.Where("nftaddr = ?", addr).Where("nftid = ?", id).Find(&comment)
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	json.NewEncoder(w).Encode(len(comment))
 }
 
@@ -2591,6 +2637,7 @@ func GetCommentsCount(w http.ResponseWriter, r *http.Request) {
 // 	//end of adding names for fromaddr
 
 // 	w.Header().Set("Content-Type", "application/json")
+//    w.Header().Set("X-Content-Type-Options", "nosniff")
 // 	w.WriteHeader(http.StatusOK)
 // 	json.NewEncoder(w).Encode(comment)
 // }
@@ -2620,6 +2667,7 @@ func GetOpenseaAssetContract(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(body, &parsed)
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	json.NewEncoder(w).Encode(parsed)
 }
 
@@ -2651,6 +2699,7 @@ func GetOpenseaAsset(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(body, &parsed)
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	json.NewEncoder(w).Encode(parsed)
 }
 
@@ -2680,6 +2729,7 @@ func GetOpenseaAssetOwner(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(body, &parsed)
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	json.NewEncoder(w).Encode(parsed)
 }
 
@@ -2709,6 +2759,7 @@ func GetOpenseaAssetOwnerENS(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(body, &parsed)
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	json.NewEncoder(w).Encode(parsed)
 }
 
@@ -2723,6 +2774,7 @@ func GetTwitter(w http.ResponseWriter, r *http.Request) {
 	formatted := FormatTwitterData(tweets)
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	json.NewEncoder(w).Encode(formatted)
 }
 
@@ -2736,6 +2788,7 @@ func GetTwitterCount(w http.ResponseWriter, r *http.Request) {
 	tweets := GetTweetsFromAPI(twitterID)
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	json.NewEncoder(w).Encode(len(tweets.Data))
 }
 
@@ -3022,6 +3075,7 @@ func GetCommunityChat(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	json.NewEncoder(w).Encode(landingData)
 }
 
@@ -3052,6 +3106,7 @@ func IsOwner(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	json.NewEncoder(w).Encode(result)
 }
 
@@ -3466,6 +3521,7 @@ func GetPoapsByAddr(w http.ResponseWriter, r *http.Request) {
 	result := getPoapInfoByAddress(walletAddr)
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	json.NewEncoder(w).Encode(result)
 }
 
