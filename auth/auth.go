@@ -48,6 +48,7 @@ var (
 	ErrUserExists     = errors.New("Authuser already exists")
 	ErrInvalidAddress = errors.New("invalid address")
 	ErrInvalidNonce   = errors.New("invalid nonce")
+	ErrInvalidSIWE    = errors.New("invalid format of SIWE message")
 	ErrInvalidDomain  = errors.New("invalid domain in SIWE message")
 	ErrMissingSig     = errors.New("signature is missing")
 	ErrAuthError      = errors.New("authentication error")
@@ -260,7 +261,7 @@ func (s SigninPayload) Validate() error {
 
 	message, err = siwe.ParseMessage(s.Msg)
 	if err != nil {
-		return ErrInvalidDomain
+		return ErrInvalidSIWE
 	}
 
 	domainMatch := false
