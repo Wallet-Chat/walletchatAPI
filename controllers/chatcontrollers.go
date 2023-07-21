@@ -3052,7 +3052,7 @@ func GetCommunityChat(w http.ResponseWriter, r *http.Request) {
 	landingData.Messaged = hasMessaged
 
 	//grab all the data for walletchat group
-	database.Connector.Where("nftaddr = ?", community).Find(&groupchat)
+	database.Connector.Where("nftaddr = ?", community).Order("id desc").Limit(100).Find(&groupchat)
 	landingData.Messages = groupchat
 
 	//get social media info
