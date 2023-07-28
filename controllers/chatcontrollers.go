@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"reflect"
+	"regexp"
 	"rest-go-demo/auth"
 	"rest-go-demo/database"
 	"rest-go-demo/email"
@@ -36,6 +38,7 @@ import (
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
+var telegramUpdateOffset = 0
 var throttleInboxCounterPerUser = make(map[string]int)
 
 func stringInSlice(a string, list []string) bool {
@@ -1018,6 +1021,11 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusCreated)
 			json.NewEncoder(w).Encode(chat)
 
+			//Test GD Support Group: -858094260
+			if strings.EqualFold(os.Getenv("TG_SUPPORT_WALLET"), chat.Toaddr) {
+				fmt.Println("sending to TG group message")
+				SendTelegramMessage("Message from WalletChat User: "+chat.Fromaddr+"\r\n"+chat.Message, "-858094260")
+			}
 			//manage support messages
 			if strings.EqualFold(os.Getenv("SUPPORT_WALLET"), chat.Toaddr) {
 				url := os.Getenv("SUPPORT_WEBOOK_URL")
@@ -1135,6 +1143,7 @@ func SendTelegramMessage(text string, chatId string) (bool, error) {
 	body, _ := json.Marshal(map[string]string{
 		"chat_id": chatId,
 		"text":    text,
+		"parse_mode": "HTML",
 	})
 	response, err = http.Post(
 		url,
@@ -1158,6 +1167,24 @@ func SendTelegramMessage(text string, chatId string) (bool, error) {
 	return true, nil
 }
 
+func isFieldSet(i interface{}) bool {
+	return !reflect.ValueOf(i).IsNil()
+}
+func extractAddress(input string) string {
+	// Define a regular expression to match the text after "WalletChat User: "
+	re := regexp.MustCompile(`WalletChat User: (.*)`)
+
+	// Find the first match in the input string
+	match := re.FindStringSubmatch(input)
+
+	if len(match) >= 2 {
+		// Extract the text after the delimiter
+		return strings.TrimSpace(match[1])
+	}
+
+	return ""
+}
+
 //TODO: should be done by webhook eventually so we don't have to loop, and can do additional verifications
 func UpdateTelegramNotifications() {
 	//poll for new users setting up telegram notifications (can be a webhook someday for better performance)
@@ -1165,7 +1192,7 @@ func UpdateTelegramNotifications() {
 	var response *http.Response
 
 	// Send the message
-	url := fmt.Sprintf("%s/getUpdates", getTelegrameUrl())
+	url := fmt.Sprintf("%s/getUpdates?offset=%d", getTelegrameUrl(), telegramUpdateOffset)
 	response, err = http.Get(
 		url,
 	)
@@ -1186,21 +1213,40 @@ func UpdateTelegramNotifications() {
 	json.Unmarshal(body, &updatedNotifsData)
 
 	for i := 0; i < len(updatedNotifsData.Result); i++ {
-		//fmt.Println("Results For Telegram Check", updatedNotifsData.Result[i])
-		verifCode := updatedNotifsData.Result[i].Message.Text
-		//fmt.Println("Results For Telegram Verification Code: ", verifCode)
-		var settings []entity.Settings
-		dbResult := database.Connector.Where("telegramcode = ?", verifCode).Find(&settings)
-		if dbResult.RowsAffected > 0 && verifCode != "" {
-			chatId := updatedNotifsData.Result[i].Message.Chat.ID
+		if isFieldSet(updatedNotifsData.Result[i].Message.ReplyToMessage) {
+			//if its a reply message, we need to send the user the reply
+			origMsgSender := extractAddress(updatedNotifsData.Result[i].Message.ReplyToMessage.Text)
+			fmt.Println("GD Admin Replied To Message from / with:", origMsgSender, updatedNotifsData.Result[i].Message.Text)
 
-			fmt.Println("Updating Telegram Chat ID for WalletAddr/chatID: ", settings[0].Walletaddr, strconv.FormatInt(chatId, 10))
-			database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", settings[0].Walletaddr).Update("telegramid", strconv.FormatInt(chatId, 10))
-			database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", settings[0].Walletaddr).Update("telegramcode", "")
+			var chat entity.Chatitem
+			chat.Timestamp = time.Now().Format("2006-01-02T15:04:05.000Z")
+			chat.Timestamp_dtm = time.Now()
+			chat.Fromaddr = os.Getenv("TG_SUPPORT_WALLET")
+			chat.Toaddr = origMsgSender
+			chat.Message = updatedNotifsData.Result[i].Message.Text
+			chat.Nftid = "0"
+			database.Connector.Create(&chat)
 
-			var message string = "You have successfully setup notifications in WalletChat for: " + settings[0].Walletaddr
-			SendTelegramMessage(message, strconv.FormatInt(chatId, 10))
+		} else {
+			//fmt.Println("Results For Telegram Check", updatedNotifsData.Result[i])
+			verifCode := updatedNotifsData.Result[i].Message.Text
+			//fmt.Println("Results For Telegram Verification Code: ", verifCode)
+			var settings []entity.Settings
+			dbResult := database.Connector.Where("telegramcode = ?", verifCode).Find(&settings)
+			if dbResult.RowsAffected > 0 && verifCode != "" {
+				chatId := updatedNotifsData.Result[i].Message.Chat.ID
+
+				fmt.Println("Updating Telegram Chat ID for WalletAddr/chatID: ", settings[0].Walletaddr, strconv.FormatInt(chatId, 10))
+				database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", settings[0].Walletaddr).Update("telegramid", strconv.FormatInt(chatId, 10))
+				database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", settings[0].Walletaddr).Update("telegramcode", "")
+
+				var message string = "You have successfully setup notifications in WalletChat for: " + settings[0].Walletaddr
+				SendTelegramMessage(message, strconv.FormatInt(chatId, 10))
+			}
 		}
+		// Update the offset to the next update ID
+		fmt.Println("updated offset TG: ", telegramUpdateOffset)
+		telegramUpdateOffset = updatedNotifsData.Result[i].UpdateID + 1
 	}
 }
 
@@ -3925,6 +3971,23 @@ type TelegramUpdateNotifsData struct {
 				Username  string `json:"username"`
 				Type      string `json:"type"`
 			} `json:"chat"`
+			ReplyToMessage *struct {
+				MessageID int `json:"message_id"`
+				From      struct {
+					ID        int64  `json:"id"`
+					IsBot     bool   `json:"is_bot"`
+					FirstName string `json:"first_name"`
+					Username  string `json:"username"`
+				} `json:"from"`
+				Chat struct {
+					ID                          int    `json:"id"`
+					Title                       string `json:"title"`
+					Type                        string `json:"type"`
+					AllMembersAreAdministrators bool   `json:"all_members_are_administrators"`
+				} `json:"chat"`
+				Date int    `json:"date"`
+				Text string `json:"text"`
+			} `json:"reply_to_message,omitempty"`
 			Date int    `json:"date"`
 			Text string `json:"text"`
 		} `json:"message"`
