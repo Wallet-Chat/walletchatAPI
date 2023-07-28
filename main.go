@@ -73,7 +73,7 @@ func main() {
 	//schedule telegram polling for new verified users (should be webhook someday)
 	t := gocron.NewScheduler(time.UTC)
 	// set time
-	t.Every(10).Seconds().Do(func() { updateTelegramVerifiedUsers() })
+	t.Every(1).Minutes().Do(func() { updateTelegramVerifiedUsers() })
 	// starts the scheduler asynchronously
 	t.StartAsync()
 
@@ -158,8 +158,6 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/community/{community}/{address}", controllers.GetCommunityChat).Methods("GET") //TODO: make common
 	router.HandleFunc("/community", controllers.CreateCommunityChatItem).Methods("POST")
 	router.HandleFunc("/create_community", controllers.CreateCommunity).Methods("POST")
-	router.HandleFunc("/update_community", controllers.UpdateCommunity).Methods("POST")
-	router.HandleFunc("/community/conditions", controllers.ChangeCommunityConditions).Methods("POST")
 
 	//bookmarks
 	router.HandleFunc("/create_bookmark", controllers.CreateBookmarkItem).Methods("POST")

@@ -10,8 +10,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"reflect"
-	"regexp"
 	"rest-go-demo/auth"
 	"rest-go-demo/database"
 	"rest-go-demo/email"
@@ -38,7 +36,6 @@ import (
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
-var telegramUpdateOffset = 0
 var throttleInboxCounterPerUser = make(map[string]int)
 
 func stringInSlice(a string, list []string) bool {
@@ -1021,12 +1018,6 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusCreated)
 			json.NewEncoder(w).Encode(chat)
 
-			//Test GD Support Group: -858094260
-			if strings.EqualFold(os.Getenv("TG_SUPPORT_WALLET"), chat.Toaddr) {
-				fmt.Println("sending to TG group message")
-				SendTelegramMessage("Message from WalletChat User: "+chat.Fromaddr+"\r\n"+chat.Message, "-858094260")
-			}
-
 			//manage support messages
 			if strings.EqualFold(os.Getenv("SUPPORT_WALLET"), chat.Toaddr) {
 				url := os.Getenv("SUPPORT_WEBOOK_URL")
@@ -1142,9 +1133,8 @@ func SendTelegramMessage(text string, chatId string) (bool, error) {
 	// Send the message
 	url := fmt.Sprintf("%s/sendMessage", getTelegrameUrl())
 	body, _ := json.Marshal(map[string]string{
-		"chat_id":    chatId,
-		"text":       text,
-		"parse_mode": "HTML",
+		"chat_id": chatId,
+		"text":    text,
 	})
 	response, err = http.Post(
 		url,
@@ -1168,24 +1158,6 @@ func SendTelegramMessage(text string, chatId string) (bool, error) {
 	return true, nil
 }
 
-func isFieldSet(i interface{}) bool {
-	return !reflect.ValueOf(i).IsNil()
-}
-func extractAddress(input string) string {
-	// Define a regular expression to match the text after "WalletChat User: "
-	re := regexp.MustCompile(`WalletChat User: (.*)`)
-
-	// Find the first match in the input string
-	match := re.FindStringSubmatch(input)
-
-	if len(match) >= 2 {
-		// Extract the text after the delimiter
-		return strings.TrimSpace(match[1])
-	}
-
-	return ""
-}
-
 //TODO: should be done by webhook eventually so we don't have to loop, and can do additional verifications
 func UpdateTelegramNotifications() {
 	//poll for new users setting up telegram notifications (can be a webhook someday for better performance)
@@ -1193,7 +1165,7 @@ func UpdateTelegramNotifications() {
 	var response *http.Response
 
 	// Send the message
-	url := fmt.Sprintf("%s/getUpdates?offset=%d", getTelegrameUrl(), telegramUpdateOffset)
+	url := fmt.Sprintf("%s/getUpdates", getTelegrameUrl())
 	response, err = http.Get(
 		url,
 	)
@@ -1214,40 +1186,21 @@ func UpdateTelegramNotifications() {
 	json.Unmarshal(body, &updatedNotifsData)
 
 	for i := 0; i < len(updatedNotifsData.Result); i++ {
-		if isFieldSet(updatedNotifsData.Result[i].Message.ReplyToMessage) {
-			//if its a reply message, we need to send the user the reply
-			origMsgSender := extractAddress(updatedNotifsData.Result[i].Message.ReplyToMessage.Text)
-			fmt.Println("GD Admin Replied To Message from / with:", origMsgSender, updatedNotifsData.Result[i].Message.Text)
+		//fmt.Println("Results For Telegram Check", updatedNotifsData.Result[i])
+		verifCode := updatedNotifsData.Result[i].Message.Text
+		//fmt.Println("Results For Telegram Verification Code: ", verifCode)
+		var settings []entity.Settings
+		dbResult := database.Connector.Where("telegramcode = ?", verifCode).Find(&settings)
+		if dbResult.RowsAffected > 0 && verifCode != "" {
+			chatId := updatedNotifsData.Result[i].Message.Chat.ID
 
-			var chat entity.Chatitem
-			chat.Timestamp = time.Now().Format("2006-01-02T15:04:05.000Z")
-			chat.Timestamp_dtm = time.Now()
-			chat.Fromaddr = os.Getenv("TG_SUPPORT_WALLET")
-			chat.Toaddr = origMsgSender
-			chat.Message = updatedNotifsData.Result[i].Message.Text
-			chat.Nftid = "0"
-			database.Connector.Create(&chat)
+			fmt.Println("Updating Telegram Chat ID for WalletAddr/chatID: ", settings[0].Walletaddr, strconv.FormatInt(chatId, 10))
+			database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", settings[0].Walletaddr).Update("telegramid", strconv.FormatInt(chatId, 10))
+			database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", settings[0].Walletaddr).Update("telegramcode", "")
 
-		} else {
-			//fmt.Println("Results For Telegram Check", updatedNotifsData.Result[i])
-			verifCode := updatedNotifsData.Result[i].Message.Text
-			//fmt.Println("Results For Telegram Verification Code: ", verifCode)
-			var settings []entity.Settings
-			dbResult := database.Connector.Where("telegramcode = ?", verifCode).Find(&settings)
-			if dbResult.RowsAffected > 0 && verifCode != "" {
-				chatId := updatedNotifsData.Result[i].Message.Chat.ID
-
-				fmt.Println("Updating Telegram Chat ID for WalletAddr/chatID: ", settings[0].Walletaddr, strconv.FormatInt(chatId, 10))
-				database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", settings[0].Walletaddr).Update("telegramid", strconv.FormatInt(chatId, 10))
-				database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", settings[0].Walletaddr).Update("telegramcode", "")
-
-				var message string = "You have successfully setup notifications in WalletChat for: " + settings[0].Walletaddr
-				SendTelegramMessage(message, strconv.FormatInt(chatId, 10))
-			}
+			var message string = "You have successfully setup notifications in WalletChat for: " + settings[0].Walletaddr
+			SendTelegramMessage(message, strconv.FormatInt(chatId, 10))
 		}
-		// Update the offset to the next update ID
-		fmt.Println("updated offset TG: ", telegramUpdateOffset)
-		telegramUpdateOffset = updatedNotifsData.Result[i].UpdateID + 1
 	}
 }
 
@@ -1311,70 +1264,6 @@ func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// ChangeCommunityConditions godoc
-// @Summary Change community access conditions
-// @Description Change community access conditions
-// @Tags GroupChat
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param message body entity.CommunityAccessCondition true "Create/Edit Community/Group Access Conditions"
-// @Success 200 {array} entity.CommunityAccessCondition
-// @Router /v1/community/conditions [post]
-func ChangeCommunityConditions(w http.ResponseWriter, r *http.Request) {
-	//todo - should maybe just accept JSON and process later.
-	requestBody, _ := ioutil.ReadAll(r.Body)
-	var accessCondition entity.Communityaccesscondition
-	json.Unmarshal(requestBody, &accessCondition)
-	fmt.Println("ChangeCommunityConditions", accessCondition)
-
-	Authuser := auth.GetUserFromReqContext(r)
-
-	//ensure the caller is an admin for the group
-	var adminForCommunity []entity.Communityadmin
-	dbQuery := database.Connector.Where("adminaddr = ?", Authuser.Address).Find(&adminForCommunity)
-	isAdmin := false
-	for i := 0; i < int(dbQuery.RowsAffected); i++ {
-		if adminForCommunity[i].Slug == accessCondition.Slug {
-			isAdmin = true
-			break
-		}
-	}
-	if !isAdmin {
-		fmt.Println("ChangeCommunityConditions not an admin", accessCondition.Slug)
-		w.WriteHeader(http.StatusForbidden)
-		return
-	}
-
-	var accessConditionToUpdate entity.Communityaccesscondition
-	dbQuery = database.Connector.Where("slug = ?", accessCondition.Slug).Find(&accessConditionToUpdate)
-	resultCnt := 0
-	if dbQuery.RowsAffected == 0 {
-		dbQuery = database.Connector.Create(&accessCondition)
-		resultCnt += int(dbQuery.RowsAffected)
-	} else {
-		dbQuery = database.Connector.Model(&entity.Communityaccesscondition{}).
-			Where("slug = ?", accessCondition.Slug).
-			Update("nftaddr", accessCondition.Nftaddr)
-		//fmt.Println("ChangeCommunityConditions 1", accessCondition, dbQuery.RowsAffected)
-		resultCnt += int(dbQuery.RowsAffected)
-
-		dbQuery = database.Connector.Model(&entity.Communityaccesscondition{}).
-			Where("slug = ?", accessCondition.Slug).
-			Update("count", accessCondition.Count)
-		//fmt.Println("ChangeCommunityConditions 2", accessCondition, dbQuery.RowsAffected)
-		resultCnt += int(dbQuery.RowsAffected)
-	}
-
-	if resultCnt > 0 {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusCreated)
-	} else {
-		fmt.Println("failed ChangeCommunityConditions", dbQuery.RowsAffected)
-		w.WriteHeader(http.StatusForbidden)
-	}
-}
-
 // CreateCommunity godoc
 // @Summary CreateCommunity creates new custom community chat
 // @Description Community Chat Creation
@@ -1382,7 +1271,7 @@ func ChangeCommunityConditions(w http.ResponseWriter, r *http.Request) {
 // @Accept  json
 // @Produce  json
 // @Security BearerAuth
-// @Param message body entity.Createcommunityitem true "Community/Group Creation"
+// @Param message body entity.Createcommunityitem true "Community Message Creation"
 // @Success 200 {array} entity.Createcommunityitem
 // @Router /v1/create_community [post]
 func CreateCommunity(w http.ResponseWriter, r *http.Request) {
@@ -1392,121 +1281,41 @@ func CreateCommunity(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Can not unmarshal JSON in CreateCommunityChat", requestBody)
 	}
 
-	Authuser := auth.GetUserFromReqContext(r)
-	//don't want groups named "new" as that is the path for creating new groups
-	if strings.EqualFold(communityInfo.Name, "new") {
-		fmt.Println("blacklisted community name", communityInfo.Name)
-		w.WriteHeader(http.StatusForbidden)
-		return
-	}
 	fmt.Println("input data create community: ", communityInfo)
 
 	var addrname entity.Addrnameitem
-	addrname.Name = communityInfo.Name //communityInfo.Title
-	//auto-generate the slug (unique URL safe group name)
-	slug := url.QueryEscape(addrname.Name)
-	fmt.Println("Slug: ", slug)
-	addrname.Address = slug //Slug
+	addrname.Address = communityInfo.Community
+	addrname.Name = communityInfo.Community //communityInfo.Title
 
 	var mappings []entity.Addrnameitem
-	dbQuery := database.Connector.Where("address = ?", addrname.Address).Find(&mappings)
-
 	//currently, community chat is in the addrname mapping table in the DB
-	for i := 0; i < 100; i++ {
-		if dbQuery.RowsAffected == 0 {
-			database.Connector.Create(&addrname)
-			break
-		}
-		addrname.Address = addrname.Address + "_" + strconv.Itoa(i)
-		dbQuery = database.Connector.Where("address = ?", addrname.Address).Find(&mappings)
+	dbQuery := database.Connector.Where("address = ?", addrname.Address).Find(&mappings)
+	if dbQuery.RowsAffected == 0 {
+		dbQuery = database.Connector.Create(&addrname)
+	}
+	//todo if we add Title back in - else case should update
+
+	//delete all communitysocials and just add back in what is passsed in, this allows for deletion
+	var socialsToDelete []entity.Communitysocial
+	database.Connector.Where("community = ?", addrname.Address).Find(&socialsToDelete)
+	for i := 0; i < len(socialsToDelete); i++ {
+		dbQuery = database.Connector.Delete(&socialsToDelete[i])
 	}
 
 	for i := 0; i < len(communityInfo.Social); i++ {
 		var social entity.Communitysocial
-		social.Community = addrname.Address //slug
+		social.Community = communityInfo.Community
 		social.Type = communityInfo.Social[i].Type
 		social.Name = communityInfo.Social[i].Name
-		database.Connector.Create(&social)
+		dbQuery = database.Connector.Create(&social)
 	}
-
-	//currently the community creator is admin (lots of room for progress)
-	var groupadmin entity.Communityadmin
-	groupadmin.Adminaddr = Authuser.Address
-	groupadmin.Slug = addrname.Address //slug
-	groupadmin.Accesslevel = "admin"   //eventually an enum - admin/moderator/?
-	dbQuery = database.Connector.Create(&groupadmin)
 
 	//TODO: do we need to limit the people that can create community chat groups?
 	//Authuser := auth.GetUserFromReqContext(r)
 	//if strings.EqualFold(chat.Fromaddr, Authuser.Address) {
-
 	if dbQuery.RowsAffected != 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("X-Content-Type-Options", "nosniff")
-		json.NewEncoder(w).Encode(slug)
-		w.WriteHeader(http.StatusCreated)
-	} else {
-		w.WriteHeader(http.StatusForbidden)
-	}
-}
-
-// UpdateCommunity godoc
-// @Summary UpdateCommunity updates  custom community chat
-// @Description Community Chat Update - input slug, and any updates to Name, Socials
-// @Tags GroupChat
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param message body entity.Createcommunityitem true "Community/Group Update"
-// @Success 200 {array} entity.Createcommunityitem
-// @Router /v1/update_community [post]
-func UpdateCommunity(w http.ResponseWriter, r *http.Request) {
-	requestBody, _ := ioutil.ReadAll(r.Body)
-	var communityInfo entity.Createcommunityitem
-
-	if err := json.Unmarshal(requestBody, &communityInfo); err != nil { // Parse []byte to the go struct pointer
-		fmt.Println("Can not unmarshal JSON in CreateCommunityChat", requestBody)
-	}
-
-	Authuser := auth.GetUserFromReqContext(r)
-
-	//don't want groups named "new" as that is the path for creating new groups
-	if strings.EqualFold(communityInfo.Slug, "new") {
-		fmt.Println("blacklisted community name", communityInfo.Name)
-		w.WriteHeader(http.StatusForbidden)
-		return
-	}
-
-	fmt.Println("input data update community: ", communityInfo)
-
-	var groupadmin entity.Communityadmin
-	database.Connector.Where("slug = ?", communityInfo.Slug).Find(&groupadmin)
-
-	if groupadmin.Accesslevel == "admin" && strings.EqualFold(groupadmin.Adminaddr, Authuser.Address) {
-		var mappings []entity.Addrnameitem
-		database.Connector.Where("address = ?", communityInfo.Slug).Find(&mappings)
-
-		//for update we modify the common name if its different
-		database.Connector.Model(&entity.Addrnameitem{}).
-			Where("address = ?", communityInfo.Slug).
-			Update("name", communityInfo.Name)
-
-		//delete all communitysocials and just add back in what is passsed in, this allows for deletion
-		var socialsToDelete []entity.Communitysocial
-		database.Connector.Where("community = ?", communityInfo.Slug).Find(&socialsToDelete)
-		for i := 0; i < len(socialsToDelete); i++ {
-			database.Connector.Delete(&socialsToDelete[i])
-		}
-
-		for i := 0; i < len(communityInfo.Social); i++ {
-			var social entity.Communitysocial
-			social.Community = communityInfo.Slug
-			social.Type = communityInfo.Social[i].Type
-			social.Name = communityInfo.Social[i].Name
-			database.Connector.Create(&social)
-		}
-
-		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 	} else {
 		w.WriteHeader(http.StatusForbidden)
@@ -3166,32 +2975,9 @@ func GetCommunityChat(w http.ResponseWriter, r *http.Request) {
 	var landingData LandingPageItems
 
 	//for now, the walletchat living room is all users by default
-	var memberCount []entity.Bookmarkitem
-	database.Connector.Where("nftaddr = ?", community).Find(&memberCount)
-	landingData.MemberCount = len(memberCount)
-
-	//need to re-architect this - will be very slow
-	for i := 0; i < landingData.MemberCount; i++ {
-		var localMember CommunityMember
-
-		localMember.Address = memberCount[i].Walletaddr
-		var localAddrName entity.Addrnameitem
-		database.Connector.Where("address = ?", localMember.Address).Find(&localAddrName)
-		localMember.Name = localAddrName.Name
-
-		var localImage entity.Imageitem
-		database.Connector.Where("addr = ?", localMember.Address).Find(&localImage)
-		localMember.Image = localImage.Base64data
-
-		localMember.Admin = false
-		var isAdmin entity.Communityadmin
-		database.Connector.Where("slug = ?", community).Find(&isAdmin)
-		if strings.EqualFold(localMember.Address, isAdmin.Adminaddr) {
-			localMember.Admin = true
-		}
-
-		landingData.Members = append(landingData.Members, localMember)
-	}
+	var members []entity.Bookmarkitem
+	database.Connector.Where("nftaddr = ?", community).Find(&members)
+	landingData.Members = len(members)
 
 	//name (this might be better moved to a different table someday)
 	var addrname entity.Addrnameitem
@@ -4046,23 +3832,16 @@ type SocialMsg struct {
 	Username string `json:"username"`
 }
 
-type CommunityMember struct {
-	Name    string `json:"name"`
-	Address string `json:"address"`
-	Image   string `json:"image"`
-	Admin   bool   `json:"admin"`
-}
 type LandingPageItems struct {
-	Name        string                 `json:"name"`
-	MemberCount int                    `json:"member_count"`
-	Members     []CommunityMember      `json:"members"`
-	Logo        string                 `json:"logo"`         // logo url, stored in backend
-	Verified    bool                   `json:"is_verified"`  // is this group verified? WalletChat's group is verified by default
-	Joined      bool                   `json:"joined"`       //number of members of the group
-	Messaged    bool                   `json:"has_messaged"` // has user messaged in this group chat before? if not show "Say hi" button
-	Messages    []entity.Groupchatitem `json:"messages"`
-	Tweets      []TweetType            `json:"tweets"` // follow format of GET /get_twitter/{nftAddr}
-	Social      []SocialMsg            `json:"social"`
+	Name     string                 `json:"name"`
+	Members  int                    `json:"members"`
+	Logo     string                 `json:"logo"`         // logo url, stored in backend
+	Verified bool                   `json:"is_verified"`  // is this group verified? WalletChat's group is verified by default
+	Joined   bool                   `json:"joined"`       //number of members of the group
+	Messaged bool                   `json:"has_messaged"` // has user messaged in this group chat before? if not show "Say hi" button
+	Messages []entity.Groupchatitem `json:"messages"`
+	Tweets   []TweetType            `json:"tweets"` // follow format of GET /get_twitter/{nftAddr}
+	Social   []SocialMsg            `json:"social"`
 }
 
 type OpenseaData struct {
@@ -4146,23 +3925,6 @@ type TelegramUpdateNotifsData struct {
 				Username  string `json:"username"`
 				Type      string `json:"type"`
 			} `json:"chat"`
-			ReplyToMessage *struct {
-				MessageID int `json:"message_id"`
-				From      struct {
-					ID        int64  `json:"id"`
-					IsBot     bool   `json:"is_bot"`
-					FirstName string `json:"first_name"`
-					Username  string `json:"username"`
-				} `json:"from"`
-				Chat struct {
-					ID                          int    `json:"id"`
-					Title                       string `json:"title"`
-					Type                        string `json:"type"`
-					AllMembersAreAdministrators bool   `json:"all_members_are_administrators"`
-				} `json:"chat"`
-				Date int    `json:"date"`
-				Text string `json:"text"`
-			} `json:"reply_to_message,omitempty"`
 			Date int    `json:"date"`
 			Text string `json:"text"`
 		} `json:"message"`
