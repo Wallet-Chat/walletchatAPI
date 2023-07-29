@@ -41,6 +41,13 @@ import (
 var telegramUpdateOffset = 0
 var throttleInboxCounterPerUser = make(map[string]int)
 
+// Retrieve the environment variable value with an array-like data as a comma-separated string
+var tgSupportWalletsCsvString = ""
+var tgSupportWalletArray []string
+
+var tgSupporChatIdsCsvString = ""
+var tgSupportChatIdsArray []string
+
 func stringInSlice(a string, list []string) bool {
 	for _, b := range list {
 		if b == a {
@@ -48,6 +55,14 @@ func stringInSlice(a string, list []string) bool {
 		}
 	}
 	return false
+}
+
+func InitGlobals() {
+	tgSupportWalletsCsvString = strings.ToLower(os.Getenv("TG_SUPPORT_WALLETS")) //TODO - non EVM addres may require this to be case sensitive
+	tgSupportWalletArray = strings.Split(tgSupportWalletsCsvString, ",")
+
+	tgSupporChatIdsCsvString = os.Getenv("TG_SUPPORT_CHAT_IDS")
+	tgSupportChatIdsArray = strings.Split(tgSupporChatIdsCsvString, ",")
 }
 
 //This function is used for MM Snaps specifically
@@ -977,6 +992,15 @@ func GetChatNftAllItemsFromAddr(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(chat)
 }
 
+func findStrIndexInArray(s string, arr []string) int {
+	for i, item := range arr {
+		if item == s {
+			return i
+		}
+	}
+	return -1 // Return -1 if the string is not found in the slice.
+}
+
 // CreateChatitem godoc
 // @Summary Create/Insert DM Chat Message (1-to-1 messaging)
 // @Description For DMs, Chatitem data struct is used to store each message and associated info.
@@ -1021,43 +1045,47 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusCreated)
 			json.NewEncoder(w).Encode(chat)
 
-			//Test GD Support Group: -858094260
-			if strings.EqualFold(os.Getenv("TG_SUPPORT_WALLET"), chat.Toaddr) {
+			fmt.Println("message check asdff", tgSupportWalletsCsvString, tgSupporChatIdsCsvString, chat.Toaddr)
+			if strings.Contains(tgSupportWalletsCsvString, chat.Toaddr) {
+				//first find the index - we could have this be the initial check, but might be slow if the list gets long
+				index := findStrIndexInArray(chat.Toaddr, tgSupportWalletArray)
+				chat_id := tgSupportChatIdsArray[index]
+
 				fmt.Println("sending to TG group message")
-				SendTelegramMessage("Message from WalletChat User: "+chat.Fromaddr+"\r\n"+chat.Message, "-858094260")
+				SendTelegramMessage("Message from WalletChat User: "+chat.Fromaddr+"\r\n"+chat.Message, chat_id)
 			}
 			//manage support messages
-			if strings.EqualFold(os.Getenv("SUPPORT_WALLET"), chat.Toaddr) {
-				url := os.Getenv("SUPPORT_WEBOOK_URL")
-				messageToWebhook := "From: " + chat.Fromaddr + " Messge: " + chat.Message
-				method := "POST"
+			// if strings.EqualFold(os.Getenv("SUPPORT_WALLET"), chat.Toaddr) {
+			// 	url := os.Getenv("SUPPORT_WEBOOK_URL")
+			// 	messageToWebhook := "From: " + chat.Fromaddr + " Messge: " + chat.Message
+			// 	method := "POST"
 
-				jsonBody := `{"content":"` + messageToWebhook + `"}`
-				payload := strings.NewReader(jsonBody)
+			// 	jsonBody := `{"content":"` + messageToWebhook + `"}`
+			// 	payload := strings.NewReader(jsonBody)
 
-				client := &http.Client{}
-				req, err := http.NewRequest(method, url, payload)
+			// 	client := &http.Client{}
+			// 	req, err := http.NewRequest(method, url, payload)
 
-				if err != nil {
-					fmt.Println(err)
-					return
-				}
-				req.Header.Add("Content-Type", "application/json")
+			// 	if err != nil {
+			// 		fmt.Println(err)
+			// 		return
+			// 	}
+			// 	req.Header.Add("Content-Type", "application/json")
 
-				res, err := client.Do(req)
-				if err != nil {
-					fmt.Println(err)
-					return
-				}
-				defer res.Body.Close()
+			// 	res, err := client.Do(req)
+			// 	if err != nil {
+			// 		fmt.Println(err)
+			// 		return
+			// 	}
+			// 	defer res.Body.Close()
 
-				body, err := ioutil.ReadAll(res.Body)
-				if err != nil {
-					fmt.Println(err)
-					return
-				}
-				fmt.Println(string(body))
-			}
+			// 	body, err := ioutil.ReadAll(res.Body)
+			// 	if err != nil {
+			// 		fmt.Println(err)
+			// 		return
+			// 	}
+			// 	fmt.Println(string(body))
+			// }
 
 			//also notify the TO user of a new message (need to throttle this somehow)
 			var settings entity.Settings
@@ -1141,8 +1169,8 @@ func SendTelegramMessage(text string, chatId string) (bool, error) {
 	// Send the message
 	url := fmt.Sprintf("%s/sendMessage", getTelegrameUrl())
 	body, _ := json.Marshal(map[string]string{
-		"chat_id": chatId,
-		"text":    text,
+		"chat_id":    chatId,
+		"text":       text,
 		"parse_mode": "HTML",
 	})
 	response, err = http.Post(
@@ -1216,15 +1244,19 @@ func UpdateTelegramNotifications() {
 		if isFieldSet(updatedNotifsData.Result[i].Message.ReplyToMessage) {
 			//if its a reply message, we need to send the user the reply
 			origMsgSender := extractAddress(updatedNotifsData.Result[i].Message.ReplyToMessage.Text)
-			fmt.Println("GD Admin Replied To Message from / with:", origMsgSender, updatedNotifsData.Result[i].Message.Text)
+			fmt.Println("GD Admin Replied To Message from / with:", origMsgSender, updatedNotifsData.Result[i].Message)
+
+			//find corresponding support wallet for given chat_id
+			indexOfChatId := findStrIndexInArray(strconv.Itoa(updatedNotifsData.Result[i].Message.ReplyToMessage.Chat.ID), tgSupportChatIdsArray)
 
 			var chat entity.Chatitem
 			chat.Timestamp = time.Now().Format("2006-01-02T15:04:05.000Z")
 			chat.Timestamp_dtm = time.Now()
-			chat.Fromaddr = os.Getenv("TG_SUPPORT_WALLET")
+			chat.Fromaddr = tgSupportWalletArray[indexOfChatId]
 			chat.Toaddr = origMsgSender
 			chat.Message = updatedNotifsData.Result[i].Message.Text
 			chat.Nftid = "0"
+			fmt.Println("creating chat item", chat)
 			database.Connector.Create(&chat)
 
 		} else {

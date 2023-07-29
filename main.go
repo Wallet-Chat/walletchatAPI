@@ -77,6 +77,7 @@ func main() {
 	// starts the scheduler asynchronously
 	t.StartAsync()
 
+	controllers.InitGlobals()
 	controllers.InitRandom()
 
 	//handler := cors.Default().Handler(router)
