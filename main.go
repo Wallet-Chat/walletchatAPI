@@ -206,6 +206,7 @@ func initaliseHandlers(router *mux.Router) {
 
 	//OpenSea Pass-Thru to prevent CORS error and API key leakage
 	router.HandleFunc("/opensea_asset_contract/{contract}", controllers.GetOpenseaAssetContract).Methods("GET")
+	router.HandleFunc("/opensea_collection_stats/{contract}", controllers.GetOpenseaCollectionStats).Methods("GET")
 	router.HandleFunc("/opensea_asset/{nftaddr}/{nftid}/{address}", controllers.GetOpenseaAsset).Methods("GET")
 	router.HandleFunc("/opensea_asset_owner/{address}", controllers.GetOpenseaAssetOwner).Methods("GET")
 	router.HandleFunc("/opensea_asset_owner_ens/{address}", controllers.GetOpenseaAssetOwnerENS).Methods("GET")

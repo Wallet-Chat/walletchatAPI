@@ -2720,6 +2720,73 @@ func GetCommentsCount(w http.ResponseWriter, r *http.Request) {
 // 	json.NewEncoder(w).Encode(comment)
 // }
 
+func GetOpenseaCollectionSlug(contractAddr string) string {
+	url := "https://api.opensea.io/api/v1/asset_contract/" + contractAddr
+
+	// Create a new request using http
+	req, _ := http.NewRequest("GET", url, nil)
+	osKey := os.Getenv("OPENSEA_API_KEY")
+	req.Header.Add("X-API-KEY", osKey)
+
+	// Send req using http Client
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println("OSea API CALL - Error on response.\n[ERROR] -", err)
+	}
+	defer resp.Body.Close()
+
+	// Create a variable of type map[string]interface{} to hold the JSON data
+	var data map[string]interface{}
+	body, _ := ioutil.ReadAll(resp.Body)
+	// Unmarshal the JSON response into the data map
+	err = json.Unmarshal(body, &data)
+	if err != nil {
+		fmt.Println("Error parsing JSON:", err)
+		return ""
+	}
+
+	// Access the "slug" field using the map
+	if collection, ok := data["collection"].(map[string]interface{}); ok {
+		if slug, ok := collection["slug"].(string); ok {
+			fmt.Println("Slug:", slug)
+			return slug
+		}
+	}
+
+	return ""
+}
+
+func GetOpenseaCollectionStats(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	contractAddr := vars["contract"]
+	slug := GetOpenseaCollectionSlug(contractAddr)
+	fmt.Println("slug: ", slug)
+	url := "https://api.opensea.io/api/v1/collection/" + slug + "/stats"
+
+	// Create a new request using http
+	req, _ := http.NewRequest("GET", url, nil)
+	osKey := os.Getenv("OPENSEA_API_KEY")
+	req.Header.Add("X-API-KEY", osKey)
+
+	// Send req using http Client
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println("OSea API CALL - Error on response.\n[ERROR] -", err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	var parsed any
+	json.Unmarshal(body, &parsed)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	json.NewEncoder(w).Encode(parsed)
+}
+
 //mainly for internal use - API integrations should get own API key
 func GetOpenseaAssetContract(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
