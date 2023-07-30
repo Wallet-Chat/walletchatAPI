@@ -1413,7 +1413,7 @@ func ChangeCommunityConditions(w http.ResponseWriter, r *http.Request) {
 // @Accept  json
 // @Produce  json
 // @Security BearerAuth
-// @Param message body entity.Createcommunityitem true "Community Message Creation"
+// @Param message body entity.Createcommunityitem true "Community/Group Creation"
 // @Success 200 {array} entity.Createcommunityitem
 // @Router /v1/create_community [post]
 func CreateCommunity(w http.ResponseWriter, r *http.Request) {
@@ -3261,9 +3261,32 @@ func GetCommunityChat(w http.ResponseWriter, r *http.Request) {
 	var landingData LandingPageItems
 
 	//for now, the walletchat living room is all users by default
-	var members []entity.Bookmarkitem
-	database.Connector.Where("nftaddr = ?", community).Find(&members)
-	landingData.Members = len(members)
+	var memberCount []entity.Bookmarkitem
+	database.Connector.Where("nftaddr = ?", community).Find(&memberCount)
+	landingData.MemberCount = len(memberCount)
+
+	//need to re-architect this - will be very slow
+	// for i := 0; i < landingData.MemberCount; i++ {
+	// 	var localMember CommunityMember
+
+	// 	localMember.Address = memberCount[i].Walletaddr
+	// 	var localAddrName entity.Addrnameitem
+	// 	database.Connector.Where("address = ?", localMember.Address).Find(&localAddrName)
+	// 	localMember.Name = localAddrName.Name
+
+	// 	var localImage entity.Imageitem
+	// 	database.Connector.Where("addr = ?", localMember.Address).Find(&localImage)
+	// 	localMember.Image = localImage.Base64data
+
+	// 	localMember.Admin = false
+	// 	var isAdmin entity.Communityadmin
+	// 	database.Connector.Where("slug = ?", community).Find(&isAdmin)
+	// 	if strings.EqualFold(localMember.Address, isAdmin.Adminaddr) {
+	// 		localMember.Admin = true
+	// 	}
+
+	// 	landingData.Members = append(landingData.Members, localMember)
+	// }
 
 	//name (this might be better moved to a different table someday)
 	var addrname entity.Addrnameitem
@@ -4118,16 +4141,23 @@ type SocialMsg struct {
 	Username string `json:"username"`
 }
 
+type CommunityMember struct {
+	Name    string `json:"name"`
+	Address string `json:"address"`
+	Image   string `json:"image"`
+	Admin   bool   `json:"admin"`
+}
 type LandingPageItems struct {
-	Name     string                 `json:"name"`
-	Members  int                    `json:"members"`
-	Logo     string                 `json:"logo"`         // logo url, stored in backend
-	Verified bool                   `json:"is_verified"`  // is this group verified? WalletChat's group is verified by default
-	Joined   bool                   `json:"joined"`       //number of members of the group
-	Messaged bool                   `json:"has_messaged"` // has user messaged in this group chat before? if not show "Say hi" button
-	Messages []entity.Groupchatitem `json:"messages"`
-	Tweets   []TweetType            `json:"tweets"` // follow format of GET /get_twitter/{nftAddr}
-	Social   []SocialMsg            `json:"social"`
+	Name        string                 `json:"name"`
+	MemberCount int                    `json:"member_count"`
+	Members     []CommunityMember      `json:"members"`
+	Logo        string                 `json:"logo"`         // logo url, stored in backend
+	Verified    bool                   `json:"is_verified"`  // is this group verified? WalletChat's group is verified by default
+	Joined      bool                   `json:"joined"`       //number of members of the group
+	Messaged    bool                   `json:"has_messaged"` // has user messaged in this group chat before? if not show "Say hi" button
+	Messages    []entity.Groupchatitem `json:"messages"`
+	Tweets      []TweetType            `json:"tweets"` // follow format of GET /get_twitter/{nftAddr}
+	Social      []SocialMsg            `json:"social"`
 }
 
 type OpenseaData struct {
