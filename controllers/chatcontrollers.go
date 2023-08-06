@@ -1052,7 +1052,7 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 				chat_id := tgSupportChatIdsArray[index]
 
 				fmt.Println("sending to TG group message")
-				SendTelegramMessage("Message from WalletChat User: "+chat.Fromaddr+"\r\n"+chat.Message, chat_id)
+				SendTelegramMessage("_Message from WalletChat User: "+chat.Fromaddr+"_\r\n"+chat.Message, chat_id)
 			}
 			//manage support messages
 			// if strings.EqualFold(os.Getenv("SUPPORT_WALLET"), chat.Toaddr) {
@@ -1171,7 +1171,7 @@ func SendTelegramMessage(text string, chatId string) (bool, error) {
 	body, _ := json.Marshal(map[string]string{
 		"chat_id":    chatId,
 		"text":       text,
-		"parse_mode": "HTML",
+		"parse_mode": "Markdown",
 	})
 	response, err = http.Post(
 		url,
@@ -1241,6 +1241,7 @@ func UpdateTelegramNotifications() {
 	json.Unmarshal(body, &updatedNotifsData)
 
 	for i := 0; i < len(updatedNotifsData.Result); i++ {
+		fmt.Println("full message: ", updatedNotifsData.Result[i])
 		if isFieldSet(updatedNotifsData.Result[i].Message.ReplyToMessage) {
 			//if its a reply message, we need to send the user the reply
 			origMsgSender := extractAddress(updatedNotifsData.Result[i].Message.ReplyToMessage.Text)
@@ -1277,7 +1278,7 @@ func UpdateTelegramNotifications() {
 			}
 		}
 		// Update the offset to the next update ID
-		fmt.Println("updated offset TG: ", telegramUpdateOffset)
+		//fmt.Println("updated offset TG: ", telegramUpdateOffset)
 		telegramUpdateOffset = updatedNotifsData.Result[i].UpdateID + 1
 	}
 }
