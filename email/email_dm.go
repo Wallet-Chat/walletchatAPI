@@ -484,7 +484,7 @@ func NotificationEmailDM(toAddress string, fromAddress string, toname string, fr
     <script>
       gtag("event", "email_open", {
         event_category: "Email",
-        event_label: "` + toAddress + `",
+        event_label: "API wagmi",
         transport_type: "beacon",
       });
     </script>
