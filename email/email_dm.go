@@ -103,6 +103,16 @@ func NotificationEmailDM(toAddress string, fromAddress string, toname string, fr
     <link href="https://fonts.googleapis.com/css?family=Cabin:400,700" rel="stylesheet" type="text/css">
     <!--<![endif]-->
   
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JL9JBW0XVP"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-JL9JBW0XVP");
+    </script>
+
   </head>
   
   <body class="clean-body u_body" style="margin: 0;padding: 0;-webkit-text-size-adjust: 100%;background-color: #f9f9f9;color: #000000">
@@ -133,7 +143,7 @@ func NotificationEmailDM(toAddress string, fromAddress string, toname string, fr
                               <td style="overflow-wrap:break-word;word-break:break-word;padding:10px;font-family:'Cabin',sans-serif;" align="left">
   
                                 <div style="color: #afb0c7; line-height: 170%; text-align: center; word-wrap: break-word;">
-                                  <p style="font-size: 14px; line-height: 170%;"><span style="font-size: 14px; line-height: 23.8px;">View Email in Browser</span></p>
+                                  <p style="font-size: 14px; line-height: 170%;"><span style="font-size: 14px; line-height: 23.8px;">From Your Frens at WalletChat.fun</span></p>
                                 </div>
   
                               </td>
@@ -470,6 +480,14 @@ func NotificationEmailDM(toAddress string, fromAddress string, toname string, fr
     </table>
     <!--[if mso]></div><![endif]-->
     <!--[if IE]></div><![endif]-->
+
+    <script>
+      gtag("event", "email_open", {
+        event_category: "Email",
+        event_label: "` + toAddress + `",
+        transport_type: "beacon",
+      });
+    </script>
   </body>
   
   </html>
