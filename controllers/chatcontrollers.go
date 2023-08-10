@@ -1926,6 +1926,21 @@ func GetImageItem(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(imgaddr)
 }
 
+func TrackEventGA4(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	event := vars["event"]
+	addr := vars["addr"]
+
+	fmt.Println("TrackEventGA4: ", event, addr)
+
+	wc_analytics.SendCustomEvent(addr, event)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.WriteHeader(http.StatusCreated)
+	//json.NewEncoder(w).Encode(imgaddr)
+}
+
 // CreateAddrNameItem godoc
 // @Summary give a common name to a user address, or NFT collection
 // @Description Give a common name (Kevin.eth, BillyTheKid, etc) to an Address

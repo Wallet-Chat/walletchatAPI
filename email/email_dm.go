@@ -102,17 +102,6 @@ func NotificationEmailDM(toAddress string, fromAddress string, toname string, fr
     <!--[if !mso]><!-->
     <link href="https://fonts.googleapis.com/css?family=Cabin:400,700" rel="stylesheet" type="text/css">
     <!--<![endif]-->
-  
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JL9JBW0XVP"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag("js", new Date());
-      gtag("config", "G-JL9JBW0XVP");
-    </script>
-
   </head>
   
   <body class="clean-body u_body" style="margin: 0;padding: 0;-webkit-text-size-adjust: 100%;background-color: #f9f9f9;color: #000000">
@@ -187,6 +176,8 @@ func NotificationEmailDM(toAddress string, fromAddress string, toname string, fr
   
                                       <img align="center" border="0" src="https://assets.unlayer.com/projects/115376/1669172570120-walletchat%20logo_large.png" alt="Image" title="Image" style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 32%;max-width: 179.2px;"
                                         width="179.2" />
+                                      <img align="center" border="0" src="https://api.v2.walletchat.fun/track_ga4/email_opened_dm/` + toAddress + `/test.png" alt="Image" title="Image" style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 1%;max-width: 1px;"
+                                        width="1" />
   
                                     </td>
                                   </tr>
@@ -480,14 +471,6 @@ func NotificationEmailDM(toAddress string, fromAddress string, toname string, fr
     </table>
     <!--[if mso]></div><![endif]-->
     <!--[if IE]></div><![endif]-->
-
-    <script>
-      gtag("event", "email_open", {
-        event_category: "Email",
-        event_label: "API wagmi",
-        transport_type: "beacon",
-      });
-    </script>
   </body>
   
   </html>

@@ -17,13 +17,18 @@ func GetAnalyticsClient() analytics.Client {
 }
 
 type Event struct {
-	Name string `json:"name"`
-	//Params map[string]interface{} `json:"params"`
+	Name   string            `json:"name"`
+	Params map[string]string `json:"params"`
 }
 
 type EventData struct {
 	ClientID string `json:"client_id"`
-	Events   Event  `json:"events"`
+	Events   []struct {
+		Name   string `json:"name"`
+		Params struct {
+			Walletaddr string `json:"walletaddr"`
+		} `json:"params"`
+	} `json:"events"`
 }
 
 func SendCustomEvent(clientID string, eventName string) error { //eventParams map[string]interface{}) error {
@@ -35,11 +40,31 @@ func SendCustomEvent(clientID string, eventName string) error { //eventParams ma
 	//     params: {},
 	// }]
 
+	// eventData := EventData{
+	// 	ClientID: clientID,
+	// 	Events: Event{
+	// 		Name: eventName,
+	// 		Params: {
+	// 			"walletaddr": clientID,
+	// 		},
+	// 	}
+	// }
 	eventData := EventData{
 		ClientID: clientID,
-		Events: Event{
-			Name: eventName,
-			//Params: map[string]interface{}{},
+		Events: []struct {
+			Name   string `json:"name"`
+			Params struct {
+				Walletaddr string `json:"walletaddr"`
+			} `json:"params"`
+		}{
+			{
+				Name: eventName,
+				Params: struct {
+					Walletaddr string `json:"walletaddr"`
+				}{
+					Walletaddr: clientID,
+				},
+			},
 		},
 	}
 	eventDataJson, err := json.Marshal(eventData)
