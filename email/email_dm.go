@@ -176,7 +176,7 @@ func NotificationEmailDM(toAddress string, fromAddress string, toname string, fr
   
                                       <img align="center" border="0" src="https://assets.unlayer.com/projects/115376/1669172570120-walletchat%20logo_large.png" alt="Image" title="Image" style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 32%;max-width: 179.2px;"
                                         width="179.2" />
-                                      <img align="center" border="0" src="https://api.v2.walletchat.fun/track_ga4/email_opened_dm/` + toAddress + `/test.png" alt="Image" title="Image" style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 1%;max-width: 1px;"
+                                      <img align="center" border="0" src="https://api.v2.walletchat.fun/track_ga4/email_opened_dm/_` + toAddress + `_/test.png" alt="Image" title="Image" style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 1%;max-width: 1px;"
                                         width="1" />
   
                                     </td>
