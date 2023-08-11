@@ -1144,7 +1144,7 @@ func SendNotificationEmails() {
 				subject := "Message Waiting In WalletChat"
 				to := mail.NewEmail(addrnameDB.Name, settings[i].Email)
 				plainTextContent := "You have " + strconv.Itoa(config.Dm) + " unread DM(s), " + strconv.Itoa(config.Nft) + " unread NFT group chat messages, and " + strconv.Itoa(config.Community) + " unread custom community chat messages waiting in WalletChat. Please login via the app at https://app.walletchat.fun to read!"
-				htmlContent := email.NotificationEmail24(addrnameDB.Address, addrnameDB.Name, strconv.Itoa(config.Dm), strconv.Itoa(config.Nft), strconv.Itoa(config.Community))
+				htmlContent := email.NotificationEmail24(addrnameDB.Address, addrnameDB.Name, strconv.Itoa(config.Dm), strconv.Itoa(config.Nft), strconv.Itoa(config.Community), settings[i].Email)
 				message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
 				client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
 				response, err := client.Send(message)
