@@ -55,7 +55,7 @@ func main() {
 	router.HandleFunc("/signin", auth.SigninHandler(jwtProvider)).Methods("POST")
 	router.HandleFunc("/resolve_name/{name}", controllers.ResolveName).Methods("GET")
 	router.PathPrefix("/docs").Handler(httpSwagger.WrapHandler)
-	router.HandleFunc("/track_ga4/{event}/{addr}/{placeholder_photo}", controllers.TrackEventGA4).Methods("GET")
+	router.HandleFunc("/track_ga4/{event}/{email}/{addr}/{placeholder_photo}", controllers.TrackEventGA4).Methods("GET")
 
 	wsRouter := router.PathPrefix("/v1").Subrouter()
 

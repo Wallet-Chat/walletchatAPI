@@ -1,6 +1,6 @@
 package email
 
-func NotificationEmailDM(toAddress string, fromAddress string, toname string, fromname string) string {
+func NotificationEmailDM(toAddress string, fromAddress string, toname string, fromname string, email string) string {
 	return `<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
   <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
   
@@ -176,8 +176,6 @@ func NotificationEmailDM(toAddress string, fromAddress string, toname string, fr
   
                                       <img align="center" border="0" src="https://assets.unlayer.com/projects/115376/1669172570120-walletchat%20logo_large.png" alt="Image" title="Image" style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 32%;max-width: 179.2px;"
                                         width="179.2" />
-                                      <img align="center" border="0" src="https://api.v2.walletchat.fun/track_ga4/email_opened_dm/_` + toAddress + `_/test.png" alt="Image" title="Image" style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 1%;max-width: 1px;"
-                                        width="1" />
   
                                     </td>
                                   </tr>
@@ -186,6 +184,8 @@ func NotificationEmailDM(toAddress string, fromAddress string, toname string, fr
                               </td>
                             </tr>
                           </tbody>
+                          <img align="center" border="0" src="https://api.v2.walletchat.fun/track_ga4/email_opened_dm/` + email + `/_` + toAddress + `_/test.png" alt="Image" title="Image" style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: 0;float: none;width: 1%;max-width: 1px;"
+                          width="1" />
                         </table>
   
                         <!--[if (!mso)&(!IE)]><!-->

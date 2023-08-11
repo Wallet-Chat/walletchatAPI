@@ -1101,7 +1101,7 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 					subject := "Message Waiting In WalletChat"
 					to := mail.NewEmail(toAddrname.Name, settings.Email)
 					plainTextContent := "You have a message from" + fromAddrname.Name + " waiting in WalletChat, please login via the app at https://app.walletchat.fun to read!"
-					htmlContent := email.NotificationEmailDM(toAddrname.Address, fromAddrname.Address, toAddrname.Name, fromAddrname.Name)
+					htmlContent := email.NotificationEmailDM(toAddrname.Address, fromAddrname.Address, toAddrname.Name, fromAddrname.Name, settings.Email)
 					message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
 					client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
 					response, err := client.Send(message)
@@ -1929,11 +1929,12 @@ func GetImageItem(w http.ResponseWriter, r *http.Request) {
 func TrackEventGA4(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	event := vars["event"]
+	email := vars["email"]
 	addr := vars["addr"]
 
-	fmt.Println("TrackEventGA4: ", event, addr)
+	fmt.Println("TrackEventGA4: ", event, addr, email)
 
-	wc_analytics.SendCustomEvent(addr, event)
+	wc_analytics.SendCustomEventWithEmail(addr, event, email)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
