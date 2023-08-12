@@ -97,16 +97,6 @@ func NotificationEmail24(toAddress string, toname string, DMs string, NFTs strin
       }
     </style>
   
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JL9JBW0XVP"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag("js", new Date());
-      gtag("config", "G-JL9JBW0XVP");
-    </script>
-  
     <!--[if !mso]><!-->
     <link href="https://fonts.googleapis.com/css?family=Cabin:400,700" rel="stylesheet" type="text/css">
     <!--<![endif]-->
@@ -480,14 +470,6 @@ func NotificationEmail24(toAddress string, toname string, DMs string, NFTs strin
         </tr>
       </tbody>
     </table>
-
-    <script>
-      gtag("event", "email_open", {
-        event_category: "Email",
-        event_label: "24hr summary",
-        transport_type: "beacon",
-      });
-    </script>
 
     <!--[if mso]></div><![endif]-->
     <!--[if IE]></div><![endif]-->
