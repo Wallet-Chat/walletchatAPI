@@ -1,6 +1,6 @@
 package email
 
-func NotificationEmailDM(toAddress string, fromAddress string, toname string, fromname string, email string) string {
+func NotificationEmailDM(toAddress string, fromAddress string, toname string, fromname string, email string, message string) string {
 	return `<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
   <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
   
@@ -297,7 +297,14 @@ func NotificationEmailDM(toAddress string, fromAddress string, toname string, fr
                                 <div style="line-height: 160%; text-align: center; word-wrap: break-word;">
                                   <p style="line-height: 160%; font-size: 14px;"><span style="font-size: 22px; line-height: 35.2px;">Hi ` + toname + `<a rel="noopener" href="https://etherscan.io/address/` + toAddress +
 		`" target="_blank">(` + toAddress[0:5] + `...` + toAddress[len(toAddress)-4:] + `)</a>, you have a new message from ` + fromname +
-		`<a rel="noopener" href="https://etherscan.io/address/` + fromAddress + `" target="_blank">(` + fromAddress[0:5] + `...` + fromAddress[len(fromAddress)-4:] + `)</a></span></p>
+		`<a rel="noopener" href="https://etherscan.io/address/` + fromAddress + `" target="_blank">(` + fromAddress[0:5] + `...` + fromAddress[len(fromAddress)-4:] + `)</a>:  
+                                      <br><br> <!-- Add line breaks before the message -->
+                                      <span style="font-style: italic; display: block; margin: 20px 0; position: relative;">
+                                        <span style="font-size: 32px; position: absolute; left: -20px; top: -10px;">“</span> <!-- Large opening quote -->
+                                        <em> ` + message + ` </em>
+                                        <span style="font-size: 32px; position: absolute; right: -20px; bottom: -10px;">”</span> <!-- Large closing quote -->
+                                      </span>
+                                    </span></p>
                                 </div>
                               </td>
                             </tr>
