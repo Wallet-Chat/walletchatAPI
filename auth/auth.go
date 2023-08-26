@@ -274,6 +274,7 @@ func (s SigninPayload) Validate() error {
 		}
 	}
 	if !domainMatch {
+		fmt.Println("Unauthorized Domain: ", message.GetDomain())
 		return ErrInvalidDomain
 	}
 

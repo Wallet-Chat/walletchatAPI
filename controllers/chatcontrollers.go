@@ -1045,7 +1045,7 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusCreated)
 			json.NewEncoder(w).Encode(chat)
 
-			fmt.Println("message check asdff", tgSupportWalletsCsvString, tgSupporChatIdsCsvString, chat.Toaddr)
+			//fmt.Println("message check for support", tgSupportWalletsCsvString, tgSupporChatIdsCsvString, chat.Toaddr)
 			if strings.Contains(tgSupportWalletsCsvString, chat.Toaddr) {
 				//first find the index - we could have this be the initial check, but might be slow if the list gets long
 				index := findStrIndexInArray(chat.Toaddr, tgSupportWalletArray)
