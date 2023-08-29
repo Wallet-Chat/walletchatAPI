@@ -1251,6 +1251,7 @@ func UpdateTelegramNotifications() {
 		if isFieldSet(updatedNotifsData.Result[i].Message.ReplyToMessage) {
 			//if its a reply message, we need to send the user the reply (but only permissioned admins can do this)
 			//TODO: need a different permission list per TG group
+			//fmt.Println("response permissions (fromID) (adminsArray)", strconv.FormatInt(updatedNotifsData.Result[i].Message.From.ID, 10), tgSupportAdminsArray)
 			if findStrIndexInArray(strconv.FormatInt(updatedNotifsData.Result[i].Message.From.ID, 10), tgSupportAdminsArray) > -1 {
 				origMsgSender := extractAddress(updatedNotifsData.Result[i].Message.ReplyToMessage.Text)
 				fmt.Println("GD Admin Replied To Message from / with:", origMsgSender, updatedNotifsData.Result[i].Message)
@@ -1265,7 +1266,7 @@ func UpdateTelegramNotifications() {
 				chat.Toaddr = origMsgSender
 				chat.Message = updatedNotifsData.Result[i].Message.Text
 				chat.Nftid = "0"
-				fmt.Println("creating chat item", chat)
+				fmt.Println("creating TG response chat item", chat)
 				database.Connector.Create(&chat)
 			}
 
@@ -3450,7 +3451,7 @@ func GetOwnerNFTs(walletAddr string, chain string) MoralisOwnerOf {
 
 	//url := "https://eth-mainnet.alchemyapi.io/v2/${process.env.REACT_APP_ALCHEMY_API_KEY}/getOwnersForToken" + contractAddr
 	//url := "https://api.nftport.xyz/v0/accounts/" + walletAddr + "?chain=" + chain
-	url := "https://deep-index.moralis.io/api/v2/" + walletAddr + "/nft?chain=" + chain + "&format=decimal&normalizeMetadata=false"
+	url := "https://deep-index.moralis.io/api/v2.2/" + walletAddr + "/nft?chain=" + chain + "&format=decimal&normalizeMetadata=false"
 
 	req, _ := http.NewRequest("GET", url, nil)
 
@@ -3602,8 +3603,8 @@ func IsOwnerOfNftLocal(contractAddr string, walletAddr string, chain string) boo
 
 		return len(result) > 0
 	} else {
-		url := "https://deep-index.moralis.io/api/v2/" + walletAddr + "/nft?chain=" + chain + "&format=decimal&token_addresses=" + contractAddr + "&normalizeMetadata=false"
-		//url := "https://deep-index.moralis.io/api/v2/0x57ca1B13510D82a6286a225a217798e079BD0767/nft?chain=eth&format=decimal&token_addresses=0x34d85c9cdeb23fa97cb08333b511ac86e1c4e258&normalizeMetadata=false"
+		url := "https://deep-index.moralis.io/api/v2.2/" + walletAddr + "/nft?chain=" + chain + "&format=decimal&token_addresses=" + contractAddr + "&normalizeMetadata=false"
+		//url := "https://deep-index.moralis.io/api/v2.2/0x57ca1B13510D82a6286a225a217798e079BD0767/nft?chain=eth&format=decimal&token_addresses=0x34d85c9cdeb23fa97cb08333b511ac86e1c4e258&normalizeMetadata=false"
 
 		req, _ := http.NewRequest("GET", url, nil)
 
@@ -3659,7 +3660,7 @@ func IsOnChain(contractAddr string, chain string) bool {
 	}
 
 	//url := "https://api.nftport.xyz/v0/nfts/" + contractAddr + "?chain=" + chain
-	url := "https://deep-index.moralis.io/api/v2/nft/" + contractAddr + "?chain=" + chain + "&format=decimal&normalizeMetadata=false"
+	url := "https://deep-index.moralis.io/api/v2.2/nft/" + contractAddr + "?chain=" + chain + "&format=decimal&normalizeMetadata=false"
 
 	req, _ := http.NewRequest("GET", url, nil)
 
@@ -3688,7 +3689,7 @@ func IsOnChain(contractAddr string, chain string) bool {
 	//fmt.Printf("Chain Response: %#v\n", result.Response)
 
 	var returnVal = false
-	if result.Total > 0 {
+	if len(result.Result) > 0 {
 		returnVal = true
 	}
 	return returnVal
@@ -3750,10 +3751,10 @@ func AutoJoinCommunitiesByChain(walletAddr string, nftAddr string, chain string,
 		chain = "eth"
 	}
 
-	url := "https://deep-index.moralis.io/api/v2/" + walletAddr + "/nft?chain=" + chain + "&format=decimal&normalizeMetadata=false"
+	url := "https://deep-index.moralis.io/api/v2.2/" + walletAddr + "/nft?chain=" + chain + "&format=decimal&normalizeMetadata=false"
 	if nftAddr != "" {
 		fmt.Println("Auto join by Contract: ", nftAddr)
-		url = "https://deep-index.moralis.io/api/v2/" + walletAddr + "/nft?chain=" + chain + "&format=decimal&normalizeMetadata=false&token_addresses%5B0%5D=" + nftAddr
+		url = "https://deep-index.moralis.io/api/v2.2/" + walletAddr + "/nft?chain=" + chain + "&format=decimal&normalizeMetadata=false&token_addresses%5B0%5D=" + nftAddr
 	}
 
 	req, _ := http.NewRequest("GET", url, nil)
@@ -3930,7 +3931,6 @@ type NFTPortOwnerOf struct {
 }
 
 type MoralisOwnerOf struct {
-	Total    int         `json:"total"`
 	Page     int         `json:"page"`
 	PageSize int         `json:"page_size"`
 	Cursor   interface{} `json:"cursor"`
@@ -3955,25 +3955,26 @@ type MoralisOwnerOf struct {
 }
 
 type MoralisContractInfoNFT struct {
-	Total    int    `json:"total"`
 	Page     int    `json:"page"`
 	PageSize int    `json:"page_size"`
 	Cursor   string `json:"cursor"`
 	Result   []struct {
-		TokenAddress      string      `json:"token_address"`
-		TokenID           string      `json:"token_id"`
-		Amount            string      `json:"amount"`
-		TokenHash         string      `json:"token_hash"`
-		BlockNumberMinted string      `json:"block_number_minted"`
-		UpdatedAt         interface{} `json:"updated_at"`
-		ContractType      string      `json:"contract_type"`
-		Name              string      `json:"name"`
-		Symbol            string      `json:"symbol"`
-		TokenURI          string      `json:"token_uri"`
-		Metadata          string      `json:"metadata"`
-		LastTokenURISync  time.Time   `json:"last_token_uri_sync"`
-		LastMetadataSync  time.Time   `json:"last_metadata_sync"`
-		MinterAddress     string      `json:"minter_address"`
+		TokenAddress       string    `json:"token_address"`
+		TokenID            string    `json:"token_id"`
+		Amount             string    `json:"amount"`
+		TokenHash          string    `json:"token_hash"`
+		BlockNumberMinted  string    `json:"block_number_minted"`
+		UpdatedAt          any       `json:"updated_at"`
+		ContractType       any       `json:"contract_type"`
+		Name               string    `json:"name"`
+		Symbol             string    `json:"symbol"`
+		TokenURI           any       `json:"token_uri"`
+		Metadata           string    `json:"metadata"`
+		LastTokenURISync   time.Time `json:"last_token_uri_sync"`
+		LastMetadataSync   time.Time `json:"last_metadata_sync"`
+		MinterAddress      any       `json:"minter_address"`
+		PossibleSpam       bool      `json:"possible_spam"`
+		VerifiedCollection bool      `json:"verified_collection"`
 	} `json:"result"`
 }
 
