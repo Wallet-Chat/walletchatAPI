@@ -7,6 +7,7 @@ import (
 	"rest-go-demo/auth"
 	"rest-go-demo/controllers"
 	"rest-go-demo/database"
+	"rest-go-demo/referrals"
 
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
@@ -213,6 +214,9 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/opensea_asset/{nftaddr}/{nftid}/{address}", controllers.GetOpenseaAsset).Methods("GET")
 	router.HandleFunc("/opensea_asset_owner/{address}", controllers.GetOpenseaAssetOwner).Methods("GET")
 	router.HandleFunc("/opensea_asset_owner_ens/{address}", controllers.GetOpenseaAssetOwnerENS).Methods("GET")
+
+	//Leaderboard calls
+	router.HandleFunc("/get_referral_code", referrals.GetReferralCode).Methods("GET")
 }
 
 func initDB() {

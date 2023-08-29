@@ -48,6 +48,9 @@ var tgSupportWalletArray []string
 var tgSupporChatIdsCsvString = ""
 var tgSupportChatIdsArray []string
 
+var tgSupportAdminsCsvString = ""
+var tgSupportAdminsArray []string
+
 func stringInSlice(a string, list []string) bool {
 	for _, b := range list {
 		if b == a {
@@ -63,6 +66,9 @@ func InitGlobals() {
 
 	tgSupporChatIdsCsvString = os.Getenv("TG_SUPPORT_CHAT_IDS")
 	tgSupportChatIdsArray = strings.Split(tgSupporChatIdsCsvString, ",")
+
+	tgSupportAdminsCsvString = os.Getenv("TG_SUPPORT_ADMIN_IDS")
+	tgSupportAdminsArray = strings.Split(tgSupportAdminsCsvString, ",")
 }
 
 //This function is used for MM Snaps specifically
@@ -1243,22 +1249,25 @@ func UpdateTelegramNotifications() {
 	for i := 0; i < len(updatedNotifsData.Result); i++ {
 		fmt.Println("full message: ", updatedNotifsData.Result[i])
 		if isFieldSet(updatedNotifsData.Result[i].Message.ReplyToMessage) {
-			//if its a reply message, we need to send the user the reply
-			origMsgSender := extractAddress(updatedNotifsData.Result[i].Message.ReplyToMessage.Text)
-			fmt.Println("GD Admin Replied To Message from / with:", origMsgSender, updatedNotifsData.Result[i].Message)
+			//if its a reply message, we need to send the user the reply (but only permissioned admins can do this)
+			//TODO: need a different permission list per TG group
+			if findStrIndexInArray(strconv.FormatInt(updatedNotifsData.Result[i].Message.From.ID, 10), tgSupportAdminsArray) > -1 {
+				origMsgSender := extractAddress(updatedNotifsData.Result[i].Message.ReplyToMessage.Text)
+				fmt.Println("GD Admin Replied To Message from / with:", origMsgSender, updatedNotifsData.Result[i].Message)
 
-			//find corresponding support wallet for given chat_id
-			indexOfChatId := findStrIndexInArray(strconv.Itoa(updatedNotifsData.Result[i].Message.ReplyToMessage.Chat.ID), tgSupportChatIdsArray)
+				//find corresponding support wallet for given chat_id
+				indexOfChatId := findStrIndexInArray(strconv.Itoa(updatedNotifsData.Result[i].Message.ReplyToMessage.Chat.ID), tgSupportChatIdsArray)
 
-			var chat entity.Chatitem
-			chat.Timestamp = time.Now().Format("2006-01-02T15:04:05.000Z")
-			chat.Timestamp_dtm = time.Now()
-			chat.Fromaddr = tgSupportWalletArray[indexOfChatId]
-			chat.Toaddr = origMsgSender
-			chat.Message = updatedNotifsData.Result[i].Message.Text
-			chat.Nftid = "0"
-			fmt.Println("creating chat item", chat)
-			database.Connector.Create(&chat)
+				var chat entity.Chatitem
+				chat.Timestamp = time.Now().Format("2006-01-02T15:04:05.000Z")
+				chat.Timestamp_dtm = time.Now()
+				chat.Fromaddr = tgSupportWalletArray[indexOfChatId]
+				chat.Toaddr = origMsgSender
+				chat.Message = updatedNotifsData.Result[i].Message.Text
+				chat.Nftid = "0"
+				fmt.Println("creating chat item", chat)
+				database.Connector.Create(&chat)
+			}
 
 		} else {
 			//fmt.Println("Results For Telegram Check", updatedNotifsData.Result[i])
