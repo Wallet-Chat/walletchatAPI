@@ -220,6 +220,7 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/get_referral_code", referrals.GetReferralCode).Methods("GET")
 	router.HandleFunc("/create_referral_code", referrals.CreateReferralCode).Methods("GET") //just for test - will be internal
 	router.HandleFunc("/redeem_referral_code/{code}", referrals.RedeemReferralCode).Methods("GET")
+	router.HandleFunc("/get_leaderboard_data", referrals.GetLeaderboardData).Methods("GET")
 }
 
 func initDB() {

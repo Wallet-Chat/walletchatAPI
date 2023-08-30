@@ -102,3 +102,25 @@ func RedeemReferralCode(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 	}
 }
+
+type ChatStatistics struct {
+	Walletaddr   string
+	MessagesTx   int
+	MessagesRx   int
+	UniqueConvos int
+}
+
+func GetLeaderboardData(w http.ResponseWriter, r *http.Request) {
+	var results []ChatStatistics
+	dbQuery := database.Connector.Raw("CALL get_leaderboard_data()").Scan(&results)
+	//fmt.Println("get leaderboard: ", dbQuery.Error, results)
+
+	if dbQuery.Error != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	json.NewEncoder(w).Encode(results)
+}
