@@ -3,12 +3,29 @@ package referrals
 import (
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"rest-go-demo/auth"
 	"rest-go-demo/database"
 	_ "rest-go-demo/docs"
 	"rest-go-demo/entity"
+	"time"
+
+	"github.com/gorilla/mux"
 )
+
+var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+func InitRandom() {
+	rand.Seed(time.Now().UnixNano())
+}
+func randSeq(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
+}
 
 // GetInboxByOwner godoc
 // @Summary Get Inbox Summary With Last Message
@@ -37,17 +54,51 @@ func GetReferralCode(w http.ResponseWriter, r *http.Request) {
 
 //just to test with postman for now - either we will do this for all addresses periodcially or need to take wallet address as input
 //possibly need to use an admin API key for authentication here as well not the user JWT
-func CreateReferralCodes(w http.ResponseWriter, r *http.Request) {
+func CreateReferralCode(w http.ResponseWriter, r *http.Request) {
 	Authuser := auth.GetUserFromReqContext(r)
 	walletaddr := Authuser.Address
 
-	fmt.Printf("Create refferal code for wallet: %#v\n", walletaddr)
+	fmt.Printf("Create referral code for wallet: %#v\n", walletaddr)
 
 	//get all items that relate to passed in owner/address
-	var code []entity.Referralcode
-	database.Connector.Where("walletaddr = ?", walletaddr).Find(&code)
+	var code entity.Referralcode
+	code.Code = "wc-" + randSeq(10)
+	code.Walletaddr = walletaddr
+	code.Date = time.Now()
+	database.Connector.Create(&code)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	json.NewEncoder(w).Encode(code)
+}
+
+func RedeemReferralCode(w http.ResponseWriter, r *http.Request) {
+	Authuser := auth.GetUserFromReqContext(r)
+	walletaddr := Authuser.Address
+	vars := mux.Vars(r)
+	referral_code := vars["code"]
+
+	//get all items that relate to passed in referral code
+	var code []entity.Referralcode
+	dbQuery := database.Connector.Where("code = ?", referral_code).Find(&code)
+
+	//don't let people redeem their own codes
+	if dbQuery.RowsAffected > 0 && code[0].Walletaddr != walletaddr {
+
+		var result = database.Connector.Model(&entity.Referralcode{}).
+			Where("code = ?", referral_code).
+			Update("redeemed", true)
+
+		if result.RowsAffected > 0 {
+			fmt.Printf("Redeemed referral code for wallet: %#v\n", code[0].Walletaddr)
+		} else {
+			fmt.Printf("Redeemed referral failed!!!!")
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		json.NewEncoder(w).Encode(code)
+	} else {
+		w.WriteHeader(http.StatusNotFound)
+	}
 }
