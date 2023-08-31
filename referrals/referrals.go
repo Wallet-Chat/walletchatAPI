@@ -72,6 +72,17 @@ func CreateReferralCode(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(code)
 }
 
+// func CreateReferralCodesForAll() {
+
+// 	//get all items that relate to passed in owner/address
+// 	var code entity.Referralcode
+// 	code.Code = "wc-" + randSeq(10)
+// 	code.Walletaddr = walletaddr
+// 	code.Date = time.Now()
+// 	database.Connector.Create(&code)
+
+// }
+
 func RedeemReferralCode(w http.ResponseWriter, r *http.Request) {
 	Authuser := auth.GetUserFromReqContext(r)
 	walletaddr := Authuser.Address
