@@ -86,10 +86,7 @@ func GetLastMsgToOwner(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//record that the user has used snaps
-	database.Connector.Model(&entity.Settings{}).
-		Where("walletaddr = ?", key).
-		Where("installedsnap != ?", "true").
-		Update("installedsnap", "true")
+	database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", key).Where("installedsnap != ?", "true").Update("installedsnap", "true")
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
