@@ -13,5 +13,5 @@ type Settings struct {
 	Notify24       string `json:"notify24"`                       //RECEIVE NOTIFICATION FOR EVERY DM RECEIVED (string value true/false)
 	Signupsite     string `json:"signupsite"`                     //LATEST SITE WHERE NOTIFICATIONS EMAIL WAS ENTERED
 	Domain         string `json:"domain"`                         //DOMAIN
-	Installedsnap  bool   `json:"installedsnap"`                  //DOMAIN
+	Installedsnap  string `json:"installedsnap"`                  //IS METAMASK SNAP INSTALLED
 }
