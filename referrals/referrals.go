@@ -91,7 +91,7 @@ func RedeemReferralCode(w http.ResponseWriter, r *http.Request) {
 
 	//get all items that relate to passed in referral code
 	var code []entity.Referralcode
-	dbQuery := database.Connector.Where("code = ?", referral_code).Find(&code)
+	dbQuery := database.Connector.Where("code = ?", referral_code).Where("redeemed = ?", 0).Find(&code)
 
 	//don't let people redeem their own codes
 	if dbQuery.RowsAffected > 0 && code[0].Walletaddr != walletaddr {
@@ -99,6 +99,8 @@ func RedeemReferralCode(w http.ResponseWriter, r *http.Request) {
 		var result = database.Connector.Model(&entity.Referralcode{}).
 			Where("code = ?", referral_code).
 			Update("redeemed", true)
+
+		code[0].Redeemed = true //for a proper return value - not sure if we will actually use it
 
 		if result.RowsAffected > 0 {
 			fmt.Printf("Redeemed referral code for wallet: %#v\n", code[0].Walletaddr)
