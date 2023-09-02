@@ -100,6 +100,12 @@ func RedeemReferralCode(w http.ResponseWriter, r *http.Request) {
 			Where("code = ?", referral_code).
 			Update("redeemed", true)
 
+		//set user as validated in the referral code table (used separate table in the case we drop this in future)
+		var uservalid entity.Referraluser
+		uservalid.Referralcode = referral_code
+		uservalid.Walletaddr = walletaddr
+		database.Connector.Create(&uservalid)
+
 		code[0].Redeemed = true //for a proper return value - not sure if we will actually use it
 
 		if result.RowsAffected > 0 {
@@ -136,4 +142,24 @@ func GetLeaderboardData(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	json.NewEncoder(w).Encode(results)
+}
+
+//this is used upon login to check if a user has entered a valid code or not in the past
+//used similar to getting user name so we don't prompt them if its already set.
+func GetHasEnteredValidCode(w http.ResponseWriter, r *http.Request) {
+	Authuser := auth.GetUserFromReqContext(r)
+	walletaddr := Authuser.Address
+
+	//get all items that relate to passed in referral code
+	var uservalid []entity.Referraluser
+	dbQuery := database.Connector.Where("walletaddr = ?", walletaddr).Find(&uservalid)
+
+	if dbQuery.RowsAffected < 1 {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	json.NewEncoder(w).Encode(uservalid)
 }
