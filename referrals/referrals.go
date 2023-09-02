@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"os"
 	"rest-go-demo/auth"
 	"rest-go-demo/database"
 	_ "rest-go-demo/docs"
 	"rest-go-demo/entity"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -52,24 +54,39 @@ func GetReferralCode(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(code)
 }
 
-//just to test with postman for now - either we will do this for all addresses periodcially or need to take wallet address as input
-//possibly need to use an admin API key for authentication here as well not the user JWT
+//just to test with mainly
 func CreateReferralCode(w http.ResponseWriter, r *http.Request) {
-	Authuser := auth.GetUserFromReqContext(r)
-	walletaddr := Authuser.Address
+	vars := mux.Vars(r)
+	walletaddr := vars["address"]
+	apiKey := r.Header.Get("Authorization")
+	if len(apiKey) > 0 {
+		const prefix = "Bearer "
+		if len(apiKey) < len(prefix) {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		apiKey = apiKey[len(prefix):]
+		if strings.Contains(os.Getenv("ADMIN_API_KEY_LIST"), apiKey) {
+			fmt.Printf("Create referral code for wallet via ADMIN: %#v\n", walletaddr)
 
-	fmt.Printf("Create referral code for wallet: %#v\n", walletaddr)
+			//get all items that relate to passed in owner/address
+			var code entity.Referralcode
+			code.Code = "wc-" + randSeq(10)
+			code.Walletaddr = walletaddr
+			code.Date = time.Now()
+			database.Connector.Create(&code)
 
-	//get all items that relate to passed in owner/address
-	var code entity.Referralcode
-	code.Code = "wc-" + randSeq(10)
-	code.Walletaddr = walletaddr
-	code.Date = time.Now()
-	database.Connector.Create(&code)
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("X-Content-Type-Options", "nosniff")
-	json.NewEncoder(w).Encode(code)
+			w.Header().Set("Content-Type", "application/json")
+			w.Header().Set("X-Content-Type-Options", "nosniff")
+			json.NewEncoder(w).Encode(code)
+		} else {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+	} else {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
 }
 
 //not called from API - called upon new user signup

@@ -219,7 +219,7 @@ func initaliseHandlers(router *mux.Router) {
 
 	//Leaderboard calls
 	router.HandleFunc("/get_referral_code", referrals.GetReferralCode).Methods("GET")
-	router.HandleFunc("/create_referral_code", referrals.CreateReferralCode).Methods("GET") //just for test - will be internal
+	router.HandleFunc("/create_referral_code/{address}", referrals.CreateReferralCode).Methods("GET") //mainly for testing
 	router.HandleFunc("/redeem_referral_code/{code}", referrals.RedeemReferralCode).Methods("GET")
 	router.HandleFunc("/get_leaderboard_data", referrals.GetLeaderboardData).Methods("GET")
 	router.HandleFunc("/get_valid_referred_user", referrals.GetHasEnteredValidCode).Methods("GET")
