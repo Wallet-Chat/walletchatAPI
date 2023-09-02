@@ -16,6 +16,7 @@ import (
 	"rest-go-demo/database"
 	"rest-go-demo/email"
 	"rest-go-demo/entity"
+	"rest-go-demo/referrals"
 	"rest-go-demo/wc_analytics"
 
 	"strconv"
@@ -2057,6 +2058,9 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 				settings.Signupsite = addrnameSignup.Signupsite
 				settings.Walletaddr = addrname.Address
 				database.Connector.Create(&settings)
+
+				//give new users 3 new referral codes
+				referrals.CreateReferralCodeInternal(settings.Walletaddr)
 			}
 		} else {
 			var result = database.Connector.Model(&entity.Addrnameitem{}).

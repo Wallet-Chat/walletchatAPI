@@ -72,6 +72,29 @@ func CreateReferralCode(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(code)
 }
 
+//not called from API - called upon new user signup
+func CreateReferralCodeInternal(walletaddr string) {
+	fmt.Printf("Create 3 New Referral Codes for Wallet: %#v\n", walletaddr)
+
+	var code entity.Referralcode
+	code.Code = "wc-" + randSeq(10)
+	code.Walletaddr = walletaddr
+	code.Date = time.Now()
+	database.Connector.Create(&code)
+
+	var code1 entity.Referralcode
+	code1.Code = "wc-" + randSeq(10)
+	code1.Walletaddr = walletaddr
+	code1.Date = time.Now()
+	database.Connector.Create(&code1)
+
+	var code2 entity.Referralcode
+	code2.Code = "wc-" + randSeq(10)
+	code2.Walletaddr = walletaddr
+	code2.Date = time.Now()
+	database.Connector.Create(&code2)
+}
+
 func CreateDailyReferralCodes() {
 	fmt.Println("Creating daily referral codes!")
 
@@ -82,17 +105,6 @@ func CreateDailyReferralCodes() {
 	//gorm results were not showing correct number of rows returned, so I had to manually do this in the SP (UGLY AF)
 	fmt.Println("Number of New Daily Referral Codes Created: ", len(result))
 }
-
-// func CreateReferralCodesForAll() {
-
-// 	//get all items that relate to passed in owner/address
-// 	var code entity.Referralcode
-// 	code.Code = "wc-" + randSeq(10)
-// 	code.Walletaddr = walletaddr
-// 	code.Date = time.Now()
-// 	database.Connector.Create(&code)
-
-// }
 
 func RedeemReferralCode(w http.ResponseWriter, r *http.Request) {
 	Authuser := auth.GetUserFromReqContext(r)
