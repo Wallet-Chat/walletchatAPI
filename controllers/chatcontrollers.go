@@ -2084,7 +2084,7 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 // @Security BearerAuth
 // @Param address path string true "Get Name for given address"
 // @Success 200 {array} entity.Addrnameitem
-// @Router /v1/name/{name} [get]
+// @Router /v1/name/{addr} [get]
 func GetAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	//Authuser := auth.GetUserFromReqContext(r)
 	//address := Authuser.Address
@@ -2096,7 +2096,7 @@ func GetAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	database.Connector.Where("address = ?", address).Find(&addrname)
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(addrname)
 }
 

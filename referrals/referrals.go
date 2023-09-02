@@ -152,14 +152,10 @@ func GetHasEnteredValidCode(w http.ResponseWriter, r *http.Request) {
 
 	//get all items that relate to passed in referral code
 	var uservalid []entity.Referraluser
-	dbQuery := database.Connector.Where("walletaddr = ?", walletaddr).Find(&uservalid)
-
-	if dbQuery.RowsAffected < 1 {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
+	database.Connector.Where("walletaddr = ?", walletaddr).Find(&uservalid)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(uservalid)
 }
