@@ -72,6 +72,17 @@ func CreateReferralCode(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(code)
 }
 
+func CreateDailyReferralCodes() {
+	fmt.Println("Creating daily referral codes!")
+
+	//only create new daily codes for those users who have no unused codes remaining
+	var result []entity.Referralcode
+	database.Connector.Raw("CALL InsertReferralCodes()").Scan(&result)
+
+	//gorm results were not showing correct number of rows returned, so I had to manually do this in the SP (UGLY AF)
+	fmt.Println("Number of New Daily Referral Codes Created: ", len(result))
+}
+
 // func CreateReferralCodesForAll() {
 
 // 	//get all items that relate to passed in owner/address

@@ -69,6 +69,7 @@ func main() {
 	s := gocron.NewScheduler(time.UTC)
 	// set time
 	s.Every(1).Day().At("10:30").Do(func() { sendPeriodicNotifications() })
+	s.Every(1).Day().At("01:00").Do(func() { referrals.CreateDailyReferralCodes() })
 	// starts the scheduler asynchronously
 	s.StartAsync()
 
