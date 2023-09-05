@@ -19,94 +19,94 @@ func InitSearchParams() {
 	sinceID = "1698219441811537927"
 }
 
-type TweetSearchResults struct {
-	Data []struct {
-		EditHistoryTweetIds []string `json:"edit_history_tweet_ids"`
-		ID                  string   `json:"id"`
-		Text                string   `json:"text"`
-	} `json:"data"`
-	Meta struct {
-		NewestID    string `json:"newest_id"`
-		OldestID    string `json:"oldest_id"`
-		ResultCount int    `json:"result_count"`
-	} `json:"meta"`
+//req.Header.Set("Authorization", "Bearer "+os.Getenv("TWITTER_BEARER_API"))
+
+type TwitterResponse struct {
+	Data     []Tweet     `json:"data"`
+	Includes TwitterData `json:"includes"`
+	Meta     MetaData    `json:"meta"`
 }
 
-func search(query string) {
-	// Encode the query for use in the URL
+type Tweet struct {
+	AuthorID string `json:"author_id"`
+	ID       string `json:"id"`
+	Text     string `json:"text"`
+}
+
+type TwitterData struct {
+	Users []User `json:"users"`
+}
+
+type User struct {
+	ID       string `json:"id"`
+	Username string `json:"username"`
+	Name     string `json:"name"`
+}
+
+type MetaData struct {
+	NewestID string `json:"newest_id"`
+}
+
+func searchTweets(query string) error {
+	// URL encode the search query
 	encodedQuery := url.QueryEscape(query)
 
-	// Twitter API v2 Search Endpoint URL with 'since_id'
-	url := fmt.Sprintf("https://api.twitter.com/2/tweets/search/recent?query=%s&max_results=10&since_id=%s", encodedQuery, sinceID)
+	// Construct the Twitter API URL
+	url := "https://api.twitter.com/2/tweets/search/recent?query=" + encodedQuery + "&since_id=" + sinceID + "&max_results=10&tweet.fields=author_id&expansions=author_id"
+	fmt.Println("URL for Twitter Search: ", url)
 
-	// Create an HTTP client
-	client := &http.Client{}
-
-	// Create a GET request
+	// Make an HTTP request to the Twitter API
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		fmt.Println("Error creating request:", err)
-		return
+		return err
 	}
 
-	// Set the Bearer Token in the request header
 	req.Header.Set("Authorization", "Bearer "+os.Getenv("TWITTER_BEARER_API"))
 
-	// Send the GET request
+	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("Error sending request:", err)
-		return
+		return err
 	}
 	defer resp.Body.Close()
 
 	// Read the response body
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("Error reading response:", err)
-		return
+		return err
 	}
 
 	// Parse the JSON response
-	var response TweetSearchResults
-	if err := json.Unmarshal(body, &response); err != nil {
-		fmt.Println("Error parsing JSON response:", err)
-		return
+	var twitterResponse TwitterResponse
+	if err := json.Unmarshal(body, &twitterResponse); err != nil {
+		return err
 	}
 
-	// Iterate over the search results and update 'sinceID'
-	for _, tweet := range response.Data {
-		// Print the Twitter username associated with the tweet
-		username := extractUsername(tweet.Text)
-		fmt.Printf("Username: %s\n", username)
+	// Create a map to store user data by ID
+	userDataByID := make(map[string]User)
+	for _, user := range twitterResponse.Includes.Users {
+		userDataByID[user.ID] = user
+	}
 
-		// Check if "wallet_chat" is part of the tweet
-		containsWalletChat := strings.Contains(tweet.Text, "wallet_chat")
-		fmt.Printf("Contains 'wallet_chat': %v\n", containsWalletChat)
+	// Print the username and name for each tweet
+	for _, tweet := range twitterResponse.Data {
+		user, exists := userDataByID[tweet.AuthorID]
+		if exists {
+			fmt.Printf("Username: %s, Name: %s\n", user.Username, user.Name)
+		}
 	}
 
 	//update sinceID to the most recent ID, so we don't get results we have already processed
-	sinceID = response.Meta.NewestID
+	if len(twitterResponse.Data) > 0 {
+		sinceID = twitterResponse.Meta.NewestID
+	}
 
 	// Print the most recent tweet ID
 	fmt.Printf("Most recent tweet ID for query '%s': %s\n", query, sinceID)
+
+	return nil
 }
 
-func extractUsername(text string) string {
-	// Logic to extract the Twitter username from the tweet text
-	// Modify this logic based on your tweet format or requirements
-
-	// Example: Extract the username after "@" symbol
-	parts := strings.Split(text, "@")
-	if len(parts) > 1 {
-		return parts[1]
-	}
-
-	// Return an empty string if no username found
-	return ""
-}
-
-//used for manual testing, will have another endpoint or local call for actual use
 func SearchTweets(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	query_str := vars["query_str"]
@@ -120,7 +120,7 @@ func SearchTweets(w http.ResponseWriter, r *http.Request) {
 		apiKey = apiKey[len(prefix):]
 		if strings.Contains(os.Getenv("ADMIN_API_KEY_LIST"), apiKey) {
 
-			search(query_str)
+			searchTweets(query_str)
 
 		} else {
 			w.WriteHeader(http.StatusUnauthorized)

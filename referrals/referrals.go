@@ -163,10 +163,14 @@ func RedeemReferralCode(w http.ResponseWriter, r *http.Request) {
 }
 
 type ChatStatistics struct {
-	Walletaddr   string
-	MessagesTx   int
-	MessagesRx   int
-	UniqueConvos int
+	Walletaddr    string
+	Username      string
+	MessagesTx    int
+	MessagesRx    int
+	UniqueConvos  int
+	Installedsnap string
+	RedeemedCount int
+	Points        int
 }
 
 func GetLeaderboardData(w http.ResponseWriter, r *http.Request) {
