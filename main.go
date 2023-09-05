@@ -8,6 +8,7 @@ import (
 	"rest-go-demo/controllers"
 	"rest-go-demo/database"
 	"rest-go-demo/referrals"
+	"rest-go-demo/twitter"
 
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
@@ -83,6 +84,7 @@ func main() {
 	controllers.InitGlobals()
 	controllers.InitRandom()
 	referrals.InitRandom()
+	twitter.InitSearchParams()
 
 	//handler := cors.Default().Handler(router)
 	handler := cors.AllowAll().Handler(router) //Live API overrides this anyway
@@ -200,6 +202,8 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/get_twitter/{contract}", controllers.GetTwitter).Methods("GET")
 	router.HandleFunc("/get_twitter_cnt/{contract}", controllers.GetTwitterCount).Methods("GET")
 	router.HandleFunc("/get_comments_cnt/{nftaddr}/{nftid}", controllers.GetCommentsCount).Methods("GET")
+	//in twitter.go
+	router.HandleFunc("/search_tweets/{query_str}", twitter.SearchTweets).Methods("GET")
 
 	//holder functions
 	//TODO: this would need a signature from holder to fully verify - ok for now
