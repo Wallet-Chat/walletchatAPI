@@ -2578,6 +2578,17 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 				log.Println("Updating Domain", settingsRX.Domain)
 				dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("domain", settingsRX.Domain)
 			}
+			if settingsRX.Twitteruser != "" {
+				//we want to ensure consistency with the @ before the username.
+				//we store without the leading @ because twitter doesn't store it this way either.
+				//We can verify on client side but should double check here
+				settingsRX.Twitteruser = strings.TrimPrefix(settingsRX.Twitteruser, "@")
+
+				log.Println("Updating Twitter User", settingsRX.Twitteruser)
+				database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("twitteruser", settingsRX.Twitteruser)
+				//when a user updates the username - must re-verify
+				dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", addr).Update("twitterverified", "false")
+			}
 		}
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")

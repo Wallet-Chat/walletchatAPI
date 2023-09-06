@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"rest-go-demo/database"
+	"rest-go-demo/entity"
 	"strings"
 
 	"github.com/gorilla/mux"
@@ -108,6 +109,11 @@ func searchTweets(query string) error {
 		user, exists := userDataByID[tweet.AuthorID]
 		if exists {
 			fmt.Printf("Username: %s, Name: %s\n", user.Username, user.Name)
+
+			//twitter handle is now verified within WalletChat, store the twitterID as well for future use maybe if user changes names
+			//we need to handle the @symbol (maybe just ensure its added when from being saved with username?)
+			database.Connector.Model(&entity.Settings{}).Where("twitteruser = ?", user.Username).Update("twitterverified", "true")
+			database.Connector.Model(&entity.Settings{}).Where("twitteruser = ?", user.Username).Update("twitterid", tweet.AuthorID)
 		}
 	}
 
