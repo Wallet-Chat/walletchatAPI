@@ -35,8 +35,6 @@ func InitSearchParams() {
 	}
 }
 
-//req.Header.Set("Authorization", "Bearer "+os.Getenv("TWITTER_BEARER_API"))
-
 type TwitterResponse struct {
 	Data     []Tweet     `json:"data"`
 	Includes TwitterData `json:"includes"`
@@ -133,8 +131,8 @@ func searchTweets(query string) error {
 }
 
 func SearchVerifyUsernames() {
-	fmt.Println(("Verify Twitter Users: "), os.Getenv("TWITTER_VERIFY_USERNAME_STRING"))
-	searchTweets(os.Getenv("TWITTER_VERIFY_USERNAME_STRING"))
+	fmt.Println(("Verify Twitter Users: "))
+	searchTweets("LFC is the new LFG! (Lets F'n Chat!) @wallet_chat")
 }
 
 func SearchTweets(w http.ResponseWriter, r *http.Request) {
