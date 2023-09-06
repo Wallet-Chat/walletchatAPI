@@ -82,6 +82,7 @@ func searchTweets(query string) error {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
+		fmt.Println("Error In Twitter Search Request: ", err)
 		return err
 	}
 	defer resp.Body.Close()
@@ -89,6 +90,7 @@ func searchTweets(query string) error {
 	// Read the response body
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		fmt.Println("Error In Twitter Search Request: ", err)
 		return err
 	}
 
@@ -131,6 +133,7 @@ func searchTweets(query string) error {
 }
 
 func SearchVerifyUsernames() {
+	fmt.Println(("Verify Twitter Users: "), os.Getenv("TWITTER_VERIFY_USERNAME_STRING"))
 	searchTweets(os.Getenv("TWITTER_VERIFY_USERNAME_STRING"))
 }
 
