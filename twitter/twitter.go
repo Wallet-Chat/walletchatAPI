@@ -30,8 +30,12 @@ func InitSearchParams() {
 	dbResult := database.Connector.Where("globalvar = ?", "sinceid").Find(&globalSinceID)
 
 	if dbResult.RowsAffected > 0 {
-		fmt.Println("Initializing Twitter sinceID: ", globalSinceID.Value)
-		sinceID = globalSinceID.Value
+		if globalSinceID.Value == "" {
+			sinceID = "1699404439969304999"
+		} else {
+			fmt.Println("Initializing Twitter sinceID: ", globalSinceID.Value)
+			sinceID = globalSinceID.Value
+		}
 	}
 }
 
