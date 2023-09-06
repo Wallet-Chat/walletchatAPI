@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"rest-go-demo/database"
 	"strings"
 
 	"github.com/gorilla/mux"
@@ -15,8 +16,22 @@ import (
 //since_id has to be at least within the ~5 days
 var sinceID string
 
+//in our db lets store the sinceID so we save requests/processing
+//for recent search API, these has the be within the last 3-4 days usually.
+type Globalstring struct {
+	ID        string `json:"id"`
+	Globalvar string `json:"globalvar"`
+	Value     string `json:"value"`
+}
+
 func InitSearchParams() {
-	sinceID = "1698219441811537927"
+	var globalSinceID Globalstring
+	dbResult := database.Connector.Where("globalvar = ?", "sinceid").Find(&globalSinceID)
+
+	if dbResult.RowsAffected > 0 {
+		fmt.Println("Initializing Twitter sinceID to: ", globalSinceID.Value)
+		sinceID = globalSinceID.Value
+	}
 }
 
 //req.Header.Set("Authorization", "Bearer "+os.Getenv("TWITTER_BEARER_API"))
@@ -103,6 +118,8 @@ func searchTweets(query string) error {
 
 	// Print the most recent tweet ID
 	fmt.Printf("Most recent tweet ID for query '%s': %s\n", query, sinceID)
+	//now we update the value in the DB for next time around so we don't get duplicate results
+	database.Connector.Model(&Globalstring{}).Where("globalvar = ?", "sinceid").Update("value", sinceID)
 
 	return nil
 }
