@@ -130,6 +130,10 @@ func searchTweets(query string) error {
 	return nil
 }
 
+func SearchVerifyUsernames() {
+	searchTweets(os.Getenv("TWITTER_VERIFY_USERNAME_STRING"))
+}
+
 func SearchTweets(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	query_str := vars["query_str"]

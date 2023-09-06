@@ -79,6 +79,7 @@ func main() {
 	t := gocron.NewScheduler(time.UTC)
 	// set time
 	t.Every(10).Seconds().Do(func() { updateTelegramVerifiedUsers() })
+	t.Every(60).Seconds().Do(func() { twitter.SearchVerifyUsernames() })
 	// starts the scheduler asynchronously
 	t.StartAsync()
 
