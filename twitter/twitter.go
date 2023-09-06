@@ -71,7 +71,7 @@ func searchTweets(query string) error {
 
 	// Construct the Twitter API URL
 	url := "https://api.twitter.com/2/tweets/search/recent?query=" + encodedQuery + "&since_id=" + sinceID + "&max_results=10&tweet.fields=author_id&expansions=author_id"
-	fmt.Println("URL for Twitter Search: ", url)
+	//fmt.Println("URL for Twitter Search: ", url)
 
 	// Make an HTTP request to the Twitter API
 	req, err := http.NewRequest("GET", url, nil)
@@ -135,7 +135,6 @@ func searchTweets(query string) error {
 }
 
 func SearchVerifyUsernames() {
-	fmt.Println(("Verify Twitter Users: "))
 	searchTweets("LFC is the new LFG! (Lets F'n Chat!) @wallet_chat")
 }
 
