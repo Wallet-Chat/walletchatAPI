@@ -165,6 +165,7 @@ func RedeemReferralCode(w http.ResponseWriter, r *http.Request) {
 type ChatStatistics struct {
 	Walletaddr    string
 	Username      string
+	Pfpdata       string
 	MessagesTx    int
 	MessagesRx    int
 	UniqueConvos  int

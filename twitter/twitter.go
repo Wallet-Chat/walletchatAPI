@@ -127,7 +127,7 @@ func searchTweets(query string) error {
 	}
 
 	// Print the most recent tweet ID
-	fmt.Printf("Most recent tweet ID for query '%s': %s\n", query, sinceID)
+	//fmt.Printf("Most recent tweet ID for query '%s': %s\n", query, sinceID)
 	//now we update the value in the DB for next time around so we don't get duplicate results
 	database.Connector.Model(&Globalstring{}).Where("globalvar = ?", "sinceid").Update("value", sinceID)
 
