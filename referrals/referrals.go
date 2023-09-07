@@ -189,6 +189,22 @@ func GetLeaderboardData(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(results)
 }
 
+func GetLeaderboardDataSingle(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	address := vars["address"]
+	var results ChatStatistics
+	dbQuery := database.Connector.Raw("CALL get_leaderboard_data_single(?)", address).Scan(&results)
+
+	if dbQuery.Error != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	json.NewEncoder(w).Encode(results)
+}
+
 //this is used upon login to check if a user has entered a valid code or not in the past
 //used similar to getting user name so we don't prompt them if its already set.
 func GetHasEnteredValidCode(w http.ResponseWriter, r *http.Request) {
