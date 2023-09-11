@@ -60,6 +60,7 @@ func main() {
 	router.HandleFunc("/track_ga4/{event}/{email}/{addr}/{placeholder_photo}", controllers.TrackEventGA4).Methods("GET")
 	router.HandleFunc("/get_leaderboard_data", referrals.GetLeaderboardData).Methods("GET")
 	router.HandleFunc("/get_leaderboard_data/{address}", referrals.GetLeaderboardDataSingle).Methods("GET")
+	router.HandleFunc("/get_referral_code/{address}", referrals.GetReferralCodeAddr).Methods("GET")
 
 	wsRouter := router.PathPrefix("/v1").Subrouter()
 

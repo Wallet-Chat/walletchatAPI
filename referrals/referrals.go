@@ -54,6 +54,21 @@ func GetReferralCode(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(code)
 }
 
+func GetReferralCodeAddr(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	walletaddr := vars["address"]
+
+	fmt.Printf("GetReferralCode for wallet: %#v\n", walletaddr)
+
+	//get all items that relate to passed in owner/address
+	var code []entity.Referralcode
+	database.Connector.Where("walletaddr = ?", walletaddr).Find(&code)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	json.NewEncoder(w).Encode(code)
+}
+
 //just to test with mainly
 func CreateReferralCode(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
