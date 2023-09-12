@@ -2061,6 +2061,16 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 
 				//give new users 3 new referral codes
 				referrals.CreateReferralCodeInternal(settings.Walletaddr)
+
+				//auto-send a message to the user to check out the leaderboard
+				var chat entity.Chatitem
+				chat.Timestamp = time.Now().Format("2006-01-02T15:04:05.000Z")
+				chat.Timestamp_dtm = time.Now()
+				chat.Fromaddr = os.Getenv("SUPPORT_WALLET")
+				chat.Toaddr = addrname.Address
+				chat.Message = "Welcome to WalletChat!  Head over to the leadboard via the trophy icon and grab your referral codes to invite your frens!"
+				chat.Nftid = "0"
+				database.Connector.Create(&chat)
 			}
 		} else {
 			var result = database.Connector.Model(&entity.Addrnameitem{}).
