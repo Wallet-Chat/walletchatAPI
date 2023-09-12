@@ -2069,9 +2069,9 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 				chat.Toaddr = addrname.Address
 				chat.Nftid = "0"
 				//auto-send a message to the user to check out the leaderboard
-				if strings.Contains(addrnameSignup.Signupsite, "app.walletchat.fun") {
+				if strings.Contains(addrnameSignup.Domain, "app.walletchat.fun") {
 					chat.Message = "Welcome to WalletChat!  Head over to the leadboard via the trophy icon and grab your referral codes to invite your frens!"
-				} else if strings.Contains(addrnameSignup.Signupsite, "good") {
+				} else if strings.Contains(addrnameSignup.Domain, "good") {
 					chat.Message = "Welcome to WalletChat! For GoodDollar direct support, please reach out via the headset icon"
 				} else {
 					chat.Message = "Welcome to WalletChat! Feel free to reach out to us with any questions!"
