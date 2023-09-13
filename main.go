@@ -84,12 +84,19 @@ func main() {
 	// starts the scheduler asynchronously
 	t.StartAsync()
 
-	//schedule telegram polling for new verified users (should be webhook someday)
+	//schedule twitter username polling for new verified users
 	u := gocron.NewScheduler(time.UTC)
 	// set time
-	u.Every(60).Seconds().Do(func() { twitter.SearchVerifyUsernames() })
+	u.Every(25).Seconds().Do(func() { twitter.SearchVerifyUsernames() })
 	// starts the scheduler asynchronously
 	u.StartAsync()
+
+	//schedule twitter polling for users requesting referral codes
+	v := gocron.NewScheduler(time.UTC)
+	// set time
+	v.Every(20).Seconds().Do(func() { twitter.SearchForUserReferralCodeTweets() })
+	// starts the scheduler asynchronously
+	v.StartAsync()
 
 	controllers.InitGlobals()
 	controllers.InitRandom()
