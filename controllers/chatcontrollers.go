@@ -720,6 +720,24 @@ func GetNChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(chat)
 	} else {
 		json.NewEncoder(w).Encode(chat[(len(chat) - count):])
+
+		//since snaps only shows 6 lines (TODO fix via UI or some other method)
+		//we have to mark the earlier messages as read - rare but possible situation
+
+		//first get number of unread messages (could be 21 total convo messages, 9 unread, 6 grabbed for snap)
+		var chatUnreadLength []entity.Chatitem
+		database.Connector.Where("toaddr = ?", from).Where("msgread != ?", true).Find(&chatUnreadLength)
+		numUnread := len(chatUnreadLength)
+		if numUnread > count {
+			for i := 0; i < (numUnread - count); i++ {
+				fmt.Println("forcing read item update at position: ", i, chatUnreadLength[i].Message)
+				database.Connector.Model(&entity.Chatitem{}).
+					Where("fromaddr = ?", chatUnreadLength[i].Fromaddr).
+					Where("toaddr = ?", chatUnreadLength[i].Toaddr).
+					Where("timestamp = ?", chatUnreadLength[i].Timestamp).
+					Update("msgread", 1)
+			}
+		}
 	}
 }
 
