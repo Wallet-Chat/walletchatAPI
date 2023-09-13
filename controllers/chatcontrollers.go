@@ -728,16 +728,20 @@ func GetNChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 		var chatUnreadLength []entity.Chatitem
 		database.Connector.Where("toaddr = ?", from).Where("msgread != ?", true).Find(&chatUnreadLength)
 		numUnread := len(chatUnreadLength)
-		if numUnread > count {
-			for i := 0; i < (numUnread - count); i++ {
-				fmt.Println("forcing read item update at position: ", i, chatUnreadLength[i].Message)
-				database.Connector.Model(&entity.Chatitem{}).
-					Where("fromaddr = ?", chatUnreadLength[i].Fromaddr).
-					Where("toaddr = ?", chatUnreadLength[i].Toaddr).
-					Where("timestamp = ?", chatUnreadLength[i].Timestamp).
-					Update("msgread", 1)
-			}
+		msgRead := true
+		//if numUnread > count {
+		//simplify for now - just mark all unread as read from this specific address when using snaps
+		//the above if statement works but worried there might be a race condition we miss, so this is safer for now
+		//and just marks the messages read a few seconds before they would be marked read anyway in the snap
+		for i := 0; i < (numUnread); i++ {
+			fmt.Println("forcing read item update at position: ", i, chatUnreadLength[i].Message)
+			database.Connector.Model(&entity.Chatitem{}).
+				Where("fromaddr = ?", chatUnreadLength[i].Fromaddr).
+				Where("toaddr = ?", chatUnreadLength[i].Toaddr).
+				Where("timestamp = ?", chatUnreadLength[i].Timestamp).
+				Update("msgread", msgRead)
 		}
+		//}
 	}
 }
 
