@@ -2087,8 +2087,8 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 				var chat entity.Chatitem
 				chat.Timestamp = time.Now().Format("2006-01-02T15:04:05.000Z")
 				chat.Timestamp_dtm = time.Now()
-				chat.Fromaddr = os.Getenv("SUPPORT_WALLET")
-				chat.Toaddr = addrname.Address
+				chat.Fromaddr = strings.ToLower(os.Getenv("SUPPORT_WALLET"))
+				chat.Toaddr = strings.ToLower(addrname.Address)
 				chat.Nftid = "0"
 				//auto-send a message to the user to check out the leaderboard
 				if strings.Contains(addrnameSignup.Domain, "app.walletchat.fun") {
