@@ -681,7 +681,7 @@ func GetNftChatFromAddress(w http.ResponseWriter, r *http.Request) {
 }
 
 //Could combine this with GetAll of we change FE to send in 0 or something for ALL
-// @Router /v1/getall_chatitems/{fromaddr}/{toaddr}/{count} [get]
+// @Router /v1/get_n_chatitems/{fromaddr}/{toaddr}/{count} [get]
 func GetNChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	//from := vars["fromaddr"]
@@ -2070,7 +2070,7 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 				chat.Nftid = "0"
 				//auto-send a message to the user to check out the leaderboard
 				if strings.Contains(addrnameSignup.Domain, "app.walletchat.fun") {
-					chat.Message = "Welcome to WalletChat!  Head over to the leadboard via the trophy icon and grab your referral codes to invite your frens!"
+					chat.Message = "Welcome to WalletChat!  Head over to the leadboard via the trophy icon and grab your referral codes to invite your frens to start earning today!"
 				} else if strings.Contains(addrnameSignup.Domain, "good") {
 					chat.Message = "Welcome to WalletChat! For GoodDollar direct support, please reach out via the headset icon"
 				} else {
