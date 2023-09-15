@@ -10,6 +10,7 @@ import (
 	"rest-go-demo/database"
 	_ "rest-go-demo/docs"
 	"rest-go-demo/entity"
+	"rest-go-demo/wc_analytics"
 	"strings"
 	"time"
 
@@ -165,6 +166,9 @@ func RedeemReferralCode(w http.ResponseWriter, r *http.Request) {
 
 		if result.RowsAffected > 0 {
 			fmt.Printf("Redeemed referral code for wallet: %#v\n", code[0].Walletaddr)
+			if code[0].Walletaddr != "0xtest" {
+				wc_analytics.SendCustomEvent(Authuser.Address, "REFERRAL_CODE_REDEEMED")
+			}
 		} else {
 			fmt.Printf("Redeemed referral failed!!!!")
 		}
