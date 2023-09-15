@@ -87,7 +87,13 @@ func GetLastMsgToOwner(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//record that the user has used snaps
-	database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", key).Where("installedsnap != ?", "true").Update("installedsnap", "true")
+	var settings []entity.Settings
+	database.Connector.Where("walletaddr = ?", key).Where("installedsnap != ?", "true").Find(&settings)
+	if len(settings) > 0 {
+		fmt.Println("New Metamask Snaps Install!! ", Authuser.Address)
+		database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", key).Where("installedsnap != ?", "true").Update("installedsnap", "true")
+		wc_analytics.SendCustomEvent(Authuser.Address, "METAMASK_SNAPS_INSTALL")
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
