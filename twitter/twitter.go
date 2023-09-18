@@ -241,7 +241,7 @@ func searchTweetsAndSendRefCodes(query string) error {
 			code.Date = time.Now()
 			database.Connector.Create(&code)
 
-			RespondToTweet(tweet.ID, code.Code)
+			RespondToTweet(tweet.ID, code.Code+"\n\nMake sure to go check 🏆 inside the app to share your codes with frens and win big!")
 
 			sinceID = tweet.ID
 		}
