@@ -199,6 +199,7 @@ type ChatStatisticsSingle struct {
 	Pfpdata       string
 	MessagesTx    int
 	MessagesRx    int
+	GroupMessages int
 	UniqueConvos  int
 	Installedsnap string
 	RedeemedCount int
