@@ -1129,26 +1129,29 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 			var settings entity.Settings
 			var dbResult = database.Connector.Where("walletaddr = ?", chat.Toaddr).Find(&settings)
 			if dbResult.RowsAffected > 0 && strings.EqualFold("true", settings.Verified) {
-				if strings.Contains(settings.Email, "@") && strings.EqualFold(settings.Notifydm, "true") {
-					var fromAddrname entity.Addrnameitem
-					database.Connector.Where("address = ?", chat.Fromaddr).Find(&fromAddrname)
-					var toAddrname entity.Addrnameitem
-					database.Connector.Where("address = ?", chat.Toaddr).Find(&toAddrname)
 
-					from := mail.NewEmail("WalletChat Notifications", "contact@walletchat.fun")
-					subject := "Message Waiting In WalletChat"
-					to := mail.NewEmail(toAddrname.Name, settings.Email)
-					plainTextContent := "You have a message from" + fromAddrname.Name + " : \r\n" + chat.Message + "\r\n Please login via the app at https://app.walletchat.fun to read!"
-					htmlContent := email.NotificationEmailDM(toAddrname.Address, fromAddrname.Address, toAddrname.Name, fromAddrname.Name, settings.Email, chat.Message)
-					message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
-					client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
-					response, err := client.Send(message)
-					if err != nil {
-						log.Println(err)
-					} else {
-						_ = response
-					}
-				}
+				//disabiling DM notifications here for now, due to high farming accounts
+
+				// if strings.Contains(settings.Email, "@") && strings.EqualFold(settings.Notifydm, "true") {
+				// 	var fromAddrname entity.Addrnameitem
+				// 	database.Connector.Where("address = ?", chat.Fromaddr).Find(&fromAddrname)
+				// 	var toAddrname entity.Addrnameitem
+				// 	database.Connector.Where("address = ?", chat.Toaddr).Find(&toAddrname)
+
+				// 	from := mail.NewEmail("WalletChat Notifications", "contact@walletchat.fun")
+				// 	subject := "Message Waiting In WalletChat"
+				// 	to := mail.NewEmail(toAddrname.Name, settings.Email)
+				// 	plainTextContent := "You have a message from" + fromAddrname.Name + " : \r\n" + chat.Message + "\r\n Please login via the app at https://app.walletchat.fun to read!"
+				// 	htmlContent := email.NotificationEmailDM(toAddrname.Address, fromAddrname.Address, toAddrname.Name, fromAddrname.Name, settings.Email, chat.Message)
+				// 	message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
+				// 	client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
+				// 	response, err := client.Send(message)
+				// 	if err != nil {
+				// 		log.Println(err)
+				// 	} else {
+				// 		_ = response
+				// 	}
+				// }
 			}
 			if dbResult.RowsAffected > 0 && settings.Telegramid != "" {
 				if strings.EqualFold(settings.Notifydm, "true") {
