@@ -222,15 +222,6 @@ func GetLeaderboardDataCronJob() {
 }
 
 func GetLeaderboardData(w http.ResponseWriter, r *http.Request) {
-	var results []ChatStatistics
-	dbQuery := database.Connector.Raw("CALL get_leaderboard_data()").Scan(&results)
-	//fmt.Println("get leaderboard: ", dbQuery.Error, results)
-
-	if dbQuery.Error != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	json.NewEncoder(w).Encode(currentLeaderboard)
