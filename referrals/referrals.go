@@ -17,6 +17,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
+var currentLeaderboard []ChatStatistics
+
 var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 func InitRandom() {
@@ -207,6 +209,18 @@ type ChatStatisticsSingle struct {
 	Referralcodes string
 }
 
+func GetLeaderboardDataCronJob() {
+	var results []ChatStatistics
+	dbQuery := database.Connector.Raw("CALL get_leaderboard_data()").Scan(&results)
+	//fmt.Println("get leaderboard: ", dbQuery.Error, results)
+
+	if dbQuery.Error != nil {
+		return
+	}
+
+	currentLeaderboard = results
+}
+
 func GetLeaderboardData(w http.ResponseWriter, r *http.Request) {
 	var results []ChatStatistics
 	dbQuery := database.Connector.Raw("CALL get_leaderboard_data()").Scan(&results)
@@ -219,7 +233,7 @@ func GetLeaderboardData(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
-	json.NewEncoder(w).Encode(results)
+	json.NewEncoder(w).Encode(currentLeaderboard)
 }
 
 func GetLeaderboardDataSingle(w http.ResponseWriter, r *http.Request) {

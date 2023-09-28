@@ -98,6 +98,13 @@ func main() {
 	// starts the scheduler asynchronously
 	v.StartAsync()
 
+	//schedule twitter polling for users requesting referral codes
+	w := gocron.NewScheduler(time.UTC)
+	// set time
+	w.Every(60).Seconds().Do(func() { referrals.GetLeaderboardDataCronJob() })
+	// starts the scheduler asynchronously
+	w.StartAsync()
+
 	controllers.InitGlobals()
 	controllers.InitRandom()
 	referrals.InitRandom()
