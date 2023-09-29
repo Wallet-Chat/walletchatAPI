@@ -122,6 +122,8 @@ func searchTweets(query string) error {
 			//we need to handle the @symbol (maybe just ensure its added when from being saved with username?)
 			database.Connector.Model(&entity.Settings{}).Where("twitteruser = ?", user.Username).Update("twitterverified", "true")
 			database.Connector.Model(&entity.Settings{}).Where("twitteruser = ?", user.Username).Update("twitterid", tweet.AuthorID)
+
+			RespondToTweet(tweet.ID, "\n\nLFC! Check 🏆 inside the app and share your referral codes with frens here! #chat2earn")
 		}
 	}
 
@@ -241,7 +243,7 @@ func searchTweetsAndSendRefCodes(query string) error {
 			code.Date = time.Now()
 			database.Connector.Create(&code)
 
-			RespondToTweet(tweet.ID, code.Code+"\n\nMake sure to go check 🏆 inside the app to share your codes with frens and win big!")
+			RespondToTweet(tweet.ID, code.Code+"\n\nMake sure to go check 🏆 inside the app to share your codes with frens and win big! #chat2earn")
 
 			sinceID = tweet.ID
 		}
