@@ -236,14 +236,23 @@ func searchTweetsAndSendRefCodes(query string) error {
 			// database.Connector.Model(&entity.Settings{}).Where("twitteruser = ?", user.Username).Update("twitterverified", "true")
 			// database.Connector.Model(&entity.Settings{}).Where("twitteruser = ?", user.Username).Update("twitterid", tweet.AuthorID)
 
-			//get all items that relate to passed in owner/address
-			var code entity.Referralcode
-			code.Code = "wc-" + randSeq(10)
-			code.Walletaddr = "0xtest"
-			code.Date = time.Now()
-			database.Connector.Create(&code)
+			//if user is already in referralusers table, they don't need another code (TODO - need to store twitter id somewhere)
+			var userAlreadyHasCode []entity.Referralcode
+			database.Connector.Where("twitterid = ?", tweet.AuthorID).Find(&userAlreadyHasCode)
 
-			RespondToTweet(tweet.ID, code.Code+"\n\nMake sure to go check 🏆 inside the app to share your codes with frens and win big! #chat2earn")
+			if len(userAlreadyHasCode) > 0 {
+				RespondToTweet(tweet.ID, "it's #chat2earn not #cheat2earn")
+			} else {
+				//get all items that relate to passed in owner/address
+				var code entity.Referralcode
+				code.Code = "wc-" + randSeq(10)
+				code.Walletaddr = "0xtest"
+				code.Date = time.Now()
+				code.Twitterid = tweet.AuthorID
+				database.Connector.Create(&code)
+
+				RespondToTweet(tweet.ID, code.Code+"\n\nMake sure to go check 🏆 inside the app to share your codes with frens and win big! #chat2earn")
+			}
 
 			sinceID = tweet.ID
 		}
