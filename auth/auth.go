@@ -336,7 +336,7 @@ func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 			//Not sure yet if this is the best way, but lets try it
 			delegates := GetDelegationsByDelegate(Authuser.Address)
 			if delegates != nil {
-				fmt.Println("Wallet Delegates in Auth: ", delegates)
+				//fmt.Println("Wallet Delegates in Auth: ", delegates)
 
 				for _, delegateWallet := range delegates {
 					if delegateWallet.Type == 1 {
@@ -633,7 +633,8 @@ func ValidateMessageSignatureNearWallet(key, sig, msg string) bool {
 }
 
 func Authenticate(walletName string, address string, nonce string, message string, sigHex string) (Authuser, error) {
-	fmt.Println("Authenticate: walletname: " + walletName + " \r\n address" + address + "\r\n msg: " + message + " sig: " + sigHex)
+	//removed print 9/29/2023 - SSO page might be authenticated a lot over and over though, TODO
+	//fmt.Println("Authenticate: walletname: " + walletName + " \r\n address" + address + "\r\n msg: " + message + " sig: " + sigHex)
 
 	pubKey := " "
 	if strings.HasPrefix(address, "edpk") {
@@ -664,7 +665,7 @@ func Authenticate(walletName string, address string, nonce string, message strin
 	}
 
 	recoveredAddr := " "
-	fmt.Println("Signature Length: ", len(sigHex))
+	//fmt.Println("Signature Length: ", len(sigHex))
 	if len(sigHex) > 400 { //594 without the 0x to be exact, but we can clean this up TODO: should be something more specific
 		fmt.Println("Using Smart Contract Wallet Signature")
 		chain := "mainnet"
@@ -730,7 +731,7 @@ func Authenticate(walletName string, address string, nonce string, message strin
 		sig[crypto.RecoveryIDOffset] -= 27
 		msg := accounts.TextHash([]byte(message))
 		recovered, err := crypto.SigToPub(msg, sig)
-		fmt.Println("EVM signature ", sig)
+		//fmt.Println("EVM signature ", sig)
 		if err != nil {
 			fmt.Println("EVM signature initial error: ", err)
 			err = nil //reset error
