@@ -742,7 +742,7 @@ func GetNChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 		//the above if statement works but worried there might be a race condition we miss, so this is safer for now
 		//and just marks the messages read a few seconds before they would be marked read anyway in the snap
 		for i := 0; i < (numUnread); i++ {
-			fmt.Println("forcing read item update at position: ", i, chatUnreadLength[i].Message)
+			//fmt.Println("forcing read item update at position: ", i, chatUnreadLength[i].Message)
 			database.Connector.Model(&entity.Chatitem{}).
 				Where("fromaddr = ?", chatUnreadLength[i].Fromaddr).
 				Where("toaddr = ?", chatUnreadLength[i].Toaddr).
@@ -1141,7 +1141,7 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 				//auto-send a message to the user to check out the leaderboard
 				chat.Message = "Tweet @wallet_chat with #chat2earn and #chat2win and be creative!\nThe tweet of the day with most impressions wins 5 USDC!"
 				database.Connector.Create(&chat)
-				fmt.Println("Prize Print for - JWT Address: ", Authuser.Address)
+				fmt.Println("$$$ Prize Print for - JWT Address: ", Authuser.Address)
 			}
 
 			//also notify the TO user of a new message (need to throttle this somehow)
