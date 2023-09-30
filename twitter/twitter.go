@@ -305,7 +305,7 @@ func RespondToTweet(tweet_id string, reply_text string) {
 
 	jsonStr, err := json.Marshal(tweet)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Error in RespondToTweet: ", err)
 		return
 	}
 
