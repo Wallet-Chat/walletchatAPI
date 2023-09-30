@@ -123,7 +123,7 @@ func searchTweets(query string) error {
 			database.Connector.Model(&entity.Settings{}).Where("twitteruser = ?", user.Username).Update("twitterverified", "true")
 			database.Connector.Model(&entity.Settings{}).Where("twitteruser = ?", user.Username).Update("twitterid", tweet.AuthorID)
 
-			RespondToTweet(tweet.ID, "\n\nLFC! Check 🏆 inside the app and share your referral codes with frens here! #chat2earn")
+			//RespondToTweet(tweet.ID, "\n\nLFC! Check 🏆 inside the app and share your referral codes with frens here! #chat2earn")
 		}
 	}
 
