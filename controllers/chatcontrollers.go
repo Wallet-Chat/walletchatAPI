@@ -2897,8 +2897,16 @@ func DebugPrint(w http.ResponseWriter, r *http.Request) {
 
 	// Unmarshal the JSON string into the json.RawMessage variable
 	if err := json.Unmarshal([]byte(requestBody), &raw); err != nil {
-		fmt.Println("Couldn't unmarshal :", requestBody, err)
-		return
+		//[object Object]
+		objectObject := []byte{91, 111, 98, 106, 101, 99, 116, 32, 79, 98, 106, 101, 99, 116, 93}
+		// Compare the two byte arrays
+		if bytes.Equal(objectObject, requestBody) {
+			//fmt.Println("Couldn't unmarshal :", requestBody, err)
+			return
+		} else {
+			fmt.Println("Couldn't unmarshal :", requestBody, err)
+			return
+		}
 	}
 
 	// Print the raw JSON as a string
