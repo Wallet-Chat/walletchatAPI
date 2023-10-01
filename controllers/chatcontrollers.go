@@ -2892,7 +2892,17 @@ func CreateComments(w http.ResponseWriter, r *http.Request) {
 func DebugPrint(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 
-	fmt.Println("debug print: ", requestBody)
+	// Define a variable of type json.RawMessage
+	var raw json.RawMessage
+
+	// Unmarshal the JSON string into the json.RawMessage variable
+	if err := json.Unmarshal([]byte(requestBody), &raw); err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+
+	// Print the raw JSON as a string
+	fmt.Println("DEBUG Raw:", string(raw))
 
 	w.WriteHeader(http.StatusOK)
 }
