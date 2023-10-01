@@ -2897,7 +2897,7 @@ func DebugPrint(w http.ResponseWriter, r *http.Request) {
 
 	// Unmarshal the JSON string into the json.RawMessage variable
 	if err := json.Unmarshal([]byte(requestBody), &raw); err != nil {
-		fmt.Println("Error:", err)
+		fmt.Println("Couldn't unmarshal :", requestBody, err)
 		return
 	}
 
