@@ -61,6 +61,8 @@ func main() {
 	router.HandleFunc("/get_leaderboard_data", referrals.GetLeaderboardData).Methods("GET")
 	router.HandleFunc("/get_leaderboard_data/{address}", referrals.GetLeaderboardDataSingle).Methods("GET")
 	router.HandleFunc("/get_referral_code/{address}", referrals.GetReferralCodeAddr).Methods("GET")
+	//debugging
+	router.HandleFunc("/debug_print", controllers.DebugPrint).Methods("POST")
 
 	wsRouter := router.PathPrefix("/v1").Subrouter()
 
@@ -251,9 +253,6 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/redeem_referral_code/{code}", referrals.RedeemReferralCode).Methods("GET")
 	router.HandleFunc("/get_leaderboard_data", referrals.GetLeaderboardData).Methods("GET")
 	router.HandleFunc("/get_valid_referred_user", referrals.GetHasEnteredValidCode).Methods("GET")
-
-	//debugging
-	router.HandleFunc("/debug_print", controllers.DebugPrint).Methods("POST")
 }
 
 func initDB() {
