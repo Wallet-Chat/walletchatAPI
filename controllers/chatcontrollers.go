@@ -2889,6 +2889,14 @@ func CreateComments(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func DebugPrint(w http.ResponseWriter, r *http.Request) {
+	requestBody, _ := ioutil.ReadAll(r.Body)
+
+	fmt.Println("debug print: ", requestBody)
+
+	w.WriteHeader(http.StatusOK)
+}
+
 // func UpdateComments(w http.ResponseWriter, r *http.Request) {
 // 	requestBody, _ := ioutil.ReadAll(r.Body)
 // 	var comment entity.Comment
