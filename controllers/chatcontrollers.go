@@ -1131,7 +1131,7 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 			// }
 
 			//send DM that the user should claim the prize on Twitter
-			if giveawayMessageCounter%100 == 0 {
+			if giveawayMessageCounter%50 == 0 {
 				var chat entity.Chatitem
 				chat.Timestamp = time.Now().Format("2006-01-02T15:04:05.000Z")
 				chat.Timestamp_dtm = time.Now()
@@ -1142,34 +1142,37 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 				chat.Message = "Tweet @wallet_chat with #chat2earn and #chat2win and be creative!\nThe tweet of the day with most impressions wins 5 USDC!"
 				database.Connector.Create(&chat)
 				fmt.Println("$$$ Prize Print for - JWT Address: ", Authuser.Address)
+
+				//send an email that the user should claim the prize on Twitter - TBD need new email template
+				var settings entity.Settings
+				var dbResult = database.Connector.Where("walletaddr = ?", chat.Fromaddr).Find(&settings)
+				if dbResult.RowsAffected > 0 {
+					fmt.Println("$$$ Prize Email for: ", chat.Fromaddr, settings.Email)
+					if strings.Contains(settings.Email, "@") {
+						var fromAddrname entity.Addrnameitem
+						database.Connector.Where("address = ?", chat.Fromaddr).Find(&fromAddrname)
+
+						from := mail.NewEmail("WalletChat Prize Notifications", "contact@walletchat.fun")
+						subject := "Prize Notfication For WalletChat!"
+						to := mail.NewEmail(fromAddrname.Name, settings.Email)
+						plainTextContent := "You have a message from" + fromAddrname.Name + " : \r\n" + chat.Message + "\r\n Please login via the app at https://app.walletchat.fun to read!"
+						htmlContent := email.NotificationEmailTwitter(fromAddrname.Address, fromAddrname.Name, settings.Email)
+						message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
+						client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
+						response, err := client.Send(message)
+						if err != nil {
+							log.Println(err)
+						} else {
+							_ = response
+						}
+					}
+				}
 			}
 
 			//also notify the TO user of a new message (need to throttle this somehow)
 			var settings entity.Settings
 			var dbResult = database.Connector.Where("walletaddr = ?", chat.Toaddr).Find(&settings)
 			if dbResult.RowsAffected > 0 && strings.EqualFold("true", settings.Verified) {
-
-				//send an email that the user should claim the prize on Twitter - TBD need new email template
-				// if giveawayMessageCounter % 500 == 0 {
-				// 	if strings.Contains(settings.Email, "@") {
-				// 		var fromAddrname entity.Addrnameitem
-				// 		database.Connector.Where("address = ?", chat.Fromaddr).Find(&fromAddrname)
-
-				// 		from := mail.NewEmail("WalletChat Prize Notifications", "contact@walletchat.fun")
-				// 		subject := "Prize Notfication For WalletChat!"
-				// 		to := mail.NewEmail(fromAddrname.Name, settings.Email)
-				// 		plainTextContent := "You have a message from" + fromAddrname.Name + " : \r\n" + chat.Message + "\r\n Please login via the app at https://app.walletchat.fun to read!"
-				// 		htmlContent := email.NotificationEmailDM(toAddrname.Address, fromAddrname.Address, toAddrname.Name, fromAddrname.Name, settings.Email, chat.Message)
-				// 		message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
-				// 		client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
-				// 		response, err := client.Send(message)
-				// 		if err != nil {
-				// 			log.Println(err)
-				// 		} else {
-				// 			_ = response
-				// 		}
-				// 	}
-				// }
 
 				//disabiling DM notifications here for now, due to high farming accounts
 
