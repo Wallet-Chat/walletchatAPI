@@ -1145,18 +1145,18 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 
 				//send an email that the user should claim the prize on Twitter - TBD need new email template
 				var settings entity.Settings
-				var dbResult = database.Connector.Where("walletaddr = ?", chat.Fromaddr).Find(&settings)
+				var dbResult = database.Connector.Where("walletaddr = ?", walletaddr).Find(&settings)
 				if dbResult.RowsAffected > 0 {
-					fmt.Println("$$$ Prize Email for: ", chat.Fromaddr, settings.Email)
+					fmt.Println("$$$ Prize Email for: ", walletaddr, settings.Email)
 					if strings.Contains(settings.Email, "@") {
 						var fromAddrname entity.Addrnameitem
-						database.Connector.Where("address = ?", chat.Fromaddr).Find(&fromAddrname)
+						database.Connector.Where("address = ?", walletaddr).Find(&fromAddrname)
 
 						from := mail.NewEmail("WalletChat Prize Notifications", "contact@walletchat.fun")
 						subject := "Prize Notfication For WalletChat!"
 						to := mail.NewEmail(fromAddrname.Name, settings.Email)
 						plainTextContent := "You have a message from" + fromAddrname.Name + " : \r\n" + chat.Message + "\r\n Please login via the app at https://app.walletchat.fun to read!"
-						htmlContent := email.NotificationEmailTwitter(fromAddrname.Address, fromAddrname.Name, settings.Email)
+						htmlContent := email.NotificationEmailTwitter(walletaddr, fromAddrname.Name, settings.Email)
 						message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
 						client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
 						response, err := client.Send(message)
