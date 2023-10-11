@@ -189,6 +189,7 @@ type ChatStatistics struct {
 	Pfpdata       string
 	MessagesTx    int
 	MessagesRx    int
+	GroupMessages int
 	UniqueConvos  int
 	Installedsnap string
 	RedeemedCount int
@@ -205,20 +206,6 @@ type ChatStatisticsReturn struct {
 	// Installedsnap string
 	// RedeemedCount int
 	Points int
-}
-
-type ChatStatisticsSingle struct {
-	Walletaddr    string
-	Username      string
-	Pfpdata       string
-	MessagesTx    int
-	MessagesRx    int
-	GroupMessages int
-	UniqueConvos  int
-	Installedsnap string
-	RedeemedCount int
-	Points        int
-	Referralcodes string
 }
 
 func GetLeaderboardDataCronJob() {
@@ -243,13 +230,9 @@ func GetLeaderboardDataSingle(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	address := vars["address"]
 	var results ChatStatistics
-
-	fmt.Println("get leaderboard single - num items: ", len(currentLeaderboard))
-
 	for i := 0; i < len(currentLeaderboard); i++ {
-		fmt.Println("get leaderboard single: ", currentLeaderboard[i].Walletaddr, address)
 		if strings.EqualFold(currentLeaderboard[i].Walletaddr, address) {
-			fmt.Println("get leaderboard single - found address: ", currentLeaderboard[i])
+			//fmt.Println("get leaderboard single - found address: ", currentLeaderboard[i])
 			results = currentLeaderboard[i]
 			break
 		}
