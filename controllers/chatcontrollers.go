@@ -1334,15 +1334,17 @@ func UpdateTelegramNotifications() {
 				//find corresponding support wallet for given chat_id
 				indexOfChatId := findStrIndexInArray(strconv.Itoa(updatedNotifsData.Result[i].Message.ReplyToMessage.Chat.ID), tgSupportChatIdsArray)
 
-				var chat entity.Chatitem
-				chat.Timestamp = time.Now().Format("2006-01-02T15:04:05.000Z")
-				chat.Timestamp_dtm = time.Now()
-				chat.Fromaddr = tgSupportWalletArray[indexOfChatId]
-				chat.Toaddr = origMsgSender
-				chat.Message = updatedNotifsData.Result[i].Message.Text
-				chat.Nftid = "0"
-				fmt.Println("creating TG response chat item", chat)
-				database.Connector.Create(&chat)
+				if indexOfChatId > -1 {
+					var chat entity.Chatitem
+					chat.Timestamp = time.Now().Format("2006-01-02T15:04:05.000Z")
+					chat.Timestamp_dtm = time.Now()
+					chat.Fromaddr = tgSupportWalletArray[indexOfChatId]
+					chat.Toaddr = origMsgSender
+					chat.Message = updatedNotifsData.Result[i].Message.Text
+					chat.Nftid = "0"
+					fmt.Println("creating TG response chat item", chat)
+					database.Connector.Create(&chat)
+				}
 			}
 
 		} else {

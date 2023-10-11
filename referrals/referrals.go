@@ -244,8 +244,12 @@ func GetLeaderboardDataSingle(w http.ResponseWriter, r *http.Request) {
 	address := vars["address"]
 	var results ChatStatistics
 
+	fmt.Println("get leaderboard single - num items: ", len(currentLeaderboard))
+
 	for i := 0; i < len(currentLeaderboard); i++ {
-		if currentLeaderboard[i].Walletaddr == address {
+		fmt.Println("get leaderboard single: ", currentLeaderboard[i].Walletaddr, address)
+		if strings.EqualFold(currentLeaderboard[i].Walletaddr, address) {
+			fmt.Println("get leaderboard single - found address: ", currentLeaderboard[i])
 			results = currentLeaderboard[i]
 			break
 		}
