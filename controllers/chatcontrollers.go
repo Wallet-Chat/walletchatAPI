@@ -122,40 +122,44 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 	//fmt.Printf("GetInboxByOwner: %#v\n", key)
 
 	//get all items that relate to passed in owner/address
-	var chat []entity.Chatitem
-	database.Connector.Where("fromaddr = ?", key).Or("toaddr = ?", key).Find(&chat)
+	// var chat []entity.Chatitem
+	// database.Connector.Where("fromaddr = ?", key).Or("toaddr = ?", key).Find(&chat)
 
 	//get unique conversation addresses
-	var uniqueChatMembers []string
-	for _, chatitem := range chat {
-		//fmt.Printf("search for unique addrs")
-		if chatitem.Fromaddr != key {
-			if !stringInSlice(chatitem.Fromaddr, uniqueChatMembers) {
-				uniqueChatMembers = append(uniqueChatMembers, chatitem.Fromaddr)
-			}
-		}
-		if chatitem.Toaddr != key {
-			if !stringInSlice(chatitem.Toaddr, uniqueChatMembers) {
-				uniqueChatMembers = append(uniqueChatMembers, chatitem.Toaddr)
-			}
-		}
-	}
+	var uniqueChatMembers []entity.Chatiteminboxconvos
+	//right now this is limiting the inbox to 100 messages (TODO: allow for scroll and update)
+	database.Connector.Raw("CALL GetUniqueAddressesWithInput(?)", key).Scan(&uniqueChatMembers)
+
+	// for _, chatitem := range chat {
+	// 	//fmt.Printf("search for unique addrs")
+	// 	if chatitem.Fromaddr != key {
+	// 		if !stringInSlice(chatitem.Fromaddr, uniqueChatMembers) {
+	// 			uniqueChatMembers = append(uniqueChatMembers, chatitem.Fromaddr)
+	// 		}
+	// 	}
+	// 	if chatitem.Toaddr != key {
+	// 		if !stringInSlice(chatitem.Toaddr, uniqueChatMembers) {
+	// 			uniqueChatMembers = append(uniqueChatMembers, chatitem.Toaddr)
+	// 		}
+	// 	}
+	// }
 
 	//fmt.Printf("find first message now")
 	//for each unique chat member that is not the owner addr, get the latest message
 	var userInbox []entity.Chatiteminbox
 	for _, chatmember := range uniqueChatMembers {
+		fmt.Println("Unique Chat Addrs Result: ", chatmember.Address)
 		// //add Unread msg count to both first/second items since we don't know which one is newer yet
 		var chatCount []entity.Chatitem
-		database.Connector.Where("fromaddr = ?", chatmember).Where("toaddr = ?", key).Where("msgread != ?", true).Find(&chatCount)
+		database.Connector.Where("fromaddr = ?", chatmember.Address).Where("toaddr = ?", key).Where("msgread != ?", true).Find(&chatCount)
 
 		// //get name for return val
 		var addrname entity.Addrnameitem
-		database.Connector.Where("address = ?", chatmember).Find(&addrname)
+		database.Connector.Where("address = ?", chatmember.Address).Find(&addrname)
 
 		//database view - local code replaced 7/14
 		var vchatitem entity.V_chatitem
-		var dbQuery = database.Connector.Where("fromaddr = ? AND toaddr = ?", key, chatmember).Find(&vchatitem)
+		var dbQuery = database.Connector.Where("fromaddr = ? AND toaddr = ?", key, chatmember.Address).Find(&vchatitem)
 		//var dbQuery = database.Connector.Raw("select * from v_chatitems WHERE fromaddr in('0xcafebabe', '0xdeadbeef');").Scan(&testView)
 
 		var itemToInsert entity.Chatiteminbox
@@ -176,7 +180,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 			//fmt.Printf("encrypted symmetric LIT key: %#v %#v %#v\n", vchatitem.Encryptsymkey, vchatitem.Toaddr, vchatitem.Fromaddr)
 
 			var imgname entity.Imageitem
-			var result = database.Connector.Where("addr = ?", chatmember).Find(&imgname)
+			var result = database.Connector.Where("addr = ?", chatmember.Address).Find(&imgname)
 			if result.RowsAffected > 0 {
 				itemToInsert.LogoData = imgname.Base64data
 			}
@@ -241,15 +245,18 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		var groupchat = gchat[0]
 
 		//get num unread messages
-		var chatCnt []entity.Groupchatitem
+		//var chatCnt []entity.Groupchatitem
+		var chatCount int
 		var chatReadTime entity.Groupchatreadtime
 		dbQuery = database.Connector.Where("fromaddr = ?", key).Where("nftaddr = ?", groupchat.Nftaddr).Find(&chatReadTime)
 		//if no respsonse to this query, its the first time a user is reading the chat history, send it all
 		if dbQuery.RowsAffected == 0 {
 			//fmt.Printf("sending all values! \n")
-			database.Connector.Where("nftaddr = ?", groupchat.Nftaddr).Find(&chatCnt)
+			database.Connector.Model(&entity.Groupchatitem{}).Where("nftaddr = ?", groupchat.Nftaddr).Count(&chatCount)
+			//database.Connector.Where("nftaddr = ?", groupchat.Nftaddr).Find(&chatCnt)
 		} else {
-			database.Connector.Where("timestamp_dtm > ?", chatReadTime.Readtimestamp_dtm).Where("nftaddr = ?", groupchat.Nftaddr).Find(&chatCnt)
+			database.Connector.Model(&entity.Groupchatitem{}).Where("timestamp_dtm > ?", chatReadTime.Readtimestamp_dtm).Where("nftaddr = ?", groupchat.Nftaddr).Count(&chatCount)
+			//database.Connector.Where("timestamp_dtm > ?", chatReadTime.Readtimestamp_dtm).Where("nftaddr = ?", groupchat.Nftaddr).Find(&chatCnt)
 			//fmt.Printf("sending time based count \n")
 		}
 		//end get num unread messages
@@ -260,7 +267,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		returnItem.Timestamp_dtm = groupchat.Timestamp_dtm
 		returnItem.Nftaddr = groupchat.Nftaddr
 		returnItem.Fromaddr = groupchat.Fromaddr
-		returnItem.Unreadcnt = len(chatCnt)
+		returnItem.Unreadcnt = chatCount
 		returnItem.Type = groupchat.Type
 		returnItem.Chain = bookmarks[idx].Chain
 		//retrofit old messages prior to setting Type
@@ -318,17 +325,6 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	json.NewEncoder(w).Encode(userInbox)
 }
-
-//removed since this will take FOREVER and its not used
-// func GetAllChatitems(w http.ResponseWriter, r *http.Request) {
-// 	var chat []entity.Chatitem
-// 	database.Connector.Find(&chat)
-
-// 	w.Header().Set("Content-Type", "application/json")
-//  w.Header().Set("X-Content-Type-Options", "nosniff")
-// 	w.WriteHeader(http.StatusOK)
-// 	json.NewEncoder(w).Encode(chat)
-// }
 
 // GetUnreadMsgCntTotal godoc
 // @Summary Get all unread messages TO a specific user, used for total count notification at top notification bar

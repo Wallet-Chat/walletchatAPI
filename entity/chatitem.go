@@ -198,3 +198,7 @@ type Chatiteminbox struct {
 	Encryptsymkey string    `json:"encrypted_sym_lit_key"` //USE IF USING LIT ENCRYPTION
 	Litaccesscond string    `json:"lit_access_conditions"`
 }
+
+type Chatiteminboxconvos struct {
+	Address string `json:"address"`
+}

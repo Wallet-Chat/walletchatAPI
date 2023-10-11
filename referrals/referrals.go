@@ -184,6 +184,18 @@ func RedeemReferralCode(w http.ResponseWriter, r *http.Request) {
 }
 
 type ChatStatistics struct {
+	Walletaddr    string
+	Username      string
+	Pfpdata       string
+	MessagesTx    int
+	MessagesRx    int
+	UniqueConvos  int
+	Installedsnap string
+	RedeemedCount int
+	Points        int
+}
+
+type ChatStatisticsReturn struct {
 	Walletaddr string
 	Username   string
 	Pfpdata    string
@@ -230,12 +242,13 @@ func GetLeaderboardData(w http.ResponseWriter, r *http.Request) {
 func GetLeaderboardDataSingle(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	address := vars["address"]
-	var results ChatStatisticsSingle
-	dbQuery := database.Connector.Raw("CALL get_leaderboard_data_single(?)", address).Scan(&results)
+	var results ChatStatistics
 
-	if dbQuery.Error != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
+	for i := 0; i < len(currentLeaderboard); i++ {
+		if currentLeaderboard[i].Walletaddr == address {
+			results = currentLeaderboard[i]
+			break
+		}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
