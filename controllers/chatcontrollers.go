@@ -148,7 +148,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 	//for each unique chat member that is not the owner addr, get the latest message
 	var userInbox []entity.Chatiteminbox
 	for _, chatmember := range uniqueChatMembers {
-		fmt.Println("Unique Chat Addrs Result: ", chatmember.Address)
+		//fmt.Println("Unique Chat Addrs Result: ", chatmember.Address)
 		// //add Unread msg count to both first/second items since we don't know which one is newer yet
 		var chatCount []entity.Chatitem
 		database.Connector.Where("fromaddr = ?", chatmember.Address).Where("toaddr = ?", key).Where("msgread != ?", true).Find(&chatCount)
