@@ -32,6 +32,10 @@ func randSeq(n int) string {
 	return string(b)
 }
 
+func GetLeaderboardDataGlobal() []ChatStatistics {
+	return currentLeaderboard
+}
+
 // GetInboxByOwner godoc
 // @Summary Get Inbox Summary With Last Message
 // @Description Get Each 1-on-1 Conversation, NFT and Community Chat For Display in Inbox

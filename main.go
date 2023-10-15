@@ -230,6 +230,8 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/get_comments_cnt/{nftaddr}/{nftid}", controllers.GetCommentsCount).Methods("GET")
 	//in twitter.go
 	router.HandleFunc("/search_tweets/{query_str}", twitter.SearchTweets).Methods("GET")
+	router.HandleFunc("/get_followers/{query_str}", twitter.GetNumTwitterFollowers).Methods("GET") //admin only
+	router.HandleFunc("/get_follower_counts", twitter.GetAllTwitterFollowerCount).Methods("GET")   //admin only
 
 	//holder functions
 	//TODO: this would need a signature from holder to fully verify - ok for now

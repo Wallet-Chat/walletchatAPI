@@ -11,6 +11,7 @@ import (
 	"os"
 	"rest-go-demo/database"
 	"rest-go-demo/entity"
+	"rest-go-demo/referrals"
 	"strings"
 	"time"
 
@@ -67,6 +68,21 @@ type User struct {
 
 type MetaData struct {
 	NewestID string `json:"newest_id"`
+}
+
+type PublicMetricData struct {
+	Data struct {
+		Username      string `json:"username"`
+		Name          string `json:"name"`
+		PublicMetrics struct {
+			FollowersCount int `json:"followers_count"`
+			FollowingCount int `json:"following_count"`
+			TweetCount     int `json:"tweet_count"`
+			ListedCount    int `json:"listed_count"`
+			LikeCount      int `json:"like_count"`
+		} `json:"public_metrics"`
+		ID string `json:"id"`
+	} `json:"data"`
 }
 
 func searchTweets(query string) error {
@@ -330,4 +346,125 @@ func RespondToTweet(tweet_id string, reply_text string) {
 	}
 
 	fmt.Println(string(body))
+}
+
+func GetNumTwitterFollowers(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	query_str := vars["query_str"]
+	apiKey := r.Header.Get("Authorization")
+	if len(apiKey) > 0 {
+		const prefix = "Bearer "
+		if len(apiKey) < len(prefix) {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		apiKey = apiKey[len(prefix):]
+		if strings.Contains(os.Getenv("ADMIN_API_KEY_LIST"), apiKey) {
+			url := "https://api.twitter.com/2/users/" + query_str + "?user.fields=public_metrics"
+
+			// Make an HTTP request to the Twitter API
+			req, err := http.NewRequest("GET", url, nil)
+			if err != nil {
+				return
+			}
+
+			req.Header.Set("Authorization", "Bearer "+os.Getenv("TWITTER_BEARER_API"))
+
+			client := &http.Client{}
+			resp, err := client.Do(req)
+			if err != nil {
+				fmt.Println("Error In Twitter Follower Request: ", err)
+				return
+			}
+			defer resp.Body.Close()
+
+			// Read the response body
+			body, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				fmt.Println("Error In Twitter Follower Request: ", err)
+				return
+			}
+
+			// Parse the JSON response
+			var twitterResponse PublicMetricData
+			if err := json.Unmarshal(body, &twitterResponse); err != nil {
+				return
+			}
+
+			fmt.Println("Follower Count Data: ", query_str, twitterResponse.Data.PublicMetrics.FollowersCount)
+
+		} else {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+	} else {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+}
+
+func GetAllTwitterFollowerCount(w http.ResponseWriter, r *http.Request) {
+	apiKey := r.Header.Get("Authorization")
+	if len(apiKey) > 0 {
+		const prefix = "Bearer "
+		if len(apiKey) < len(prefix) {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		apiKey = apiKey[len(prefix):]
+		if strings.Contains(os.Getenv("ADMIN_API_KEY_LIST"), apiKey) {
+			currLeaderData := referrals.GetLeaderboardDataGlobal()
+
+			//only do top 100 (twitter API limit is 100 per 24 hours anyway...)
+			for i := 0; i < 100; i++ {
+				var settings []entity.Settings
+				database.Connector.Where("walletaddr = ?", currLeaderData[i].Walletaddr).Find(&settings)
+
+				if len(settings) > 0 && settings[0].Twitterid != "" {
+					url := "https://api.twitter.com/2/users/" + settings[0].Twitterid + "?user.fields=public_metrics"
+
+					// Make an HTTP request to the Twitter API
+					req, err := http.NewRequest("GET", url, nil)
+					if err != nil {
+						fmt.Println("Error In Twitter Follower Request: ", err)
+						return
+					}
+
+					req.Header.Set("Authorization", "Bearer "+os.Getenv("TWITTER_BEARER_API"))
+
+					client := &http.Client{}
+					resp, err := client.Do(req)
+					if err != nil {
+						fmt.Println("Error In Twitter Follower Request: ", err)
+						return
+					}
+					defer resp.Body.Close()
+
+					// Read the response body
+					body, err := ioutil.ReadAll(resp.Body)
+					if err != nil {
+						fmt.Println("Error In Twitter Follower Request: ", err)
+						return
+					}
+
+					// Parse the JSON response
+					var twitterResponse PublicMetricData
+					if err := json.Unmarshal(body, &twitterResponse); err != nil {
+						fmt.Println("Error In Twitter Follower Request: ", err)
+						return
+					}
+
+					if twitterResponse.Data.PublicMetrics.FollowersCount > 1000 {
+						fmt.Println("Follower Count Data: ", settings[0].Telegramhandle, settings[0].Walletaddr, twitterResponse.Data.PublicMetrics.FollowersCount)
+					}
+				}
+			}
+		} else {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+	} else {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
 }
