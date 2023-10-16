@@ -415,6 +415,11 @@ func GetAllTwitterFollowerCount(w http.ResponseWriter, r *http.Request) {
 		if strings.Contains(os.Getenv("ADMIN_API_KEY_LIST"), apiKey) {
 			currLeaderData := referrals.GetLeaderboardDataGlobal()
 
+			if len(currLeaderData) < 1 {
+				w.WriteHeader(http.StatusNoContent)
+				return
+			}
+
 			//only do top 100 (twitter API limit is 100 per 24 hours anyway...)
 			for i := 0; i < 100; i++ {
 				var settings []entity.Settings

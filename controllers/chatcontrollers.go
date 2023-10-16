@@ -1540,6 +1540,13 @@ func CreateCommunity(w http.ResponseWriter, r *http.Request) {
 		dbQuery = database.Connector.Where("address = ?", addrname.Address).Find(&mappings)
 	}
 
+	if communityInfo.Image != "" {
+		var imageaddr entity.Imageitem
+		imageaddr.Addr = slug
+		imageaddr.Base64data = communityInfo.Image
+		database.Connector.Create(&imageaddr)
+	}
+
 	for i := 0; i < len(communityInfo.Social); i++ {
 		var social entity.Communitysocial
 		social.Community = addrname.Address //slug
