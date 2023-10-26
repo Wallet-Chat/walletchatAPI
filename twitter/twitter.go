@@ -460,7 +460,7 @@ func GetAllTwitterFollowerCount(w http.ResponseWriter, r *http.Request) {
 					}
 
 					if twitterResponse.Data.PublicMetrics.FollowersCount > 1000 {
-						fmt.Println("Follower Count Data: ", settings[0].Telegramhandle, settings[0].Walletaddr, twitterResponse.Data.PublicMetrics.FollowersCount)
+						fmt.Println("Follower Count Data: ", settings[0].Twitteruser, settings[0].Walletaddr, twitterResponse.Data.PublicMetrics.FollowersCount)
 					}
 				}
 			}

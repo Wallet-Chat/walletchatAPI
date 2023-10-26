@@ -1595,7 +1595,6 @@ func UpdateCommunity(w http.ResponseWriter, r *http.Request) {
 
 	//don't want groups named "new" as that is the path for creating new groups
 	if strings.EqualFold(communityInfo.Slug, "new") {
-		fmt.Println("blacklisted community name", communityInfo.Name)
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
@@ -1627,6 +1626,17 @@ func UpdateCommunity(w http.ResponseWriter, r *http.Request) {
 			social.Type = communityInfo.Social[i].Type
 			social.Name = communityInfo.Social[i].Name
 			database.Connector.Create(&social)
+		}
+
+		if communityInfo.Image != "" {
+			var imageaddr entity.Imageitem
+			imageaddr.Addr = communityInfo.Slug
+			imageaddr.Base64data = communityInfo.Image
+
+			//just delete what is there, if anything is there. (saves checking what exists to do create or update)
+			database.Connector.Where("addr = ?", communityInfo.Slug).Delete(&imageaddr)
+
+			database.Connector.Create(&imageaddr)
 		}
 
 		w.Header().Set("Content-Type", "application/json")
