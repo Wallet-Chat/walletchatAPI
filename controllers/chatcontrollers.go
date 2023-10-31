@@ -1163,7 +1163,7 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 			// 			}
 			// 		}
 			// 	}
-			}
+			// }
 
 			//also notify the TO user of a new message (need to throttle this somehow)
 			var settings entity.Settings

@@ -155,6 +155,14 @@ func RedeemReferralCode(w http.ResponseWriter, r *http.Request) {
 	var code []entity.Referralcode
 	dbQuery := database.Connector.Where("code = ?", referral_code).Where("redeemed = ?", 0).Find(&code)
 
+	//allow users to sign in without a code, just don't get referral points
+	if referral_code == "wc-test" {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		json.NewEncoder(w).Encode(code)
+		return
+	}
+
 	//don't let people redeem their own codes
 	if dbQuery.RowsAffected > 0 && code[0].Walletaddr != walletaddr {
 
