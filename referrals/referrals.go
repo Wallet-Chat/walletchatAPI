@@ -157,6 +157,11 @@ func RedeemReferralCode(w http.ResponseWriter, r *http.Request) {
 
 	//allow users to sign in without a code, just don't get referral points
 	if referral_code == "wc-test" {
+		var uservalid entity.Referraluser
+		uservalid.Referralcode = "wc-test"
+		uservalid.Walletaddr = walletaddr
+		database.Connector.Create(&uservalid)
+
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		json.NewEncoder(w).Encode(code)
