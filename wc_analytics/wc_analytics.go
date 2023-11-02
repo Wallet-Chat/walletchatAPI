@@ -42,6 +42,17 @@ type EventDataWithEmail struct {
 	} `json:"events"`
 }
 
+type EventDataWithSignupSite struct {
+	ClientID string `json:"client_id"`
+	Events   []struct {
+		Name   string `json:"name"`
+		Params struct {
+			Walletaddr string `json:"walletaddr"`
+			Signupsite string `json:"signupsite"`
+		} `json:"params"`
+	} `json:"events"`
+}
+
 func SendCustomEvent(clientID string, eventName string) error { //eventParams map[string]interface{}) error {
 	apiUrl := "https://www.google-analytics.com/mp/collect?measurement_id=" + os.Getenv("GOOGLE_GA4_MEASUREMENT_ID") + "&api_secret=" + os.Getenv("GOOGLE_GA4_API_KEY")
 
@@ -127,6 +138,59 @@ func SendCustomEventWithEmail(clientID string, eventName string, emailInput stri
 				}{
 					Walletaddr: clientID,
 					Email:      emailInput,
+				},
+			},
+		},
+	}
+	eventDataJson, err := json.Marshal(eventData)
+	if err != nil {
+		fmt.Println("GA4 Called Custom Event - Error 0 Repsonse: ", err)
+		return err
+	}
+	eventDataBytes := bytes.NewBuffer(eventDataJson)
+
+	req, err := http.NewRequest("POST", apiUrl, eventDataBytes)
+	if err != nil {
+		fmt.Println("GA4 Called Custom Event - Error 1 Repsonse: ", err)
+		return err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println("GA4 Called Custom Event - Error 2 Repsonse: ", err)
+		return err
+	}
+
+	//fmt.Println("GA4 Called Custom Event - HTTP Repsonse: ", resp)
+
+	defer resp.Body.Close()
+
+	return nil
+}
+
+func SendCustomEventWithSignupSite(clientID string, eventName string, signupSite string) error { //eventParams map[string]interface{}) error {
+	apiUrl := "https://www.google-analytics.com/mp/collect?measurement_id=" + os.Getenv("GOOGLE_GA4_MEASUREMENT_ID") + "&api_secret=" + os.Getenv("GOOGLE_GA4_API_KEY")
+
+	eventData := EventDataWithSignupSite{
+		ClientID: clientID,
+		Events: []struct {
+			Name   string `json:"name"`
+			Params struct {
+				Walletaddr string `json:"walletaddr"`
+				Signupsite string `json:"signupsite"`
+			} `json:"params"`
+		}{
+			{
+				Name: eventName,
+				Params: struct {
+					Walletaddr string `json:"walletaddr"`
+					Signupsite string `json:"signupsite"`
+				}{
+					Walletaddr: clientID,
+					Signupsite: signupSite,
 				},
 			},
 		},

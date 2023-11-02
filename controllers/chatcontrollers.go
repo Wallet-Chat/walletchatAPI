@@ -1077,8 +1077,6 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(dbQuery.Error)
 		} else {
-			wc_analytics.SendCustomEvent(Authuser.Address, "SEND_MESSAGE")
-
 			w.Header().Set("Content-Type", "application/json")
 			w.Header().Set("X-Content-Type-Options", "nosniff")
 			w.WriteHeader(http.StatusCreated)
@@ -1168,6 +1166,7 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 			//also notify the TO user of a new message (need to throttle this somehow)
 			var settings entity.Settings
 			var dbResult = database.Connector.Where("walletaddr = ?", chat.Toaddr).Find(&settings)
+			wc_analytics.SendCustomEventWithSignupSite(Authuser.Address, "SEND_MESSAGE", settings.Signupsite)
 			if dbResult.RowsAffected > 0 && strings.EqualFold("true", settings.Verified) {
 
 				//disabiling DM notifications here for now, due to high farming accounts
