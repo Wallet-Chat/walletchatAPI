@@ -4067,6 +4067,7 @@ func WalletGuardCheck(w http.ResponseWriter, r *http.Request) {
 	// Read the request body to get the list of URLs
 	requestBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		fmt.Println("Error requestBody: ", r.Body)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -4074,6 +4075,7 @@ func WalletGuardCheck(w http.ResponseWriter, r *http.Request) {
 	// Parse the list of URLs from the request body
 	var urls []string
 	if err := json.Unmarshal(requestBody, &urls); err != nil {
+		fmt.Println("Parse Error : ", urls)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -4126,10 +4128,8 @@ func WalletGuardCheck(w http.ResponseWriter, r *http.Request) {
 
 	// Respond with the results as JSON
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(recommendedActions); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	json.NewEncoder(w).Encode(recommendedActions)
 }
 
 type POAPInfoByAddress struct {
