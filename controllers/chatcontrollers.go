@@ -4046,6 +4046,92 @@ func getPoapInfoByAddress(walletAddr string) []POAPInfoByAddress {
 	return result
 }
 
+type WalletGuardStruct struct {
+	DomainName        string `json:"domainName"`
+	RecommendedAction string `json:"recommendedAction"`
+	RiskFactors       []struct {
+		Type     string `json:"type"`
+		Severity string `json:"severity"`
+		Message  string `json:"message"`
+		Value    string `json:"value,omitempty"`
+	} `json:"riskFactors"`
+	Verified bool   `json:"verified"`
+	Status   string `json:"status"`
+}
+
+type WalletGuardResponse struct {
+	RecommendedAction string `json:"recommendedAction"`
+}
+
+func WalletGuardCheck(w http.ResponseWriter, r *http.Request) {
+	// Read the request body to get the list of URLs
+	requestBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Parse the list of URLs from the request body
+	var urls []string
+	if err := json.Unmarshal(requestBody, &urls); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Initialize a slice to store RecommendedActions
+	recommendedActions := make([]string, len(urls))
+
+	for i, url := range urls {
+		// Create the URL for the WalletGuard API
+		apiUrl := "https://api.walletguard.app/v1/scan?url=" + url
+
+		// Create the HTTP request
+		req, err := http.NewRequest("GET", apiUrl, nil)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		req.Header.Add("accept", "application/json")
+		req.Header.Add("X-API-KEY", os.Getenv("WALLET_GUARD_API_KEY"))
+
+		// Send the HTTP request
+		res, err := http.DefaultClient.Do(req)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer res.Body.Close()
+
+		// Read and parse the response body
+		responseBody, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// Unmarshal the JSON response to get the RecommendedAction
+		var walletGuardResponse WalletGuardResponse
+		if err := json.Unmarshal(responseBody, &walletGuardResponse); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// Store the RecommendedAction in the slice
+		recommendedActions[i] = walletGuardResponse.RecommendedAction
+	}
+
+	// Now, recommendedActions contains the RecommendedAction for each URL
+	//fmt.Printf("Recommended Actions: %v\n", recommendedActions)
+
+	// Respond with the results as JSON
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(recommendedActions); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
 type POAPInfoByAddress struct {
 	Event struct {
 		ID          int    `json:"id"`

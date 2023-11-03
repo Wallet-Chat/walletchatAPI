@@ -249,6 +249,9 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/opensea_asset_owner/{address}", controllers.GetOpenseaAssetOwner).Methods("GET")
 	router.HandleFunc("/opensea_asset_owner_ens/{address}", controllers.GetOpenseaAssetOwnerENS).Methods("GET")
 
+	//WalletGuard Calls to prevent CORS errors and API key leakage
+	router.HandleFunc("/wallet_guard_check", controllers.WalletGuardCheck).Methods("POST")
+
 	//Leaderboard calls
 	router.HandleFunc("/get_referral_code", referrals.GetReferralCode).Methods("GET")
 	router.HandleFunc("/create_referral_code/{address}", referrals.CreateReferralCode).Methods("GET") //mainly for testing

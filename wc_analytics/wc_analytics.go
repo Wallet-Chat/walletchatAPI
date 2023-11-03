@@ -56,21 +56,6 @@ type EventDataWithSignupSite struct {
 func SendCustomEvent(clientID string, eventName string) error { //eventParams map[string]interface{}) error {
 	apiUrl := "https://www.google-analytics.com/mp/collect?measurement_id=" + os.Getenv("GOOGLE_GA4_MEASUREMENT_ID") + "&api_secret=" + os.Getenv("GOOGLE_GA4_API_KEY")
 
-	// client_id: '0xkevin',
-	// events: [{
-	//     name: 'TestKevinPostman',
-	//     params: {},
-	// }]
-
-	// eventData := EventData{
-	// 	ClientID: clientID,
-	// 	Events: Event{
-	// 		Name: eventName,
-	// 		Params: {
-	// 			"walletaddr": clientID,
-	// 		},
-	// 	}
-	// }
 	eventData := EventData{
 		ClientID: clientID,
 		Events: []struct {
