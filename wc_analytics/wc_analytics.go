@@ -84,7 +84,7 @@ func SendCustomEvent(clientID string, eventName string) error { //eventParams ma
 				Params: struct {
 					Walletaddr string `json:"walletaddr"`
 				}{
-					Walletaddr: clientID,
+					Walletaddr: "." + clientID, //GA4 converts this into a goofy integer otherwise, add . for workaround
 				},
 			},
 		},
@@ -136,7 +136,7 @@ func SendCustomEventWithEmail(clientID string, eventName string, emailInput stri
 					Walletaddr string `json:"walletaddr"`
 					Email      string `json:"email"`
 				}{
-					Walletaddr: clientID,
+					Walletaddr: "." + clientID, //GA4 converts this into a goofy integer otherwise, add . for workaround
 					Email:      emailInput,
 				},
 			},
@@ -189,7 +189,7 @@ func SendCustomEventWithSignupSite(clientID string, eventName string, signupSite
 					Walletaddr string `json:"walletaddr"`
 					Signupsite string `json:"signupsite"`
 				}{
-					Walletaddr: clientID,
+					Walletaddr: "." + clientID, //GA4 converts this into a goofy integer otherwise, add . for workaround
 					Signupsite: signupSite,
 				},
 			},
