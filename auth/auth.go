@@ -661,10 +661,11 @@ func Authenticate(walletName string, address string, nonce string, message strin
 		fmt.Println("Get Address Validate Error: ", address, err)
 		return Authuser, err
 	}
-	if Authuser.Nonce != nonce {
-		fmt.Println("Invalid Nonce Error: ", Authuser.Nonce, nonce)
-		return Authuser, ErrAuthError
-	}
+	//For SSO either need to require users use this nonce + check for its presence in the message
+	// if Authuser.Nonce != nonce {
+	// 	fmt.Println("Invalid Nonce Error: ", Authuser.Nonce, nonce)
+	// 	return Authuser, ErrAuthError
+	// }
 
 	recoveredAddr := " "
 	//fmt.Println("Signature Length: ", len(sigHex))
