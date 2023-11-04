@@ -279,9 +279,11 @@ func (s SigninPayload) Validate() error {
 	}
 
 	if !nonceRegex.MatchString(s.Nonce) {
+		fmt.Println("Invalid Nonce: ", s.Nonce)
 		return ErrInvalidNonce
 	}
 	if len(s.Sig) == 0 {
+		fmt.Println("Missing Sig")
 		return ErrMissingSig
 	}
 	return nil
@@ -660,7 +662,7 @@ func Authenticate(walletName string, address string, nonce string, message strin
 		return Authuser, err
 	}
 	if Authuser.Nonce != nonce {
-		fmt.Println("Invalid Nonce Error: ", err)
+		fmt.Println("Invalid Nonce Error: ", Authuser.Nonce, nonce)
 		return Authuser, ErrAuthError
 	}
 
