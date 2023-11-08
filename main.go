@@ -123,7 +123,7 @@ func main() {
 	// handler := c.Handler(router)
 
 	//rate limit POST/PUT requests (We still use GET for polling, so we can't rate limit this yet)
-	lmt := tollbooth.NewLimiter(float64(3), nil)
+	lmt := tollbooth.NewLimiter(float64(5), nil)
 	lmt.SetIPLookups([]string{"RemoteAddr", "X-Forwarded-For", "X-Real-IP"}).SetMethods([]string{"POST"})
 
 	log.Fatal(http.ListenAndServe(":8080", tollbooth.LimitHandler(lmt, handler)))
