@@ -34,7 +34,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gorilla/mux"
-	"github.com/segmentio/analytics-go/v3"
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
@@ -2076,17 +2075,6 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 		if strings.Contains(os.Getenv("ADMIN_API_KEY_LIST"), apiKey) {
 			isAdmin = true
 			fmt.Println("Found API key in Authorization header")
-
-			var SegmentClient = analytics.New(os.Getenv("SEGMENT_API_KEY"))
-			SegmentClient.Enqueue(analytics.Track{
-				Event:  "ADMIN UPDATE NAME",
-				UserId: "ADMIN",
-				Properties: analytics.NewProperties().
-					Set("category", "API_ADMIN").
-					Set("label", apiKey[:16]).
-					Set("value", addrname.Name),
-			})
-			SegmentClient.Close()
 			wc_analytics.SendCustomEvent(apiKey[:16], "ADMIN_UPDATE_NAME")
 		}
 	}
@@ -2124,18 +2112,6 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 			var result = database.Connector.Create(&addrname)
 			affectedRows = int(result.RowsAffected)
 			fmt.Printf("creating addr->name item: %s <-> %s\n", addrname.Address, addrname.Name)
-
-			var SegmentClient = analytics.New(os.Getenv("SEGMENT_API_KEY"))
-			SegmentClient.Enqueue(analytics.Track{
-				Event:  "NEW SIGNUP",
-				UserId: Authuser.Address,
-				Properties: analytics.NewProperties().
-					//Set("time", time.Now()).
-					//Set("category", "NewUsers").
-					Set("label", addrnameSignup.Address).
-					Set("category", addrnameSignup.Domain),
-			})
-			SegmentClient.Close()
 			wc_analytics.SendCustomEvent(Authuser.Address, "NEW_SIGNUP")
 
 			//create a settings entry as well to save signupsite, could be combined upon redesign
@@ -2527,16 +2503,6 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("Found API key in Authorization header")
 			//force verified = true here
 			settingsRX.Verified = "true"
-			var SegmentClient = analytics.New(os.Getenv("SEGMENT_API_KEY"))
-			SegmentClient.Enqueue(analytics.Track{
-				Event:  "ADMIN UPDATE SETTINGS",
-				UserId: "ADMIN",
-				Properties: analytics.NewProperties().
-					Set("category", "IntegratedSignin").
-					Set("label", settingsRX.Walletaddr).
-					Set("value", settingsRX.Signupsite),
-			})
-			SegmentClient.Close()
 			fmt.Println("Admin Update Settings")
 			wc_analytics.SendCustomEvent(settingsRX.Walletaddr, "ADMIN_UPDATE_SETTINGS")
 		}
@@ -2598,16 +2564,6 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 					}
 				}
 			}
-			var SegmentClient = analytics.New(os.Getenv("SEGMENT_API_KEY"))
-			SegmentClient.Enqueue(analytics.Track{
-				Event:  "SetSetting",
-				UserId: Authuser.Address,
-				Properties: analytics.NewProperties().
-					Set("category", "IntegratedSignin").
-					Set("label", settingsRX.Walletaddr).
-					Set("value", settingsRX.Signupsite),
-			})
-			SegmentClient.Close()
 			wc_analytics.SendCustomEvent(settingsRX.Walletaddr, "UPDATE_SETTINGS")
 		} else {
 			if settingsRX.Telegramhandle != "" {

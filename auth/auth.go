@@ -23,7 +23,6 @@ import (
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/segmentio/analytics-go"
 	"github.com/spruceid/siwe-go"
 
 	//"github.com/ethereum/go-ethereum/crypto/secp256k1"
@@ -350,15 +349,6 @@ func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 			}
 		}
 
-		// fmt.Println("WC Analytics SignIn")
-		// var SegmentClient = analytics.New(os.Getenv("SEGMENT_API_KEY"))
-		// SegmentClient.Enqueue(analytics.Track{
-		// 	Event:  "Signed In",
-		// 	UserId: Authuser.Address,
-		// 	Properties: analytics.NewProperties().
-		// 		Set("time", time.Now()), //TODO fix this time to something standard?
-		// })
-		// SegmentClient.Close()
 		wc_analytics.SendCustomEvent(Authuser.Address, "CONNECT_WALLET_SIGNIN")
 
 		signedToken, err := jwtProvider.CreateStandard(Authuser.Address)
@@ -406,15 +396,6 @@ func WelcomeHandler() http.HandlerFunc {
 		var dbQuery = database.Connector.Where("address = ?", Authuser.Address).Find(&addrnameDB)
 		if dbQuery.RowsAffected > 0 {
 			resp.Msg = "Welcome:" + addrnameDB.Name + ":Addr:" + Authuser.Address
-			// var SegmentClient = analytics.New(os.Getenv("SEGMENT_API_KEY"))
-			// SegmentClient.Enqueue(analytics.Track{
-			// 	Event:  "Signed In",
-			// 	UserId: Authuser.Address,
-			// 	Properties: analytics.NewProperties().
-			// 		Set("time", time.Now()).    //TODO fix this time to something standard?
-			// 		Set("returningUser", true), //TODO fix this time to something standard?
-			// })
-			// SegmentClient.Close()
 			wc_analytics.SendCustomEvent(Authuser.Address, "CONNECT_WALLET_VALID_JWT")
 		}
 
@@ -481,16 +462,6 @@ func AuthMiddleware(jwtProvider *JwtHmacProvider) func(next http.Handler) http.H
 					}
 
 					//fmt.Println("POST Count Update for Addr: ", SHORT_API_ID, apiTrackerCnt[SHORT_API_ID])
-					var SegmentClient = analytics.New(os.Getenv("SEGMENT_API_KEY"))
-					SegmentClient.Enqueue(analytics.Track{
-						Event:  "POST COUNT",
-						UserId: authAdmin.Address,
-						Properties: analytics.NewProperties().
-							Set("category", "API_COUNT").
-							Set("label", authAdmin.Address),
-						//Set("value", r.URL.Path),
-					})
-					SegmentClient.Close()
 					wc_analytics.SendCustomEvent(authAdmin.Address, "POST_COUNT")
 
 				}
@@ -498,16 +469,6 @@ func AuthMiddleware(jwtProvider *JwtHmacProvider) func(next http.Handler) http.H
 				ctx := context.WithValue(r.Context(), "Authuser", authAdmin)
 				next.ServeHTTP(w, r.WithContext(ctx))
 
-				var SegmentClient = analytics.New(os.Getenv("SEGMENT_API_KEY"))
-				SegmentClient.Enqueue(analytics.Track{
-					Event:  "ADMIN API AUTH",
-					UserId: authAdmin.Address,
-					Properties: analytics.NewProperties().
-						Set("category", "API_ADMIN").
-						Set("label", authAdmin.Address),
-					//Set("value", r.URL.Path),
-				})
-				SegmentClient.Close()
 				wc_analytics.SendCustomEvent(authAdmin.Address, "ADMIN_API_AUTH")
 			}
 			claims, err := jwtProvider.Verify(tokenString)
@@ -530,17 +491,6 @@ func AuthMiddleware(jwtProvider *JwtHmacProvider) func(next http.Handler) http.H
 			if r.Method == "POST" {
 				apiTrackerCnt[Authuser.Address] = apiTrackerCnt[Authuser.Address] + 1
 				//fmt.Println("POST Count Update for Addr: ", Authuser.Address, apiTrackerCnt[Authuser.Address])
-
-				var SegmentClient = analytics.New(os.Getenv("SEGMENT_API_KEY"))
-				SegmentClient.Enqueue(analytics.Track{
-					Event:  "POST COUNT",
-					UserId: Authuser.Address,
-					Properties: analytics.NewProperties().
-						Set("category", "API_COUNT").
-						Set("label", Authuser.Address),
-					//Set("value", ),
-				})
-				SegmentClient.Close()
 				wc_analytics.SendCustomEvent(Authuser.Address, "POST_COUNT")
 			}
 
