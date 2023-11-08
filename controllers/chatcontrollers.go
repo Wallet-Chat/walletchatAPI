@@ -2106,19 +2106,27 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 		//create or update in one function is easier
 		var addrnameDB entity.Addrnameitem
 		var dbQuery = database.Connector.Where("address = ?", addrname.Address).Find(&addrnameDB)
+		fmt.Println("dbQuery count: ", dbQuery.RowsAffected)
+		fmt.Println("input data: ", addrnameSignup)
 
 		var affectedRows = 0
 		if dbQuery.RowsAffected == 0 {
 			var result = database.Connector.Create(&addrname)
 			affectedRows = int(result.RowsAffected)
 			fmt.Printf("creating addr->name item: %s <-> %s\n", addrname.Address, addrname.Name)
-			wc_analytics.SendCustomEvent(Authuser.Address, "NEW_SIGNUP")
+			wc_analytics.SendCustomEvent(addrname.Address, "NEW_SIGNUP")
 
 			//create a settings entry as well to save signupsite, could be combined upon redesign
 			fmt.Printf("Signup Site: %s \n", addrnameSignup.Signupsite)
 			var settings entity.Settings
 			var dbResults = database.Connector.Where("walletaddr = ?", addrname.Address).Find(&settings)
 			if dbResults.RowsAffected == 0 {
+				if isAdmin && addrnameSignup.Email != "" {
+					settings.Email = addrnameSignup.Email
+					settings.Verified = "true"
+					settings.Notify24 = "false"
+					settings.Notifydm = "true"
+				}
 				settings.Domain = addrnameSignup.Domain
 				settings.Signupsite = addrnameSignup.Signupsite
 				settings.Walletaddr = addrname.Address

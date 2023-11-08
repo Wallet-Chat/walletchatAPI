@@ -95,6 +95,7 @@ type Addrnamesignupitem struct {
 	Name       string `json:"name"`       //NAME
 	Signupsite string `json:"signupsite"` //SITE USER SIGNED UP FROM
 	Domain     string `json:"domain"`     //DOMAIN
+	Email      string `json:"email"`      //ADMIN ONLY USAGE
 }
 
 type Addrnameitem struct {
