@@ -26,16 +26,16 @@ import (
 	"time"
 )
 
-// @title WalletChat API
+// @title   WalletChat API
 // @version 2.0
 // @description.markdown
-// @wallet_chat API Support via Twitter
-// @contact.url https://walletchat.fun
-// @contact.email contact@walletchat.fun
+// @wallet_chat                API Support via Twitter
+// @contact.url                https://walletchat.fun
+// @contact.email              contact@walletchat.fun
 // @securityDefinitions.apikey BearerAuth
-// @in header
-// @name Authorization
-// @host app.walletchat.fun
+// @in                         header
+// @name                       Authorization
+// @host                       app.walletchat.fun
 // @BasePath
 func main() {
 	godotenv.Load(".env")

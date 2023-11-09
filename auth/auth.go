@@ -191,15 +191,15 @@ func RegisterHandler() http.HandlerFunc {
 }
 
 // UserNonceHandler godoc
-// @Summary If the current wallet doesn't have a valid local JWT, need to request a new nonce to sign
+// @Summary     If the current wallet doesn't have a valid local JWT, need to request a new nonce to sign
 // @Description As part of the login process, we need a user to sign a nonce genrated from the API, to prove the user in fact
 // @Description the owner of the wallet they are siging in from.  JWT currently set to 24 hour validity (could change this upon request)
-// @Tags Auth
-// @Accept  json
-// @Produce json
-// @Param address path string true "wallet address to get nonce to sign"
-// @Success 200 {} Authuser
-// @Router /users/{address}/nonce [get]
+// @Tags        Auth
+// @Accept      json
+// @Produce     json
+// @Param       address path string true "wallet address to get nonce to sign"
+// @Success     200     {}   Authuser
+// @Router      /users/{address}/nonce [get]
 func UserNonceHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
@@ -289,16 +289,16 @@ func (s SigninPayload) Validate() error {
 }
 
 // SigninHandler godoc
-// @Summary Sign In with signed nonce value, currently JWT token returned should be valid for 24 hours
+// @Summary     Sign In with signed nonce value, currently JWT token returned should be valid for 24 hours
 // @Description Every call the to API after this signin should present the JWT Bearer token for authenticated access.
 // @Description Upon request we can change the timeout to greater than 24 hours, or setup an addtional dedicated API for
 // @Description an agreed upon development and maintenance cost
-// @Tags Auth
-// @Accept  json
-// @Produce json
-// @Param message body SigninPayload true "json input containing signed message and append nonce for easy processing"
-// @Success 200 {integer} int
-// @Router /signin [post]
+// @Tags        Auth
+// @Accept      json
+// @Produce     json
+// @Param       message body      SigninPayload true "json input containing signed message and append nonce for easy processing"
+// @Success     200     {integer} int
+// @Router      /signin [post]
 func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var p SigninPayload

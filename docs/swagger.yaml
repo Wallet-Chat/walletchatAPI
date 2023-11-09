@@ -19,6 +19,17 @@ definitions:
           type: string
         type: array
     type: object
+  controllers.CommunityMember:
+    properties:
+      address:
+        type: string
+      admin:
+        type: boolean
+      image:
+        type: string
+      name:
+        type: string
+    type: object
   controllers.LandingPageItems:
     properties:
       has_messaged:
@@ -34,8 +45,12 @@ definitions:
       logo:
         description: logo url, stored in backend
         type: string
-      members:
+      member_count:
         type: integer
+      members:
+        items:
+          $ref: '#/definitions/controllers.CommunityMember'
+        type: array
       messages:
         items:
           $ref: '#/definitions/entity.Groupchatitem'
@@ -106,6 +121,9 @@ definitions:
         type: string
       domain:
         description: DOMAIN
+        type: string
+      email:
+        description: ADMIN ONLY USAGE
         type: string
       id:
         type: integer
@@ -234,9 +252,28 @@ definitions:
       type:
         type: string
     type: object
+  entity.Communityaccesscondition:
+    properties:
+      address:
+        type: string
+      count:
+        type: string
+      id:
+        type: integer
+      slug:
+        description: change community to slug in DB table too
+        type: string
+    type: object
   entity.Createcommunityitem:
     properties:
-      community:
+      id:
+        type: integer
+      image:
+        description: base64
+        type: string
+      name:
+        type: string
+      slug:
         type: string
       social:
         items:
@@ -273,17 +310,31 @@ definitions:
       id:
         type: integer
     type: object
+  entity.ImageitemPhoto:
+    properties:
+      addr:
+        type: string
+      base64data:
+        type: string
+      id:
+        type: integer
+      imageid:
+        type: string
+    type: object
   entity.Settings:
     properties:
       domain:
         description: DOMAIN
         type: string
       email:
-        description: Publickey  string `json:"publickey"`
+        description: EMAIL ADDRESS TO GET NOTIFICATIONS
         type: string
       id:
         description: AUTO-GENERATED (PRIMARY KEY)
         type: integer
+      installedsnap:
+        description: IS METAMASK SNAP INSTALLED
+        type: string
       notify24:
         description: RECEIVE NOTIFICATION FOR EVERY DM RECEIVED (string value true/false)
         type: string
@@ -292,6 +343,26 @@ definitions:
         type: string
       signupsite:
         description: LATEST SITE WHERE NOTIFICATIONS EMAIL WAS ENTERED
+        type: string
+      telegramcode:
+        description: TELEGRAM VERIFICATION CODE - REQUIRES THIS MSG SENT TO WALLETCHAT
+          BOT
+        type: string
+      telegramhandle:
+        description: TELEGRAM @ handle - MAINLY USED AS DOUBLE CHECK DURING INITIAL
+          SETUP
+        type: string
+      telegramid:
+        description: TELEGRAM CHAT ID - REQUIRES MSG SENT TO WALLETCHAT BOT TO VERIFY
+        type: string
+      twitterid:
+        description: TWITTER USER ID - FUTURE USE IF USER CHANGES NAME?
+        type: string
+      twitteruser:
+        description: TWITTER/X @user
+        type: string
+      twitterverified:
+        description: HAS USER VERIFIED @user with WALLETCHAT (not twitter blue checkmark)
         type: string
       verified:
         description: USER CONFIRMED EMAIL OR NOT (string value true/false)
@@ -453,6 +524,32 @@ paths:
       summary: Get Community Chat Landing Page Info
       tags:
       - GroupChat
+  /v1/community/conditions:
+    post:
+      consumes:
+      - application/json
+      description: Change community access conditions
+      parameters:
+      - description: Create/Edit Community/Group Access Conditions
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Communityaccesscondition'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Communityaccesscondition'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Change community access conditions
+      tags:
+      - GroupChat
   /v1/create_bookmark:
     post:
       consumes:
@@ -542,7 +639,7 @@ paths:
       - application/json
       description: Community Chat Creation
       parameters:
-      - description: Community Message Creation
+      - description: Community/Group Creation
         in: body
         name: message
         required: true
@@ -878,6 +975,38 @@ paths:
       tags:
       - Common
   /v1/get_inbox/{address}:
+    get:
+      consumes:
+      - application/json
+      description: Get Each 1-on-1 Conversation, NFT and Community Chat For Display
+        in Inbox
+      parameters:
+      - description: Wallet Address
+        in: path
+        name: address
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Chatiteminbox'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get Inbox Summary With Last Message
+      tags:
+      - Inbox
+  /v1/get_latest_unread/{address}:
+    get:
+      responses: {}
+  /v1/get_n_chatitems/{fromaddr}/{toaddr}/{count}:
+    get:
+      responses: {}
+  /v1/get_referral_code:
     get:
       consumes:
       - application/json
@@ -1403,19 +1532,44 @@ paths:
       summary: Get Thumbnail Image Data
       tags:
       - Common
-  /v1/imagepfp:
+  /v1/imageraw:
     post:
       consumes:
       - application/json
-      description: public facing PFP storage to make it faster for UI to get and load
-        images
+      description: |-
+        private image storage for photo uploads in DMS
+        imageid should follow format: <fromAddr>_<toAddr>_<random 10 digit number>
+        the random number is passed in instead of returned, to make it easier for the FE to save this in message data
       parameters:
-      - description: Profile Thumbnail Pic (PFP)
+      - description: Raw Images
         in: body
         name: message
         required: true
         schema:
-          $ref: '#/definitions/entity.Imageitem'
+          $ref: '#/definitions/entity.ImageitemPhoto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      security:
+      - BearerAuth: []
+      summary: Store Image in Bucket Storage
+      tags:
+      - DMs
+  /v1/imageraw/{imageid}:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        private image storage for photo uploads in DMs
+        Images can only be fetched by address to (recipient), or address from (sender)
+      parameters:
+      - description: unique image id to fetch
+        in: path
+        name: imageid
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -1429,7 +1583,7 @@ paths:
       - BearerAuth: []
       summary: Store Image in Bucket Storage
       tags:
-      - Common
+      - DMs
   /v1/is_owner/{contract}/{wallet}:
     get:
       consumes:
@@ -1487,7 +1641,7 @@ paths:
       summary: give a common name to a user address, or NFT collection
       tags:
       - Common
-  /v1/name/{name}:
+  /v1/name/{addr}:
     get:
       consumes:
       - application/json
@@ -1513,6 +1667,31 @@ paths:
       summary: get the common name which has been mapped to an address
       tags:
       - Common
+  /v1/resolve_name/{name}:
+    get:
+      consumes:
+      - application/json
+      description: Resolve .ETH, .BNB, .ARB names
+      parameters:
+      - description: ENS/BNB/ARB/TEZ/NEAR/BTC Name
+        in: path
+        name: address
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Settings'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Generic Resolve Name Service
+      tags:
+      - ""
   /v1/unreadcount/{address}:
     get:
       consumes:
@@ -1566,6 +1745,32 @@ paths:
       summary: Update Message Read Status of a given DM chat message
       tags:
       - DMs
+  /v1/update_community:
+    post:
+      consumes:
+      - application/json
+      description: Community Chat Update - input slug, and any updates to Name, Socials
+      parameters:
+      - description: Community/Group Update
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Createcommunityitem'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Createcommunityitem'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: UpdateCommunity updates  custom community chat
+      tags:
+      - GroupChat
   /v1/update_settings:
     post:
       consumes:

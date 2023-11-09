@@ -37,15 +37,15 @@ func GetLeaderboardDataGlobal() []ChatStatistics {
 }
 
 // GetInboxByOwner godoc
-// @Summary Get Inbox Summary With Last Message
+// @Summary     Get Inbox Summary With Last Message
 // @Description Get Each 1-on-1 Conversation, NFT and Community Chat For Display in Inbox
-// @Tags Inbox
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param address path string true "Wallet Address"
-// @Success 200 {array} entity.Chatiteminbox
-// @Router /v1/get_referral_code [get]
+// @Tags        Inbox
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       address path    string true "Wallet Address"
+// @Success     200     {array} entity.Chatiteminbox
+// @Router      /v1/get_referral_code [get]
 func GetReferralCode(w http.ResponseWriter, r *http.Request) {
 	Authuser := auth.GetUserFromReqContext(r)
 	walletaddr := Authuser.Address

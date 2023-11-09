@@ -127,6 +127,48 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/community/conditions": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Change community access conditions",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "GroupChat"
+                ],
+                "summary": "Change community access conditions",
+                "parameters": [
+                    {
+                        "description": "Create/Edit Community/Group Access Conditions",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Communityaccesscondition"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Communityaccesscondition"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/v1/community/{community}/{address}": {
             "get": {
                 "security": [
@@ -320,7 +362,7 @@ const docTemplate = `{
                 "summary": "CreateCommunity creates new custom community chat",
                 "parameters": [
                     {
-                        "description": "Community Message Creation",
+                        "description": "Community/Group Creation",
                         "name": "message",
                         "in": "body",
                         "required": true,
@@ -831,6 +873,56 @@ const docTemplate = `{
             }
         },
         "/v1/get_inbox/{address}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get Each 1-on-1 Conversation, NFT and Community Chat For Display in Inbox",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Inbox"
+                ],
+                "summary": "Get Inbox Summary With Last Message",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wallet Address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Chatiteminbox"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/get_latest_unread/{address}": {
+            "get": {
+                "responses": {}
+            }
+        },
+        "/v1/get_n_chatitems/{fromaddr}/{toaddr}/{count}": {
+            "get": {
+                "responses": {}
+            }
+        },
+        "/v1/get_referral_code": {
             "get": {
                 "security": [
                     {
@@ -1635,14 +1727,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/imagepfp": {
+        "/v1/imageraw": {
             "post": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "public facing PFP storage to make it faster for UI to get and load images",
+                "description": "private image storage for photo uploads in DMS\nimageid should follow format: \u003cfromAddr\u003e_\u003ctoAddr\u003e_\u003crandom 10 digit number\u003e\nthe random number is passed in instead of returned, to make it easier for the FE to save this in message data",
                 "consumes": [
                     "application/json"
                 ],
@@ -1650,18 +1742,52 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Common"
+                    "DMs"
                 ],
                 "summary": "Store Image in Bucket Storage",
                 "parameters": [
                     {
-                        "description": "Profile Thumbnail Pic (PFP)",
+                        "description": "Raw Images",
                         "name": "message",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/entity.Imageitem"
+                            "$ref": "#/definitions/entity.ImageitemPhoto"
                         }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/v1/imageraw/{imageid}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "private image storage for photo uploads in DMs\nImages can only be fetched by address to (recipient), or address from (sender)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "DMs"
+                ],
+                "summary": "Store Image in Bucket Storage",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "unique image id to fetch",
+                        "name": "imageid",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -1763,7 +1889,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/name/{name}": {
+        "/v1/name/{addr}": {
             "get": {
                 "security": [
                     {
@@ -1797,6 +1923,46 @@ const docTemplate = `{
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/entity.Addrnameitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/resolve_name/{name}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Resolve .ETH, .BNB, .ARB names",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    ""
+                ],
+                "summary": "Generic Resolve Name Service",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ENS/BNB/ARB/TEZ/NEAR/BTC Name",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Settings"
                             }
                         }
                     }
@@ -1876,6 +2042,48 @@ const docTemplate = `{
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/entity.Chatitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/update_community": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Community Chat Update - input slug, and any updates to Name, Socials",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "GroupChat"
+                ],
+                "summary": "UpdateCommunity updates  custom community chat",
+                "parameters": [
+                    {
+                        "description": "Community/Group Update",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Createcommunityitem"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Createcommunityitem"
                             }
                         }
                     }
@@ -1999,6 +2207,23 @@ const docTemplate = `{
                 }
             }
         },
+        "controllers.CommunityMember": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "admin": {
+                    "type": "boolean"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "controllers.LandingPageItems": {
             "type": "object",
             "properties": {
@@ -2018,8 +2243,14 @@ const docTemplate = `{
                     "description": "logo url, stored in backend",
                     "type": "string"
                 },
-                "members": {
+                "member_count": {
                     "type": "integer"
+                },
+                "members": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/controllers.CommunityMember"
+                    }
                 },
                 "messages": {
                     "type": "array",
@@ -2127,6 +2358,10 @@ const docTemplate = `{
                 },
                 "domain": {
                     "description": "DOMAIN",
+                    "type": "string"
+                },
+                "email": {
+                    "description": "ADMIN ONLY USAGE",
                     "type": "string"
                 },
                 "id": {
@@ -2314,10 +2549,38 @@ const docTemplate = `{
                 }
             }
         },
+        "entity.Communityaccesscondition": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "count": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "slug": {
+                    "description": "change community to slug in DB table too",
+                    "type": "string"
+                }
+            }
+        },
         "entity.Createcommunityitem": {
             "type": "object",
             "properties": {
-                "community": {
+                "id": {
+                    "type": "integer"
+                },
+                "image": {
+                    "description": "base64",
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "slug": {
                     "type": "string"
                 },
                 "social": {
@@ -2374,6 +2637,23 @@ const docTemplate = `{
                 }
             }
         },
+        "entity.ImageitemPhoto": {
+            "type": "object",
+            "properties": {
+                "addr": {
+                    "type": "string"
+                },
+                "base64data": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "imageid": {
+                    "type": "string"
+                }
+            }
+        },
         "entity.Settings": {
             "type": "object",
             "required": [
@@ -2385,12 +2665,16 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "email": {
-                    "description": "Publickey  string ` + "`" + `json:\"publickey\"` + "`" + `",
+                    "description": "EMAIL ADDRESS TO GET NOTIFICATIONS",
                     "type": "string"
                 },
                 "id": {
                     "description": "AUTO-GENERATED (PRIMARY KEY)",
                     "type": "integer"
+                },
+                "installedsnap": {
+                    "description": "IS METAMASK SNAP INSTALLED",
+                    "type": "string"
                 },
                 "notify24": {
                     "description": "RECEIVE NOTIFICATION FOR EVERY DM RECEIVED (string value true/false)",
@@ -2402,6 +2686,30 @@ const docTemplate = `{
                 },
                 "signupsite": {
                     "description": "LATEST SITE WHERE NOTIFICATIONS EMAIL WAS ENTERED",
+                    "type": "string"
+                },
+                "telegramcode": {
+                    "description": "TELEGRAM VERIFICATION CODE - REQUIRES THIS MSG SENT TO WALLETCHAT BOT",
+                    "type": "string"
+                },
+                "telegramhandle": {
+                    "description": "TELEGRAM @ handle - MAINLY USED AS DOUBLE CHECK DURING INITIAL SETUP",
+                    "type": "string"
+                },
+                "telegramid": {
+                    "description": "TELEGRAM CHAT ID - REQUIRES MSG SENT TO WALLETCHAT BOT TO VERIFY",
+                    "type": "string"
+                },
+                "twitterid": {
+                    "description": "TWITTER USER ID - FUTURE USE IF USER CHANGES NAME?",
+                    "type": "string"
+                },
+                "twitteruser": {
+                    "description": "TWITTER/X @user",
+                    "type": "string"
+                },
+                "twitterverified": {
+                    "description": "HAS USER VERIFIED @user with WALLETCHAT (not twitter blue checkmark)",
                     "type": "string"
                 },
                 "verified": {

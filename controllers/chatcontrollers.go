@@ -102,15 +102,15 @@ func GetLastMsgToOwner(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetInboxByOwner godoc
-// @Summary Get Inbox Summary With Last Message
+// @Summary     Get Inbox Summary With Last Message
 // @Description Get Each 1-on-1 Conversation, NFT and Community Chat For Display in Inbox
-// @Tags Inbox
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param address path string true "Wallet Address"
-// @Success 200 {array} entity.Chatiteminbox
-// @Router /v1/get_inbox/{address} [get]
+// @Tags        Inbox
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       address path    string true "Wallet Address"
+// @Success     200     {array} entity.Chatiteminbox
+// @Router      /v1/get_inbox/{address} [get]
 func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 
 	//GetInboxByID returns the latest message for each unique conversation
@@ -326,15 +326,15 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetUnreadMsgCntTotal godoc
-// @Summary Get all unread messages TO a specific user, used for total count notification at top notification bar
+// @Summary     Get all unread messages TO a specific user, used for total count notification at top notification bar
 // @Description Get Each 1-on-1 Conversation, NFT and Community Chat For Display in Inbox
-// @Tags Inbox
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param address path string true "Wallet Address"
-// @Success 200 {integer} int
-// @Router /v1/get_unread_cnt/{address} [get]
+// @Tags        Inbox
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       address path      string true "Wallet Address"
+// @Success     200     {integer} int
+// @Router      /v1/get_unread_cnt/{address} [get]
 func GetUnreadMsgCntTotal(w http.ResponseWriter, r *http.Request) {
 	//vars := mux.Vars(r)
 	Authuser := auth.GetUserFromReqContext(r)
@@ -352,16 +352,16 @@ func GetUnreadMsgCntTotal(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetUnreadMsgCntTotalByType godoc
-// @Summary Get all unread messages TO a specific user, used for total count notification at top notification bar
+// @Summary     Get all unread messages TO a specific user, used for total count notification at top notification bar
 // @Description Get Each 1-on-1 Conversation, NFT and Community Chat For Display in Inbox
-// @Tags Unused/Legacy
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param address path string true "Wallet Address"
-// @Param type path string true "Message Type - nft|community|dm|all"
-// @Success 200 {integer} int
-// @Router /v1/get_unread_cnt_by_type/{address}/{type} [get]
+// @Tags        Unused/Legacy
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       address path      string true "Wallet Address"
+// @Param       type    path      string true "Message Type - nft|community|dm|all"
+// @Success     200     {integer} int
+// @Router      /v1/get_unread_cnt_by_type/{address}/{type} [get]
 func GetUnreadMsgCntTotalByType(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	Authuser := auth.GetUserFromReqContext(r)
@@ -473,15 +473,15 @@ func LocalGetUnread(address string) entity.Unreadcountitem {
 }
 
 // GetUnreadcnt godoc
-// @Summary Get all unread messages TO a specific user, used for total count notification at top notification bar
+// @Summary     Get all unread messages TO a specific user, used for total count notification at top notification bar
 // @Description Get Unread count just given an address
-// @Tags Inbox
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param address path string true "Wallet Address"
-// @Success 200 {integer} int
-// @Router /v1/unreadcount/{address} [get]
+// @Tags        Inbox
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       address path      string true "Wallet Address"
+// @Success     200     {integer} int
+// @Router      /v1/unreadcount/{address} [get]
 func GetUnreadcnt(w http.ResponseWriter, r *http.Request) {
 	//vars := mux.Vars(r)
 	Authuser := auth.GetUserFromReqContext(r)
@@ -498,17 +498,17 @@ func GetUnreadcnt(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetUnreadMsgCntNft godoc
-// @Summary Get all unread messages for a specific NFT context
+// @Summary     Get all unread messages for a specific NFT context
 // @Description Get Unread count for specifc NFT context given a wallet address and specific NFT
-// @Tags NFT
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param address path string true "Wallet Address"
-// @Param nftaddr path string true "NFT Contract Address"
-// @Param nftid path string true "NFT ID"
-// @Success 200 {integer} int
-// @Router /v1/get_unread_cnt/{address}/{nftaddr}/{nftid} [get]
+// @Tags        NFT
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       address path      string true "Wallet Address"
+// @Param       nftaddr path      string true "NFT Contract Address"
+// @Param       nftid   path      string true "NFT ID"
+// @Success     200     {integer} int
+// @Router      /v1/get_unread_cnt/{address}/{nftaddr}/{nftid} [get]
 func GetUnreadMsgCntNft(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	Authuser := auth.GetUserFromReqContext(r)
@@ -527,15 +527,15 @@ func GetUnreadMsgCntNft(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetUnreadMsgCntNft godoc
-// @Summary Get all unread messages for all NFT related chats for given user
+// @Summary     Get all unread messages for all NFT related chats for given user
 // @Description Get Unread count for all NFT contexts given a wallet address
-// @Tags Unused/Legacy
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param address path string true "Wallet Address"
-// @Success 200 {integer} int
-// @Router /v1/get_unread_cnt_nft/{address} [get]
+// @Tags        Unused/Legacy
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       address path      string true "Wallet Address"
+// @Success     200     {integer} int
+// @Router      /v1/get_unread_cnt_nft/{address} [get]
 func GetUnreadMsgCntNftAllByAddr(w http.ResponseWriter, r *http.Request) {
 	// vars := mux.Vars(r)
 	// key := vars["address"]
@@ -610,16 +610,16 @@ func GetUnreadMsgCntNftAllByAddr(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetUnreadMsgCnt godoc
-// @Summary Get all unread messages between two addresses
+// @Summary     Get all unread messages between two addresses
 // @Description Get Unread count for DMs
-// @Tags Unused/Legacy
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param toaddr path string true "TO: Wallet Address"
-// @Param from path string true "FROM: Wallet Address"
-// @Success 200 {integer} int
-// @Router /v1/get_unread_cnt/{fromaddr}/{toaddr} [get]
+// @Tags        Unused/Legacy
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       toaddr path      string true "TO: Wallet Address"
+// @Param       from   path      string true "FROM: Wallet Address"
+// @Success     200    {integer} int
+// @Router      /v1/get_unread_cnt/{fromaddr}/{toaddr} [get]
 func GetUnreadMsgCnt(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	//to := vars["toaddr"]
@@ -637,15 +637,15 @@ func GetUnreadMsgCnt(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetChatFromAddress godoc
-// @Summary Get Chat Item For Given Wallet Address
+// @Summary     Get Chat Item For Given Wallet Address
 // @Description Get all Chat Items for DMs for a given wallet address
-// @Tags Unused/Legacy
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param toaddr path string true "Wallet Address"
-// @Success 200 {array} entity.Chatitem
-// @Router /v1/getall_chatitems/{address} [get]
+// @Tags        Unused/Legacy
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       toaddr path    string true "Wallet Address"
+// @Success     200    {array} entity.Chatitem
+// @Router      /v1/getall_chatitems/{address} [get]
 func GetChatFromAddress(w http.ResponseWriter, r *http.Request) {
 	// vars := mux.Vars(r)
 	// key := vars["address"]
@@ -660,15 +660,15 @@ func GetChatFromAddress(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetNftChatFromAddress godoc
-// @Summary Get NFT Related Chat Items For Given Wallet Address
+// @Summary     Get NFT Related Chat Items For Given Wallet Address
 // @Description Get ALL NFT context items for a given wallet address
-// @Tags Unused/Legacy
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param toaddr path string true "Wallet Address"
-// @Success 200 {array} entity.Chatitem
-// @Router /v1/getnft_chatitems/{address} [get]
+// @Tags        Unused/Legacy
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       toaddr path    string true "Wallet Address"
+// @Success     200    {array} entity.Chatitem
+// @Router      /v1/getnft_chatitems/{address} [get]
 func GetNftChatFromAddress(w http.ResponseWriter, r *http.Request) {
 	// vars := mux.Vars(r)
 	// key := vars["address"]
@@ -749,16 +749,16 @@ func GetNChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetChatFromAddressToAddr godoc
-// @Summary Get Chat Data Between Two Addresses
+// @Summary     Get Chat Data Between Two Addresses
 // @Description Get chat data between the given two addresses, TO and FROM and interchangable here
-// @Tags DMs
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param toaddr path string true "TO: Wallet Address"
-// @Param from path string true "FROM: Wallet Address"
-// @Success 200 {array} entity.Chatitem
-// @Router /v1/getall_chatitems/{fromaddr}/{toaddr} [get]
+// @Tags        DMs
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       toaddr path    string true "TO: Wallet Address"
+// @Param       from   path    string true "FROM: Wallet Address"
+// @Success     200    {array} entity.Chatitem
+// @Router      /v1/getall_chatitems/{fromaddr}/{toaddr} [get]
 func GetAllChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	//from := vars["fromaddr"]
@@ -796,16 +796,16 @@ func GetAllChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetReadChatFromAddressToAddr godoc
-// @Summary Get Recently Read Messages
+// @Summary     Get Recently Read Messages
 // @Description Get newly read messages to update READ status for lazy loading
-// @Tags DMs
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param toaddr path string true "TO: Wallet Address"
-// @Param from path string true "FROM: Wallet Address"
-// @Success 200 {array} entity.Chatitem
-// @Router /v1/getread_chatitems/{fromaddr}/{toaddr} [get]
+// @Tags        DMs
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       toaddr path    string true "TO: Wallet Address"
+// @Param       from   path    string true "FROM: Wallet Address"
+// @Success     200    {array} entity.Chatitem
+// @Router      /v1/getread_chatitems/{fromaddr}/{toaddr} [get]
 func GetReadChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 	//we only want to return values here once (don't repeatedly report newly read messages)
 	//need to keep track of current prev messages and detect changes
@@ -826,17 +826,17 @@ func GetReadChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetChatFromAddressToAddr godoc
-// @Summary Get Chat Data Between Two Addresses
+// @Summary     Get Chat Data Between Two Addresses
 // @Description Get chat data between the given two addresses, TO and FROM and interchangable here
-// @Tags DMs
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param toaddr path string true "TO: Wallet Address"
-// @Param from path string true "FROM: Wallet Address"
-// @Param time path string true "Load only messages after this time"
-// @Success 200 {array} entity.Chatitem
-// @Router /v1/getall_chatitems/{fromaddr}/{toaddr}/${time} [get]
+// @Tags        DMs
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       toaddr path    string true "TO: Wallet Address"
+// @Param       from   path    string true "FROM: Wallet Address"
+// @Param       time   path    string true "Load only messages after this time"
+// @Success     200    {array} entity.Chatitem
+// @Router      /v1/getall_chatitems/{fromaddr}/{toaddr}/${time} [get]
 func GetNewChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	//from := vars["fromaddr"]
@@ -898,16 +898,16 @@ func GetNewChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetChatNftContext godoc
-// @Summary Get NFT Related Chat Items For Given NFT Contract and ID
+// @Summary     Get NFT Related Chat Items For Given NFT Contract and ID
 // @Description Get ALL NFT context items for a given wallet address
-// @Tags Unused/Legacy
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param nftaddr path string true "NFT Contract Address"
-// @Param nftid path string true "NFT ID"
-// @Success 200 {array} entity.Chatitem
-// @Router /v1/getnft_chatitems/{nftaddr}/{nftid} [get]
+// @Tags        Unused/Legacy
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       nftaddr path    string true "NFT Contract Address"
+// @Param       nftid   path    string true "NFT ID"
+// @Success     200     {array} entity.Chatitem
+// @Router      /v1/getnft_chatitems/{nftaddr}/{nftid} [get]
 func GetChatNftContext(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	nftaddr := vars["nftaddr"]
@@ -922,18 +922,18 @@ func GetChatNftContext(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetChatNftContext godoc
-// @Summary Get NFT Related Chat Items For Given NFT Contract and ID, between two wallet addresses (TO and FROM are interchangable)
+// @Summary     Get NFT Related Chat Items For Given NFT Contract and ID, between two wallet addresses (TO and FROM are interchangable)
 // @Description Get ALL NFT context items for a specifc NFT context convo between two wallets
-// @Tags NFT
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param nftaddr path string true "NFT Contract Address"
-// @Param nftid path string true "NFT ID"
-// @Param toaddr path string true "TO: Wallet Address"
-// @Param from path string true "FROM: Wallet Address"
-// @Success 200 {array} entity.Chatitem
-// @Router /v1/getnft_chatitems/{fromaddr}/{toaddr}/{nftaddr}/{nftid} [get]
+// @Tags        NFT
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       nftaddr path    string true "NFT Contract Address"
+// @Param       nftid   path    string true "NFT ID"
+// @Param       toaddr  path    string true "TO: Wallet Address"
+// @Param       from    path    string true "FROM: Wallet Address"
+// @Success     200     {array} entity.Chatitem
+// @Router      /v1/getnft_chatitems/{fromaddr}/{toaddr}/{nftaddr}/{nftid} [get]
 func GetChatNftAllItemsFromAddrAndNFT(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	from := vars["fromaddr"]
@@ -978,17 +978,17 @@ func GetChatNftAllItemsFromAddrAndNFT(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetChatNftAllItemsFromAddr godoc
-// @Summary Get NFT Related Chat Items For Given NFT Contract and ID, relating to one wallet
+// @Summary     Get NFT Related Chat Items For Given NFT Contract and ID, relating to one wallet
 // @Description Get all specified NFT contract and ID items for a given wallet address
-// @Tags Unused/Legacy
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param address path string true "Wallet Address"
-// @Param nftaddr path string true "NFT Contract Address"
-// @Param nftid path string true "NFT ID"
-// @Success 200 {array} entity.Chatitem
-// @Router /v1/getnft_chatitems/{address}/{nftaddr}/{nftid} [get]
+// @Tags        Unused/Legacy
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       address path    string true "Wallet Address"
+// @Param       nftaddr path    string true "NFT Contract Address"
+// @Param       nftid   path    string true "NFT ID"
+// @Success     200     {array} entity.Chatitem
+// @Router      /v1/getnft_chatitems/{address}/{nftaddr}/{nftid} [get]
 func GetChatNftAllItemsFromAddr(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	//walletaddr := vars["address"]
@@ -1037,18 +1037,18 @@ func findStrIndexInArray(s string, arr []string) int {
 }
 
 // CreateChatitem godoc
-// @Summary Create/Insert DM Chat Message (1-to-1 messaging)
+// @Summary     Create/Insert DM Chat Message (1-to-1 messaging)
 // @Description For DMs, Chatitem data struct is used to store each message and associated info.
 // @Description REQUIRED: fromaddr, toaddr, message (see data struct section at bottom of page for more detailed info on each paramter)
 // @Description Other fields are generally filled in by the backed REST API and used as return parameters
 // @Description ID is auto generated and should never be used as input.
-// @Tags DMs
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param message body entity.Chatitem true "Direct Message Chat Data"
-// @Success 200 {array} entity.Chatitem
-// @Router /v1/create_chatitem [post]
+// @Tags        DMs
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       message body    entity.Chatitem true "Direct Message Chat Data"
+// @Success     200     {array} entity.Chatitem
+// @Router      /v1/create_chatitem [post]
 func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var chat entity.Chatitem
@@ -1264,12 +1264,6 @@ func SendTelegramMessage(text string, chatId string) (bool, error) {
 	// Close the request at the end
 	defer response.Body.Close()
 
-	// Body
-	body, err = ioutil.ReadAll(response.Body)
-	if err != nil {
-		return false, err
-	}
-
 	// Return
 	return true, nil
 }
@@ -1369,15 +1363,15 @@ func UpdateTelegramNotifications() {
 }
 
 // CreateGroupChatitem godoc
-// @Summary Create/Insert chat message for NFT Group Messaging
+// @Summary     Create/Insert chat message for NFT Group Messaging
 // @Description Currently used for NFT Gated Chats
-// @Tags GroupChat
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param message body entity.Groupchatitem true "NFT Group Message Chat Data"
-// @Success 200 {array} entity.Groupchatitem
-// @Router /v1/create_groupchatitem [post]
+// @Tags        GroupChat
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       message body    entity.Groupchatitem true "NFT Group Message Chat Data"
+// @Success     200     {array} entity.Groupchatitem
+// @Router      /v1/create_groupchatitem [post]
 func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var chat entity.Groupchatitem
@@ -1429,15 +1423,15 @@ func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 }
 
 // ChangeCommunityConditions godoc
-// @Summary Change community access conditions
+// @Summary     Change community access conditions
 // @Description Change community access conditions
-// @Tags GroupChat
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param message body entity.CommunityAccessCondition true "Create/Edit Community/Group Access Conditions"
-// @Success 200 {array} entity.CommunityAccessCondition
-// @Router /v1/community/conditions [post]
+// @Tags        GroupChat
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       message body    entity.Communityaccesscondition true "Create/Edit Community/Group Access Conditions"
+// @Success     200     {array} entity.Communityaccesscondition
+// @Router      /v1/community/conditions [post]
 func ChangeCommunityConditions(w http.ResponseWriter, r *http.Request) {
 	//todo - should maybe just accept JSON and process later.
 	requestBody, _ := ioutil.ReadAll(r.Body)
@@ -1493,15 +1487,15 @@ func ChangeCommunityConditions(w http.ResponseWriter, r *http.Request) {
 }
 
 // CreateCommunity godoc
-// @Summary CreateCommunity creates new custom community chat
+// @Summary     CreateCommunity creates new custom community chat
 // @Description Community Chat Creation
-// @Tags GroupChat
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param message body entity.Createcommunityitem true "Community/Group Creation"
-// @Success 200 {array} entity.Createcommunityitem
-// @Router /v1/create_community [post]
+// @Tags        GroupChat
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       message body    entity.Createcommunityitem true "Community/Group Creation"
+// @Success     200     {array} entity.Createcommunityitem
+// @Router      /v1/create_community [post]
 func CreateCommunity(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var communityInfo entity.Createcommunityitem
@@ -1573,15 +1567,15 @@ func CreateCommunity(w http.ResponseWriter, r *http.Request) {
 }
 
 // UpdateCommunity godoc
-// @Summary UpdateCommunity updates  custom community chat
+// @Summary     UpdateCommunity updates  custom community chat
 // @Description Community Chat Update - input slug, and any updates to Name, Socials
-// @Tags GroupChat
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param message body entity.Createcommunityitem true "Community/Group Update"
-// @Success 200 {array} entity.Createcommunityitem
-// @Router /v1/update_community [post]
+// @Tags        GroupChat
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       message body    entity.Createcommunityitem true "Community/Group Update"
+// @Success     200     {array} entity.Createcommunityitem
+// @Router      /v1/update_community [post]
 func UpdateCommunity(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var communityInfo entity.Createcommunityitem
@@ -1645,15 +1639,15 @@ func UpdateCommunity(w http.ResponseWriter, r *http.Request) {
 }
 
 // CreateCommunityChatitem godoc
-// @Summary CreateCommunityChatitem creates GroupChatitem just with community tag (likely could be consolidated)
+// @Summary     CreateCommunityChatitem creates GroupChatitem just with community tag (likely could be consolidated)
 // @Description Community Chat Data
-// @Tags GroupChat
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param message body entity.Groupchatitem true "Community Message Chat Data"
-// @Success 200 {array} entity.Groupchatitem
-// @Router /v1/community [post]
+// @Tags        GroupChat
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       message body    entity.Groupchatitem true "Community Message Chat Data"
+// @Success     200     {array} entity.Groupchatitem
+// @Router      /v1/community [post]
 func CreateCommunityChatItem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var chat entity.Groupchatitem
@@ -1688,15 +1682,15 @@ func CreateCommunityChatItem(w http.ResponseWriter, r *http.Request) {
 }
 
 // CreateBookmarkItem godoc
-// @Summary Join an NFT or Community group chat
+// @Summary     Join an NFT or Community group chat
 // @Description Bookmarks keep an NFT/Community group chat in the sidebar
-// @Tags GroupChat
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param message body entity.Bookmarkitem true "Add Bookmark from Community Group Chat"
-// @Success 200 {array} entity.Bookmarkitem
-// @Router /v1/create_bookmark [post]
+// @Tags        GroupChat
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       message body    entity.Bookmarkitem true "Add Bookmark from Community Group Chat"
+// @Success     200     {array} entity.Bookmarkitem
+// @Router      /v1/create_bookmark [post]
 func CreateBookmarkItem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var bookmark entity.Bookmarkitem
@@ -1733,15 +1727,15 @@ func CreateBookmarkItem(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteBookmarkItem godoc
-// @Summary Leave an NFT or Community group chat
+// @Summary     Leave an NFT or Community group chat
 // @Description Bookmarks keep an NFT/Community group chat in the sidebar
-// @Tags GroupChat
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param message body entity.Bookmarkitem true "Remove Bookmark from Community Group Chat"
-// @Success 200 {array} entity.Bookmarkitem
-// @Router /v1/delete_bookmark [post]
+// @Tags        GroupChat
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       message body    entity.Bookmarkitem true "Remove Bookmark from Community Group Chat"
+// @Success     200     {array} entity.Bookmarkitem
+// @Router      /v1/delete_bookmark [post]
 func DeleteBookmarkItem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var bookmark entity.Bookmarkitem
@@ -1783,16 +1777,16 @@ func DeleteBookmarkItem(w http.ResponseWriter, r *http.Request) {
 }
 
 // IsBookmarkItem godoc
-// @Summary Check if a wallet address has bookmarked/joined given NFT contract
+// @Summary     Check if a wallet address has bookmarked/joined given NFT contract
 // @Description This used for UI purposes, checking if a user/wallet has bookmarked a community.
-// @Tags GroupChat
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param walletaddr path string true "Wallet Address"
-// @Param nftaddr path string true "NFT Contract Address"
-// @Success 200 {bool} bool
-// @Router /v1/get_bookmarks/{walletaddr}/{nftaddr} [get]
+// @Tags        GroupChat
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       walletaddr path   string true "Wallet Address"
+// @Param       nftaddr    path   string true "NFT Contract Address"
+// @Success     200        {bool} bool
+// @Router      /v1/get_bookmarks/{walletaddr}/{nftaddr} [get]
 func IsBookmarkItem(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	//walletaddr := vars["walletaddr"]
@@ -1816,15 +1810,15 @@ func IsBookmarkItem(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetBookmarkItems godoc
-// @Summary Check if a wallet address has bookmarked/joined given NFT contract
+// @Summary     Check if a wallet address has bookmarked/joined given NFT contract
 // @Description This used for UI purposes, checking if a user/wallet has bookmarked a community.
-// @Tags GroupChat
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param address path string true "Wallet Address"
-// @Success 200 {array} entity.Bookmarkitem
-// @Router /v1/get_bookmarks/{address}/ [get]
+// @Tags        GroupChat
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       address path    string true "Wallet Address"
+// @Success     200     {array} entity.Bookmarkitem
+// @Router      /v1/get_bookmarks/{address}/ [get]
 func GetBookmarkItems(w http.ResponseWriter, r *http.Request) {
 	// vars := mux.Vars(r)
 	// key := vars["address"]
@@ -1879,15 +1873,15 @@ func GetBookmarkItems(w http.ResponseWriter, r *http.Request) {
 }
 
 // CreateImageItem godoc
-// @Summary Store Image in DB for later user
+// @Summary     Store Image in DB for later user
 // @Description Currently used for the WC HQ Logo, stores the base64 raw data of the profile image for a community
-// @Tags Common
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param message body entity.Imageitem true "Profile Thumbnail Pic"
-// @Success 200 {array} entity.Imageitem
-// @Router /v1/image [post]
+// @Tags        Common
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       message body    entity.Imageitem true "Profile Thumbnail Pic"
+// @Success     200     {array} entity.Imageitem
+// @Router      /v1/image [post]
 func CreateImageItem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var imageaddr entity.Imageitem
@@ -1907,15 +1901,17 @@ func CreateImageItem(w http.ResponseWriter, r *http.Request) {
 }
 
 // CreateImageItemPFP godoc
-// @Summary Store Image in Bucket Storage
-// @Description private image storage for photo uploads in chat
-// @Tags Common
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param message body entity.ImageitemPhoto true "Raw Images"
-// @Success 200
-// @Router /v1/imageraw [post]
+// @Summary     Store Image in Bucket Storage
+// @Description private image storage for photo uploads in DMS
+// @Description imageid should follow format: <fromAddr>_<toAddr>_<random 10 digit number>
+// @Description the random number is passed in instead of returned, to make it easier for the FE to save this in message data
+// @Tags        DMs
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       message body entity.ImageitemPhoto true "Raw Images"
+// @Success     200
+// @Router      /v1/imageraw [post]
 func CreateRawImageItem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var imageaddr entity.ImageitemPhoto
@@ -1923,7 +1919,8 @@ func CreateRawImageItem(w http.ResponseWriter, r *http.Request) {
 
 	Authuser := auth.GetUserFromReqContext(r)
 
-	if strings.EqualFold(Authuser.Address, imageaddr.Addr) {
+	//only allow users to create images for themselves in DMs
+	if strings.Contains(strings.ToLower(imageaddr.Imageid), Authuser.Address) {
 		// Step 2: Define the parameters for the session you want to create.
 		key := "DO00CLQBPDAEHFUTYMGR"        // Access key pair. You can create access key pairs using the control panel or API.
 		secret := os.Getenv("SPACES_SECRET") // Secret access key defined through an environment variable.
@@ -1957,83 +1954,93 @@ func CreateRawImageItem(w http.ResponseWriter, r *http.Request) {
 		_, err := s3Client.PutObject(&object)
 		if err != nil {
 			fmt.Println(err)
+			w.WriteHeader(http.StatusConflict)
+		} else {
+			w.WriteHeader(http.StatusCreated)
 		}
-
-		w.WriteHeader(http.StatusCreated)
 	} else {
 		w.WriteHeader(http.StatusForbidden)
 	}
 }
 
 // GetRawImageItem godoc
-// @Summary Store Image in Bucket Storage
-// @Description private image storage for photo uploads in chat
-// @Tags Common
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param address path string true
-// @Success 200 {array} entity.Imageitem
-// @Router /v1/imageraw/{imageid} [get]
+// @Summary     Store Image in Bucket Storage
+// @Description private image storage for photo uploads in DMs
+// @Description Images can only be fetched by address to (recipient), or address from (sender)
+// @Tags        DMs
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       imageid path    string true "unique image id to fetch"
+// @Success     200     {array} entity.Imageitem
+// @Router      /v1/imageraw/{imageid} [get]
 func GetRawImageItem(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	imageid := vars["imageid"]
 
-	//var imageaddr entity.Imageitem
+	//check addresses out of it to ensure user can get this file
+	Authuser := auth.GetUserFromReqContext(r)
+	//fmt.Println("auth check: ", imageid, Authuser.Address)
+	if strings.Contains(strings.ToLower(imageid), Authuser.Address) {
+		// Step 2: Define the parameters for the session you want to create.
+		key := "DO00CLQBPDAEHFUTYMGR"        // Access key pair. You can create access key pairs using the control panel or API.
+		secret := os.Getenv("SPACES_SECRET") // Secret access key defined through an environment variable.
 
-	//TODO: once imageid format is verified, we strip addresses out of it to ensure user can get this file
+		s3Config := &aws.Config{
+			Credentials:      credentials.NewStaticCredentials(key, secret, ""), // Specifies your credentials.
+			Endpoint:         aws.String("https://sgp1.digitaloceanspaces.com"), // Find your endpoint in the control panel, under Settings. Prepend "https://".
+			S3ForcePathStyle: aws.Bool(false),                                   // // Configures to use subdomain/virtual calling format. Depending on your version, alternatively use o.UsePathStyle = false
+			Region:           aws.String("us-east-1"),                           // Must be "us-east-1" when creating new Spaces. Otherwise, use the region in your endpoint, such as "nyc3".
+		}
 
-	//Authuser := auth.GetUserFromReqContext(r)
-	//if strings.EqualFold(Authuser.Address, imageaddr.Addr) {
-	// Step 2: Define the parameters for the session you want to create.
-	key := "DO00CLQBPDAEHFUTYMGR"        // Access key pair. You can create access key pairs using the control panel or API.
-	secret := os.Getenv("SPACES_SECRET") // Secret access key defined through an environment variable.
+		// Step 3: The new session validates your request and directs it to your Space's specified endpoint using the AWS SDK.
+		newSession, errs := session.NewSession(s3Config)
+		if errs != nil {
+			fmt.Println(errs.Error())
+		}
+		s3Client := s3.New(newSession)
 
-	s3Config := &aws.Config{
-		Credentials:      credentials.NewStaticCredentials(key, secret, ""), // Specifies your credentials.
-		Endpoint:         aws.String("https://sgp1.digitaloceanspaces.com"), // Find your endpoint in the control panel, under Settings. Prepend "https://".
-		S3ForcePathStyle: aws.Bool(false),                                   // // Configures to use subdomain/virtual calling format. Depending on your version, alternatively use o.UsePathStyle = false
-		Region:           aws.String("us-east-1"),                           // Must be "us-east-1" when creating new Spaces. Otherwise, use the region in your endpoint, such as "nyc3".
+		// Step 4: Define the parameters of the object you want to upload.
+		object := s3.GetObjectInput{
+			Bucket: aws.String("walletchat-pfp-storage"), // The path to the directory you want to upload the object to, starting with your Space name.
+			Key:    aws.String(imageid),                  // Object key, referenced whenever you want to access this file later.
+		}
+
+		// Step 5: Run the PutObject function with your parameters, catching for errors.
+		imageObject, err := s3Client.GetObject(&object)
+		if err != nil {
+			fmt.Println(err)
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		// Read the contents of the object's body
+		content, err := ioutil.ReadAll(imageObject.Body)
+		if err != nil {
+			fmt.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(content)
+	} else {
+		w.WriteHeader(http.StatusForbidden)
 	}
-
-	// Step 3: The new session validates your request and directs it to your Space's specified endpoint using the AWS SDK.
-	newSession, errs := session.NewSession(s3Config)
-	if errs != nil {
-		fmt.Println(errs.Error())
-	}
-	s3Client := s3.New(newSession)
-
-	// Step 4: Define the parameters of the object you want to upload.
-	object := s3.GetObjectInput{
-		Bucket: aws.String("walletchat-pfp-storage"), // The path to the directory you want to upload the object to, starting with your Space name.
-		Key:    aws.String(imageid),                  // Object key, referenced whenever you want to access this file later.
-	}
-
-	// Step 5: Run the PutObject function with your parameters, catching for errors.
-	imageObject, err := s3Client.GetObject(&object)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("X-Content-Type-Options", "nosniff")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(imageObject)
-	// } else {
-	// 	w.WriteHeader(http.StatusForbidden)
-	// }
 }
 
 // UpdateImageItem godoc
-// @Summary Store Image in DB for later user (update existing photo)
+// @Summary     Store Image in DB for later user (update existing photo)
 // @Description Currently used for the WC HQ Logo, stores the base64 raw data of the profile image for a community
-// @Tags Common
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param message body entity.Imageitem true "Profile Thumbnail Pic"
-// @Success 200 {array} entity.Bookmarkitem
-// @Router /v1/image [put]
+// @Tags        Common
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       message body    entity.Imageitem true "Profile Thumbnail Pic"
+// @Success     200     {array} entity.Bookmarkitem
+// @Router      /v1/image [put]
 func UpdateImageItem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var imageaddr entity.Imageitem
@@ -2062,15 +2069,15 @@ func UpdateImageItem(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetImageItem godoc
-// @Summary Get Thumbnail Image Data
+// @Summary     Get Thumbnail Image Data
 // @Description Retreive image data for use with user/community/nft group dislayed icon
-// @Tags Common
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param name path string true "Wallet/NFT Address Mapped to User/Community"
-// @Success 200 {array} entity.Imageitem
-// @Router /v1/image/{addr} [get]
+// @Tags        Common
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       name path    string true "Wallet/NFT Address Mapped to User/Community"
+// @Success     200  {array} entity.Imageitem
+// @Router      /v1/image/{addr} [get]
 func GetImageItem(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	addr := vars["addr"]
@@ -2101,16 +2108,16 @@ func TrackEventGA4(w http.ResponseWriter, r *http.Request) {
 }
 
 // CreateAddrNameItem godoc
-// @Summary give a common name to a user address, or NFT collection
+// @Summary     give a common name to a user address, or NFT collection
 // @Description Give a common name (Kevin.eth, BillyTheKid, etc) to an Address
 // @Description Accepts ADMIN_API_KEY for integrated sign-in
-// @Tags Common
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param message body entity.Addrnamesignupitem true "Address and Name to map together"
-// @Success 200 {integer} int
-// @Router /v1/name [post]
+// @Tags        Common
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       message body      entity.Addrnamesignupitem true "Address and Name to map together"
+// @Success     200     {integer} int
+// @Router      /v1/name [post]
 func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var addrnameSignup entity.Addrnamesignupitem
@@ -2225,15 +2232,15 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetAddrNameItem godoc
-// @Summary get the common name which has been mapped to an address
+// @Summary     get the common name which has been mapped to an address
 // @Description get the given a common name (Kevin.eth, BillyTheKid, etc) what has already been mapped to an Address
-// @Tags Common
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param address path string true "Get Name for given address"
-// @Success 200 {array} entity.Addrnameitem
-// @Router /v1/name/{addr} [get]
+// @Tags        Common
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       address path    string true "Get Name for given address"
+// @Success     200     {array} entity.Addrnameitem
+// @Router      /v1/name/{addr} [get]
 func GetAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	//Authuser := auth.GetUserFromReqContext(r)
 	//address := Authuser.Address
@@ -2296,16 +2303,16 @@ func GetAddrNameItem(w http.ResponseWriter, r *http.Request) {
 // }
 
 // GetGroupChatItemsByAddr godoc
-// @Summary Get group chat items, given a wallt FROM address and NFT Contract Address
+// @Summary     Get group chat items, given a wallt FROM address and NFT Contract Address
 // @Description Get all group chat items for a given wallet (useraddress) for a given NFT Contract Address (TODO: fix up var names)
-// @Tags NFT
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param address path string true "NFT Address"
-// @Param useraddress path string true "FROM: wallet address"
-// @Success 200 {array} entity.Groupchatitem
-// @Router /v1/get_groupchatitems/{address}/{useraddress} [get]
+// @Tags        NFT
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       address     path    string true "NFT Address"
+// @Param       useraddress path    string true "FROM: wallet address"
+// @Success     200         {array} entity.Groupchatitem
+// @Router      /v1/get_groupchatitems/{address}/{useraddress} [get]
 func GetGroupChatItemsByAddr(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	nftaddr := vars["address"]
@@ -2370,16 +2377,16 @@ func GetGroupChatItemsByAddr(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetGroupChatItemsByAddrLen godoc
-// @Summary Get Unread Groupchat Items (TODO: cleanup naming convention here)
+// @Summary     Get Unread Groupchat Items (TODO: cleanup naming convention here)
 // @Description For group chat unread counts, currently the database stores a timestamp for each time a user enters a group chat.
 // @Description We though in the design it would be impractical to keep a read/unread count copy per user per message, but if this
 // @Description method doesn't proof to be fine grained enough, we could add a boolean relational table of read messgages per user.
-// @Tags Common
-// @Accept  json
-// @Produce plain
-// @Param name path string true "Common Name Mapped to User/Community"
-// @Success 200 {integer} int
-// @Router /v1/get_groupchatitems_unreadcnt/{address}/{useraddress} [get]
+// @Tags        Common
+// @Accept      json
+// @Produce     plain
+// @Param       name path      string true "Common Name Mapped to User/Community"
+// @Success     200  {integer} int
+// @Router      /v1/get_groupchatitems_unreadcnt/{address}/{useraddress} [get]
 func GetGroupChatItemsByAddrLen(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	nftaddr := vars["address"]
@@ -2406,17 +2413,17 @@ func GetGroupChatItemsByAddrLen(w http.ResponseWriter, r *http.Request) {
 }
 
 // CreateAddrNameItem godoc
-// @Summary Update Message Read Status of a given DM chat message
+// @Summary     Update Message Read Status of a given DM chat message
 // @Description Currently this only update the message read/unread status.  It could update the entire JSON struct
 // @Description upon request, however we only needed this functionality currently and it saved re-encryption of the data.
 // @Description TODO: TO/FROM address in the URL is not needed/not used anymore.
-// @Tags DMs
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param message body entity.Chatitem true "chat item JSON struct to update msg read status"
-// @Success 200 {array} entity.Chatitem
-// @Router /v1/update_chatitem/{fromaddr}/{toaddr} [put]
+// @Tags        DMs
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       message body    entity.Chatitem true "chat item JSON struct to update msg read status"
+// @Success     200     {array} entity.Chatitem
+// @Router      /v1/update_chatitem/{fromaddr}/{toaddr} [put]
 func UpdateChatitemByOwner(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var chat entity.Chatitem
@@ -2447,16 +2454,16 @@ func UpdateChatitemByOwner(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteAllChatitemsToAddressByOwner godoc
-// @Summary Delete All Chat Items (DMs) between FROM and TO given addresses
+// @Summary     Delete All Chat Items (DMs) between FROM and TO given addresses
 // @Description Currently deletes all chat items between these two addresses
-// @Tags Unused/Legacy
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param toaddr path string true "TO: Address"
-// @Param fromaddr path string true "FROM: Address"
-// @Success 204
-// @Router /v1/deleteall_chatitems/{fromaddr}/{toaddr} [delete]
+// @Tags        Unused/Legacy
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       toaddr   path string true "TO: Address"
+// @Param       fromaddr path string true "FROM: Address"
+// @Success     204
+// @Router      /v1/deleteall_chatitems/{fromaddr}/{toaddr} [delete]
 func DeleteAllChatitemsToAddressByOwner(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	to := vars["toaddr"]
@@ -2480,15 +2487,15 @@ func DeleteAllChatitemsToAddressByOwner(w http.ResponseWriter, r *http.Request) 
 }
 
 // DeleteAllChatitemsToAddressByOwner godoc
-// @Summary Delete Single Chat Item (DM)
+// @Summary     Delete Single Chat Item (DM)
 // @Description Can only delete messages sent, cannot delete incoming messages
-// @Tags Unused/Legacy
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param id path string true "message ID"
-// @Success 204
-// @Router /v1/delete_chatitem/{id} [delete]
+// @Tags        Unused/Legacy
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       id path string true "message ID"
+// @Success     204
+// @Router      /v1/delete_chatitem/{id} [delete]
 func DeleteChatitem(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
@@ -2537,16 +2544,16 @@ func randSeq(n int) string {
 }
 
 // UpdateSettings godoc
-// @Summary Settings hold a user address and the email address for notifications if they opt-in
+// @Summary     Settings hold a user address and the email address for notifications if they opt-in
 // @Description Update settings, email address, daily notifications and per DM notifications
 // @Description Accepts ADMIN_API_KEY for integrated sign-in
-// @Tags Common
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param message body entity.Settings true "update struct"
-// @Success 200 {array} entity.Settings
-// @Router /v1/update_settings [POST]
+// @Tags        Common
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       message body    entity.Settings true "update struct"
+// @Success     200     {array} entity.Settings
+// @Router      /v1/update_settings [POST]
 func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var settingsRX entity.Settings
@@ -2727,15 +2734,15 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 }
 
 // UpdateSettings godoc
-// @Summary Link a user can click in email to verify email address, will have unique code
+// @Summary     Link a user can click in email to verify email address, will have unique code
 // @Description Users will get an email when signing-up to verify email, to ensure we do not send spam
-// @Tags Common
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param message body entity.Settings true "update struct"
-// @Success 200 {array} entity.Settings
-// @Router /v1/verify_email/{email}/{verification_code} [GET]
+// @Tags        Common
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       message body    entity.Settings true "update struct"
+// @Success     200     {array} entity.Settings
+// @Router      /v1/verify_email/{email}/{verification_code} [GET]
 func VerifyEmail(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	email := vars["email"]
@@ -2766,15 +2773,15 @@ func VerifyEmail(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteSettings godoc
-// @Summary Delete Settings Info
+// @Summary     Delete Settings Info
 // @Description TODO: not yet used
-// @Tags Unused/Legacy
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param address path string true "Wallet Address"
-// @Success 204
-// @Router /v1/delete_settings/{address} [delete]
+// @Tags        Unused/Legacy
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       address path string true "Wallet Address"
+// @Success     204
+// @Router      /v1/delete_settings/{address} [delete]
 func DeleteSettings(w http.ResponseWriter, r *http.Request) {
 	//vars := mux.Vars(r)
 	//key := vars["address"]
@@ -2788,15 +2795,15 @@ func DeleteSettings(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetSettings godoc
-// @Summary Get Settings Info
+// @Summary     Get Settings Info
 // @Description TODO: not yet used
-// @Tags Unused/Legacy
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param address path string true "Wallet Address"
-// @Success 200 {array} entity.Settings
-// @Router /v1/get_settings/{address} [get]
+// @Tags        Unused/Legacy
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       address path    string true "Wallet Address"
+// @Success     200     {array} entity.Settings
+// @Router      /v1/get_settings/{address} [get]
 func GetSettings(w http.ResponseWriter, r *http.Request) {
 	// vars := mux.Vars(r)
 	// key := vars["address"]
@@ -2818,15 +2825,15 @@ func GetSettings(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetSettings godoc
-// @Summary Generic Resolve Name Service
+// @Summary     Generic Resolve Name Service
 // @Description Resolve .ETH, .BNB, .ARB names
 // @Tags
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param address path string true "ENS/BNB/ARB/TEZ/NEAR/BTC Name"
-// @Success 200 {array} entity.Settings
-// @Router /v1/resolve_name/{name} [get]
+// @Accept   json
+// @Produce     json
+// @Security    BearerAuth
+// @Param    address path    string true "ENS/BNB/ARB/TEZ/NEAR/BTC Name"
+// @Success  200     {array} entity.Settings
+// @Router   /v1/resolve_name/{name} [get]
 func ResolveName(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	nameToResolve := vars["name"]
@@ -2900,15 +2907,15 @@ func ResolveName(w http.ResponseWriter, r *http.Request) {
 }
 
 // CreateComments godoc
-// @Summary Comments are used within an NFT community chat
+// @Summary     Comments are used within an NFT community chat
 // @Description Comments are meant to be public, someday having an up/downvote method for auto-moderation
-// @Tags NFT
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param message body entity.Comments true "create struct"
-// @Success 200 {array} entity.Comments
-// @Router /v1/create_comments [post]
+// @Tags        NFT
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       message body    entity.Comments true "create struct"
+// @Success     200     {array} entity.Comments
+// @Router      /v1/create_comments [post]
 func CreateComments(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var comment entity.Comments
@@ -2966,17 +2973,17 @@ func DebugPrint(w http.ResponseWriter, r *http.Request) {
 // }
 
 // DeleteComments godoc
-// @Summary Delete Public Comments for given FROM wallet address, NFT Contract and ID
+// @Summary     Delete Public Comments for given FROM wallet address, NFT Contract and ID
 // @Description NFTs have a public comment section
-// @Tags NFT
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param address path string true "FROM Wallet Address"
-// @Param nftaddr path string true "NFT Contract Address"
-// @Param nftid path string true "NFT ID"
-// @Success 204
-// @Router /v1/delete_comments/{fromaddr}/{nftaddr}/{nftid} [delete]
+// @Tags        NFT
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       address path string true "FROM Wallet Address"
+// @Param       nftaddr path string true "NFT Contract Address"
+// @Param       nftid   path string true "NFT ID"
+// @Success     204
+// @Router      /v1/delete_comments/{fromaddr}/{nftaddr}/{nftid} [delete]
 func DeleteComments(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	//fromaddr := vars["address"]
@@ -2992,15 +2999,15 @@ func DeleteComments(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetComments godoc
-// @Summary Get Public Comments for given NFT Contract and ID
+// @Summary     Get Public Comments for given NFT Contract and ID
 // @Description NFTs have a public comment section
-// @Tags NFT
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param address path string true "Wallet Address"
-// @Success 200 {array} entity.Comments
-// @Router /v1/get_comments/{nftaddr}/{nftid} [get]
+// @Tags        NFT
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       address path    string true "Wallet Address"
+// @Success     200     {array} entity.Comments
+// @Router      /v1/get_comments/{nftaddr}/{nftid} [get]
 func GetComments(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["nftid"]
@@ -3015,16 +3022,16 @@ func GetComments(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetCommentsCount godoc
-// @Summary Get Public Comments Count for given NFT Contract and ID
+// @Summary     Get Public Comments Count for given NFT Contract and ID
 // @Description NFTs have a public comment section
-// @Tags NFT
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param nftaddr path string true "NFT Contract Address"
-// @Param nftid path string true "NFT ID"
-// @Success 200 {integer} int
-// @Router /v1/get_comments_cnt/{nftaddr}/{nftid} [get]
+// @Tags        NFT
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       nftaddr path      string true "NFT Contract Address"
+// @Param       nftid   path      string true "NFT ID"
+// @Success     200     {integer} int
+// @Router      /v1/get_comments_cnt/{nftaddr}/{nftid} [get]
 func GetCommentsCount(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["nftid"]
@@ -3440,16 +3447,16 @@ func FormatTwitterData(data TwitterTweetsData) []TweetType {
 }
 
 // GetCommunityChat godoc
-// @Summary Get Community Chat Landing Page Info
+// @Summary     Get Community Chat Landing Page Info
 // @Description TODO: need a creation API for communities, which includes specificied welcome message text, Twitter handle, page title
-// @Tags GroupChat
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param address path string true "Wallet Address"
-// @Param address path string true "Wallet Address"
-// @Success 200 {array} LandingPageItems
-// @Router /v1/community/{community}/{address} [get]
+// @Tags        GroupChat
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       address path    string true "Wallet Address"
+// @Param       address path    string true "Wallet Address"
+// @Success     200     {array} LandingPageItems
+// @Router      /v1/community/{community}/{address} [get]
 func GetCommunityChat(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	community := vars["community"]
@@ -3585,16 +3592,16 @@ func GetCommunityChat(w http.ResponseWriter, r *http.Request) {
 }
 
 // IsOwner godoc
-// @Summary Check if given wallet address owns an NFT from given contract address
+// @Summary     Check if given wallet address owns an NFT from given contract address
 // @Description API user could check this directly via any third party service like NFTPort, Moralis as well
-// @Tags Common
-// @Accept  json
+// @Tags        Common
+// @Accept      json
 // @Produce  json
 // @Security BearerAuth
-// @Param contract path string true "NFT Contract Address"
-// @Param wallet path string true "Wallet Address"
-// @Success 200 {array} LandingPageItems
-// @Router /v1/is_owner/{contract}/{wallet} [get]
+// @Param       contract path    string true "NFT Contract Address"
+// @Param       wallet   path    string true "Wallet Address"
+// @Success     200      {array} LandingPageItems
+// @Router      /v1/is_owner/{contract}/{wallet} [get]
 func IsOwner(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	contract := vars["contract"]
@@ -3691,15 +3698,12 @@ func IsOwnerOfNFT(contractAddr string, walletAddr string, chain string) bool {
 
 	if !result && (chain == "ethereum" || chain == "polygon") {
 		delegates := auth.GetDelegationsByDelegate(walletAddr)
-		if delegates != nil {
-			//fmt.Println("Wallet Delegates in OwnerOfNFT: ", delegates)
-
-			for _, delegateWallet := range delegates {
-				result = IsOwnerOfNftLocal(contractAddr, delegateWallet.Vault.Hex(), chain)
-				if result {
-					break
-				} //if we find an NFT, can stop here
-			}
+		//fmt.Println("Wallet Delegates in OwnerOfNFT: ", delegates)
+		for _, delegateWallet := range delegates {
+			result = IsOwnerOfNftLocal(contractAddr, delegateWallet.Vault.Hex(), chain)
+			if result {
+				break
+			} //if we find an NFT, can stop here
 		}
 	}
 
@@ -3785,13 +3789,13 @@ func IsOwnerOfNftLocal(contractAddr string, walletAddr string, chain string) boo
 		client := &http.Client{}
 		resp, err := client.Do(req)
 		if err != nil {
-			fmt.Printf("Error on response.\n[ERROR] -", err)
+			fmt.Println("Error on response.\n[ERROR] -", err)
 		}
 		defer resp.Body.Close()
 
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			fmt.Printf("Error while reading the response bytes:", err)
+			fmt.Println("Error while reading the response bytes:", err)
 		}
 
 		var result MoralisOwnerOf
