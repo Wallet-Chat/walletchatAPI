@@ -2025,7 +2025,7 @@ func GetRawImageItem(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(content)
+		json.NewEncoder(w).Encode(string(content))
 	} else {
 		w.WriteHeader(http.StatusForbidden)
 	}
