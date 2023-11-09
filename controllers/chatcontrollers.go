@@ -1908,17 +1908,17 @@ func CreateImageItem(w http.ResponseWriter, r *http.Request) {
 
 // CreateImageItemPFP godoc
 // @Summary Store Image in Bucket Storage
-// @Description public facing PFP storage to make it faster for UI to get and load images
+// @Description private image storage for photo uploads in chat
 // @Tags Common
 // @Accept  json
 // @Produce  json
 // @Security BearerAuth
-// @Param message body entity.Imageitem true "Profile Thumbnail Pic (PFP)"
-// @Success 200 {array} entity.Imageitem
-// @Router /v1/imagepfp [post]
-func CreateImageItemPFP(w http.ResponseWriter, r *http.Request) {
+// @Param message body entity.ImageitemPhoto true "Raw Images"
+// @Success 200
+// @Router /v1/imageraw [post]
+func CreateRawImageItem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
-	var imageaddr entity.Imageitem
+	var imageaddr entity.ImageitemPhoto
 	json.Unmarshal(requestBody, &imageaddr)
 
 	Authuser := auth.GetUserFromReqContext(r)
@@ -1947,7 +1947,7 @@ func CreateImageItemPFP(w http.ResponseWriter, r *http.Request) {
 			Bucket: aws.String("walletchat-pfp-storage"),    // The path to the directory you want to upload the object to, starting with your Space name.
 			Key:    aws.String(imageaddr.Addr),              // Object key, referenced whenever you want to access this file later.
 			Body:   strings.NewReader(imageaddr.Base64data), // The object's contents.
-			ACL:    aws.String("public-read"),               // Defines Access-control List (ACL) permissions, such as private or public.
+			ACL:    aws.String("private-read"),              // Defines Access-control List (ACL) permissions, such as private or public.
 			Metadata: map[string]*string{ // Required. Defines metadata tags.
 				"x-amz-meta-my-key": aws.String("your-value"),
 			},
@@ -1959,13 +1959,69 @@ func CreateImageItemPFP(w http.ResponseWriter, r *http.Request) {
 			fmt.Println(err)
 		}
 
-		w.Header().Set("Content-Type", "application/json")
-		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(imageaddr)
 	} else {
 		w.WriteHeader(http.StatusForbidden)
 	}
+}
+
+// GetRawImageItem godoc
+// @Summary Store Image in Bucket Storage
+// @Description private image storage for photo uploads in chat
+// @Tags Common
+// @Accept  json
+// @Produce  json
+// @Security BearerAuth
+// @Param address path string true
+// @Success 200 {array} entity.Imageitem
+// @Router /v1/imageraw/{imageid} [get]
+func GetRawImageItem(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	imageid := vars["imageid"]
+
+	//var imageaddr entity.Imageitem
+
+	//TODO: once imageid format is verified, we strip addresses out of it to ensure user can get this file
+
+	//Authuser := auth.GetUserFromReqContext(r)
+	//if strings.EqualFold(Authuser.Address, imageaddr.Addr) {
+	// Step 2: Define the parameters for the session you want to create.
+	key := "DO00CLQBPDAEHFUTYMGR"        // Access key pair. You can create access key pairs using the control panel or API.
+	secret := os.Getenv("SPACES_SECRET") // Secret access key defined through an environment variable.
+
+	s3Config := &aws.Config{
+		Credentials:      credentials.NewStaticCredentials(key, secret, ""), // Specifies your credentials.
+		Endpoint:         aws.String("https://sgp1.digitaloceanspaces.com"), // Find your endpoint in the control panel, under Settings. Prepend "https://".
+		S3ForcePathStyle: aws.Bool(false),                                   // // Configures to use subdomain/virtual calling format. Depending on your version, alternatively use o.UsePathStyle = false
+		Region:           aws.String("us-east-1"),                           // Must be "us-east-1" when creating new Spaces. Otherwise, use the region in your endpoint, such as "nyc3".
+	}
+
+	// Step 3: The new session validates your request and directs it to your Space's specified endpoint using the AWS SDK.
+	newSession, errs := session.NewSession(s3Config)
+	if errs != nil {
+		fmt.Println(errs.Error())
+	}
+	s3Client := s3.New(newSession)
+
+	// Step 4: Define the parameters of the object you want to upload.
+	object := s3.GetObjectInput{
+		Bucket: aws.String("walletchat-pfp-storage"), // The path to the directory you want to upload the object to, starting with your Space name.
+		Key:    aws.String(imageid),                  // Object key, referenced whenever you want to access this file later.
+	}
+
+	// Step 5: Run the PutObject function with your parameters, catching for errors.
+	imageObject, err := s3Client.GetObject(&object)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(imageObject)
+	// } else {
+	// 	w.WriteHeader(http.StatusForbidden)
+	// }
 }
 
 // UpdateImageItem godoc

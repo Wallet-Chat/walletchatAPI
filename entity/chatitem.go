@@ -110,6 +110,13 @@ type Imageitem struct {
 	Addr       string `json:"addr"`
 }
 
+type ImageitemPhoto struct {
+	Id         int    `gorm:"primaryKey;autoIncrement"`
+	Base64data string `json:"base64data"`
+	Addr       string `json:"addr"`
+	Imageid    string `json:"imageid"`
+}
+
 //we have to keep track if a user has manually unjoined, if they did don't auto-join them again
 type Userunjoined struct {
 	Id         int    `gorm:"primaryKey;autoIncrement"`
