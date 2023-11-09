@@ -1945,9 +1945,9 @@ func CreateRawImageItem(w http.ResponseWriter, r *http.Request) {
 		// Step 4: Define the parameters of the object you want to upload.
 		object := s3.PutObjectInput{
 			Bucket: aws.String("walletchat-pfp-storage"),    // The path to the directory you want to upload the object to, starting with your Space name.
-			Key:    aws.String(imageaddr.Addr),              // Object key, referenced whenever you want to access this file later.
+			Key:    aws.String(imageaddr.Imageid),           // Object key, referenced whenever you want to access this file later.
 			Body:   strings.NewReader(imageaddr.Base64data), // The object's contents.
-			ACL:    aws.String("private-read"),              // Defines Access-control List (ACL) permissions, such as private or public.
+			ACL:    aws.String("private"),                   // Defines Access-control List (ACL) permissions, such as private or public.
 			Metadata: map[string]*string{ // Required. Defines metadata tags.
 				"x-amz-meta-my-key": aws.String("your-value"),
 			},
