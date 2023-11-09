@@ -278,7 +278,7 @@ func (s SigninPayload) Validate() error {
 	}
 
 	if !nonceRegex.MatchString(s.Nonce) {
-		fmt.Println("Invalid Nonce: ", s.Nonce)
+		fmt.Println("Invalid Nonce: ", s.Address, s.Msg, s.Name, s.Nonce)
 		return ErrInvalidNonce
 	}
 	if len(s.Sig) == 0 {
