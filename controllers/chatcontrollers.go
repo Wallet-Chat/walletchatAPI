@@ -2187,7 +2187,7 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 			if dbResults.RowsAffected == 0 {
 				if isAdmin {
 					var uservalid entity.Referraluser
-					uservalid.Referralcode = "admin_create"
+					uservalid.Referralcode = "wc-admin"
 					uservalid.Walletaddr = addrname.Address
 					database.Connector.Create(&uservalid)
 
