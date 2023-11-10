@@ -1848,7 +1848,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Give a common name (Kevin.eth, BillyTheKid, etc) to an Address\nAccepts ADMIN_API_KEY for integrated sign-in",
+                "description": "Give a common name (Kevin.eth, BillyTheKid, etc) to an Address (*** Will return 403 if address doesn't own ENS name! ***)\nAccepts ADMIN_API_KEY for integrated sign-in and creating new WC users (see top of page for examples)",
                 "consumes": [
                     "application/json"
                 ],

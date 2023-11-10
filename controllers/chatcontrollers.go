@@ -2109,8 +2109,8 @@ func TrackEventGA4(w http.ResponseWriter, r *http.Request) {
 
 // CreateAddrNameItem godoc
 // @Summary     give a common name to a user address, or NFT collection
-// @Description Give a common name (Kevin.eth, BillyTheKid, etc) to an Address
-// @Description Accepts ADMIN_API_KEY for integrated sign-in
+// @Description Give a common name (Kevin.eth, BillyTheKid, etc) to an Address (*** Will return 403 if address doesn't own ENS name! ***)
+// @Description Accepts ADMIN_API_KEY for integrated sign-in and creating new WC users (see top of page for examples)
 // @Tags        Common
 // @Accept      json
 // @Produce     json
@@ -2185,12 +2185,19 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 			var settings entity.Settings
 			var dbResults = database.Connector.Where("walletaddr = ?", addrname.Address).Find(&settings)
 			if dbResults.RowsAffected == 0 {
-				if isAdmin && addrnameSignup.Email != "" {
-					fmt.Println("Update from Admin: ", apiKey[:16])
-					settings.Email = addrnameSignup.Email
-					settings.Verified = "true"
-					settings.Notify24 = "false"
-					settings.Notifydm = "true"
+				if isAdmin {
+					var uservalid entity.Referraluser
+					uservalid.Referralcode = "admin_create"
+					uservalid.Walletaddr = addrname.Address
+					database.Connector.Create(&uservalid)
+
+					if addrnameSignup.Email != "" {
+						fmt.Println("Update from Admin: ", apiKey[:16])
+						settings.Email = addrnameSignup.Email
+						settings.Verified = "true"
+						settings.Notify24 = "false"
+						settings.Notifydm = "true"
+					}
 				}
 				settings.Domain = addrnameSignup.Domain
 				settings.Signupsite = addrnameSignup.Signupsite

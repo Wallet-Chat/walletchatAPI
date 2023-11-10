@@ -1618,8 +1618,8 @@ paths:
       consumes:
       - application/json
       description: |-
-        Give a common name (Kevin.eth, BillyTheKid, etc) to an Address
-        Accepts ADMIN_API_KEY for integrated sign-in
+        Give a common name (Kevin.eth, BillyTheKid, etc) to an Address (*** Will return 403 if address doesn't own ENS name! ***)
+        Accepts ADMIN_API_KEY for integrated sign-in and creating new WC users (see top of page for examples)
       parameters:
       - description: Address and Name to map together
         in: body
