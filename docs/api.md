@@ -44,9 +44,9 @@ replace with equivalent functionality as needed.
 Update the wallet address to name mapping:
 
 ```
-curl --location 'https://api.v2.walletchat.fun/v1/name' \
---header 'Content-Type: application/json' \
---header 'Authorization: Bearer AdminTestKey123' \
+curl --location 'https://api.v2.walletchat.fun/v1/name'
+--header 'Content-Type: application/json'
+--header 'Authorization: Bearer AdminTestKey123'
 --data-raw '{
     "address":"0xWalletAddressHere",
     "email":"billAndTed@universe.com",

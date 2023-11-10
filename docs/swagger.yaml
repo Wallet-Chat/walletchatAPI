@@ -406,10 +406,10 @@ info:
     \n\nBelow are examples of each API which has an ADMIN API Key overrride. `curl`
     is just used as example,\nreplace with equivalent functionality as needed.\n\n##
     Example for <API>/v1/name \nUpdate the wallet address to name mapping:\n\n```\ncurl
-    --location 'https://api.v2.walletchat.fun/v1/name' \\\n--header 'Content-Type:
-    application/json' \\\n--header 'Authorization: Bearer AdminTestKey123' \\\n--data-raw
-    '{\n    \"address\":\"0xWalletAddressHere\",\n    \"email\":\"billAndTed@universe.com\",\n
-    \   \"signupsite\":\"app.yoursite.xyz\",\n    \"domain\":\"yoursite.xyz\",\n    \"name\":\"CyberTed\"\n}'\n```"
+    --location 'https://api.v2.walletchat.fun/v1/name'\n--header 'Content-Type: application/json'\n--header
+    'Authorization: Bearer AdminTestKey123'\n--data-raw '{\n    \"address\":\"0xWalletAddressHere\",\n
+    \   \"email\":\"billAndTed@universe.com\",\n    \"signupsite\":\"app.yoursite.xyz\",\n
+    \   \"domain\":\"yoursite.xyz\",\n    \"name\":\"CyberTed\"\n}'\n```"
   title: WalletChat API
   version: "2.0"
 paths:
