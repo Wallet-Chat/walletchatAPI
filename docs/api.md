@@ -44,24 +44,14 @@ replace with equivalent functionality as needed.
 Update the wallet address to name mapping:
 
 ```
-curl --location 'https://api.v2.walletchat.fun/v1/name'
---header 'Authorization: Bearer AdminTestKey123'
---header 'Content-Type: text/plain'
---data '{
-"name": "Nftz4Life",
-"address": "0x14ffE94d2B5Bf47a8d55D713b3d6b35039167cfb"
-}'
-```
-
-## Example for <API>/v1/update_settings
-Update the email address to wallet address mapping:
-
-```
-curl --location 'https://api.v2.walletchat.fun/v1/update_settings'
---header 'Authorization: Bearer MyTestApiKey123'
---header 'Content-Type: text/plain'
+curl --location 'https://api.v2.walletchat.fun/v1/name' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer AdminTestKey123' \
 --data-raw '{
-"email": "savemynft@gmail.com",
-"walletaddr": "0x14fcE94d2B5Bf47a8d54D713b3d6b35039167cfb"
+    "address":"0xWalletAddressHere",
+    "email":"billAndTed@universe.com",
+    "signupsite":"app.yoursite.xyz",
+    "domain":"yoursite.xyz",
+    "name":"CyberTed"
 }'
 ```

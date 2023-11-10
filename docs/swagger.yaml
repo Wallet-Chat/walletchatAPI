@@ -406,12 +406,10 @@ info:
     \n\nBelow are examples of each API which has an ADMIN API Key overrride. `curl`
     is just used as example,\nreplace with equivalent functionality as needed.\n\n##
     Example for <API>/v1/name \nUpdate the wallet address to name mapping:\n\n```\ncurl
-    --location 'https://api.v2.walletchat.fun/v1/name'\n--header 'Authorization: Bearer
-    AdminTestKey123'\n--header 'Content-Type: text/plain'\n--data '{\n\"name\": \"Nftz4Life\",\n\"address\":
-    \"0x14ffE94d2B5Bf47a8d55D713b3d6b35039167cfb\"\n}'\n```\n\n## Example for <API>/v1/update_settings\nUpdate
-    the email address to wallet address mapping:\n\n```\ncurl --location 'https://api.v2.walletchat.fun/v1/update_settings'\n--header
-    'Authorization: Bearer MyTestApiKey123'\n--header 'Content-Type: text/plain'\n--data-raw
-    '{\n\"email\": \"savemynft@gmail.com\",\n\"walletaddr\": \"0x14fcE94d2B5Bf47a8d54D713b3d6b35039167cfb\"\n}'\n```"
+    --location 'https://api.v2.walletchat.fun/v1/name' \\\n--header 'Content-Type:
+    application/json' \\\n--header 'Authorization: Bearer AdminTestKey123' \\\n--data-raw
+    '{\n    \"address\":\"0xWalletAddressHere\",\n    \"email\":\"billAndTed@universe.com\",\n
+    \   \"signupsite\":\"app.yoursite.xyz\",\n    \"domain\":\"yoursite.xyz\",\n    \"name\":\"CyberTed\"\n}'\n```"
   title: WalletChat API
   version: "2.0"
 paths:
@@ -1775,9 +1773,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: |-
-        Update settings, email address, daily notifications and per DM notifications
-        Accepts ADMIN_API_KEY for integrated sign-in
+      description: Update settings, email address, daily notifications and per DM
+        notifications
       parameters:
       - description: update struct
         in: body
