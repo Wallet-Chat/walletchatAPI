@@ -1915,7 +1915,11 @@ func CreateImageItem(w http.ResponseWriter, r *http.Request) {
 func CreateRawImageItem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var imageaddr entity.ImageitemPhoto
-	json.Unmarshal(requestBody, &imageaddr)
+	err := json.Unmarshal(requestBody, &imageaddr)
+	if err != nil {
+		w.WriteHeader(http.StatusNotAcceptable)
+		return
+	}
 
 	Authuser := auth.GetUserFromReqContext(r)
 
