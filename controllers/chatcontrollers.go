@@ -1382,6 +1382,7 @@ func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 	chat.Type = entity.Message
 
 	//probably can removed now with DB trigger
+	chat.Timestamp = time.Now().Format("2006-01-02T15:04:05.000Z")
 	chat.Timestamp_dtm = time.Now()
 
 	Authuser := auth.GetUserFromReqContext(r)
@@ -1660,7 +1661,7 @@ func CreateCommunityChatItem(w http.ResponseWriter, r *http.Request) {
 		chat.Type = entity.Message
 	}
 
-	//can remove now I think
+	chat.Timestamp = time.Now().Format("2006-01-02T15:04:05.000Z")
 	chat.Timestamp_dtm = time.Now()
 
 	Authuser := auth.GetUserFromReqContext(r)
