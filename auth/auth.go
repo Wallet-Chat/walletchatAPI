@@ -260,6 +260,7 @@ func (s SigninPayload) Validate() error {
 
 	message, err = siwe.ParseMessage(s.Msg)
 	if err != nil {
+		fmt.Println("Invalid SIWE format: ", s.Msg)
 		return ErrInvalidSIWE
 	}
 
