@@ -1088,7 +1088,7 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 				chat_id := tgSupportChatIdsArray[index]
 
 				fmt.Println("sending to TG group message")
-				SendTelegramMessage("_Message from WalletChat User: "+chat.Fromaddr+"_\r\n"+chat.Message, chat_id)
+				SendTelegramMessage("_Message from WalletChat User: "+chat.Fromaddr[0:4]+"..."+chat.Fromaddr[len(chat.Fromaddr)-4:]+"_\r\n"+chat.Message, chat_id)
 			}
 			//manage support messages
 			// if strings.EqualFold(os.Getenv("SUPPORT_WALLET"), chat.Toaddr) {
