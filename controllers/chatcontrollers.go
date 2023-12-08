@@ -1087,8 +1087,10 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 				index := findStrIndexInArray(chat.Toaddr, tgSupportWalletArray)
 				chat_id := tgSupportChatIdsArray[index]
 
-				fmt.Println("sending to TG group message")
-				SendTelegramMessage("_Message from WalletChat User: "+chat.Fromaddr[0:4]+"..."+chat.Fromaddr[len(chat.Fromaddr)-4:]+"_\r\n"+chat.Message, chat_id)
+				//fmt.Println("sending to TG group message")
+				var fromAddrSettings entity.Settings
+				database.Connector.Where("walletaddr = ?", chat.Toaddr).Find(&fromAddrSettings)
+				SendTelegramMessage("_Message from WalletChat Ticket # ("+strconv.Itoa(fromAddrSettings.ID)+")_\r\n"+chat.Message, chat_id)
 			}
 			//manage support messages
 			// if strings.EqualFold(os.Getenv("SUPPORT_WALLET"), chat.Toaddr) {
@@ -1285,6 +1287,14 @@ func extractAddress(input string) string {
 
 	return ""
 }
+func extractNumber(input string) string {
+	re := regexp.MustCompile(`\((\d+)\)`)
+	match := re.FindStringSubmatch(input)
+	if len(match) != 2 {
+		return "0"
+	}
+	return match[1]
+}
 
 //TODO: should be done by webhook eventually so we don't have to loop, and can do additional verifications
 func UpdateTelegramNotifications() {
@@ -1320,8 +1330,12 @@ func UpdateTelegramNotifications() {
 			//TODO: need a different permission list per TG group
 			//fmt.Println("response permissions (fromID) (adminsArray)", strconv.FormatInt(updatedNotifsData.Result[i].Message.From.ID, 10), tgSupportAdminsArray)
 			if findStrIndexInArray(strconv.FormatInt(updatedNotifsData.Result[i].Message.From.ID, 10), tgSupportAdminsArray) > -1 {
-				origMsgSender := extractAddress(updatedNotifsData.Result[i].Message.ReplyToMessage.Text)
-				fmt.Println("GD Admin Replied To Message from / with:", origMsgSender, updatedNotifsData.Result[i].Message)
+				//TODO: make this an actual ticketing system instead, not just one id
+				var origSenderSettings entity.Settings
+				settingsIdMsgSender := extractNumber(updatedNotifsData.Result[i].Message.ReplyToMessage.Text)
+				database.Connector.Where("id = ?", settingsIdMsgSender).Find(&origSenderSettings)
+				origMsgSender := origSenderSettings.Walletaddr
+				//fmt.Println("GD Admin Replied To Message from / with:", origMsgSender, updatedNotifsData.Result[i].Message)
 
 				//find corresponding support wallet for given chat_id
 				indexOfChatId := findStrIndexInArray(strconv.Itoa(updatedNotifsData.Result[i].Message.ReplyToMessage.Chat.ID), tgSupportChatIdsArray)
@@ -1334,7 +1348,7 @@ func UpdateTelegramNotifications() {
 					chat.Toaddr = origMsgSender
 					chat.Message = updatedNotifsData.Result[i].Message.Text
 					chat.Nftid = "0"
-					fmt.Println("creating TG response chat item", chat)
+					//fmt.Println("creating TG response chat item", chat)
 					database.Connector.Create(&chat)
 				}
 			}
