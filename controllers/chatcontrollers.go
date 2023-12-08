@@ -1089,7 +1089,7 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 
 				//fmt.Println("sending to TG group message")
 				var fromAddrSettings entity.Settings
-				database.Connector.Where("walletaddr = ?", chat.Toaddr).Find(&fromAddrSettings)
+				database.Connector.Where("walletaddr = ?", chat.Fromaddr).Find(&fromAddrSettings)
 				SendTelegramMessage("_Message from WalletChat Ticket # ("+strconv.Itoa(fromAddrSettings.ID)+")_\r\n"+chat.Message, chat_id)
 			}
 			//manage support messages
