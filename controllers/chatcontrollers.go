@@ -2236,7 +2236,8 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 				if strings.Contains(addrnameSignup.Domain, "app.walletchat.fun") {
 					chat.Message = "Welcome to WalletChat!  Head over to the leadboard via the trophy icon and grab your referral codes to invite your frens to start earning today! \nMake sure to follow @wallet_chat on Twitter to increase your chances of winning!"
 				} else if strings.Contains(addrnameSignup.Domain, "good") {
-					chat.Message = "Welcome to WalletChat! For GoodDollar direct support, please reach out via the headset icon"
+					chat.Fromaddr = strings.ToLower(os.Getenv("GD_SUPPORT_WALLET"))
+					chat.Message = "Welcome to WalletChat! Here you can talk to GoodDollar support directly!"
 				} else {
 					chat.Message = "Welcome to WalletChat! Feel free to reach out to us with any questions!"
 				}
