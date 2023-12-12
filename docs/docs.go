@@ -216,6 +216,60 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/community/{community}/{time}/{count}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get Community Chat Items When Scrolling",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "GroupChat"
+                ],
+                "summary": "Get Community Chat Items When Scrolling",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "community slug",
+                        "name": "community",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Timestamp of last message in current community chat",
+                        "name": "time",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Number of Messages To Get (1-1000)",
+                        "name": "count",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/controllers.LandingPageItems"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/v1/create_bookmark": {
             "post": {
                 "security": [

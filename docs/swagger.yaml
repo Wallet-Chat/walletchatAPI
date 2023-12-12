@@ -522,6 +522,41 @@ paths:
       summary: Get Community Chat Landing Page Info
       tags:
       - GroupChat
+  /v1/community/{community}/{time}/{count}:
+    get:
+      consumes:
+      - application/json
+      description: Get Community Chat Items When Scrolling
+      parameters:
+      - description: community slug
+        in: path
+        name: community
+        required: true
+        type: string
+      - description: Timestamp of last message in current community chat
+        in: path
+        name: time
+        required: true
+        type: string
+      - description: Number of Messages To Get (1-1000)
+        in: path
+        name: count
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/controllers.LandingPageItems'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get Community Chat Items When Scrolling
+      tags:
+      - GroupChat
   /v1/community/conditions:
     post:
       consumes:

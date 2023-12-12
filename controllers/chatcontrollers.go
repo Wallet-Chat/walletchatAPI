@@ -3466,7 +3466,7 @@ func FormatTwitterData(data TwitterTweetsData) []TweetType {
 // @Security    BearerAuth
 // @Param       address path    string true "Wallet Address"
 // @Param       address path    string true "Wallet Address"
-// @Success     200     {array} LandingPageItems
+// @Success     200       {array} LandingPageItems
 // @Router      /v1/community/{community}/{address} [get]
 func GetCommunityChat(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -3600,6 +3600,36 @@ func GetCommunityChat(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	json.NewEncoder(w).Encode(landingData)
+}
+
+// GetCommunityChatAfterTime godoc
+// @Summary     Get Community Chat Items When Scrolling
+// @Description Get Community Chat Items When Scrolling
+// @Tags        GroupChat
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       community path    string true "community slug"
+// @Param       time      path    string true "Timestamp of last message in current community chat"
+// @Param       count     path    string true "Number of Messages To Get (1-1000)"
+// @Success     200     {array} LandingPageItems
+// @Router      /v1/community/{community}/{time}/{count} [get]
+func GetCommunityChatAfterTime(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	community := vars["community"]
+	time := vars["time"]
+
+	count, _ := strconv.Atoi(vars["count"])
+	if count > 1000 || count < 1 {
+		count = 100
+	}
+
+	var messages []entity.Groupchatitem
+	database.Connector.Where("nftaddr = ?", community).Order("id desc").Where("timestamp_dtm < ?", time).Limit(count).Find(&messages)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	json.NewEncoder(w).Encode(messages)
 }
 
 // IsOwner godoc
