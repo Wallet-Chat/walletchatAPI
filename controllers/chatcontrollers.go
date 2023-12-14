@@ -1068,6 +1068,15 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 	walletaddr := Authuser.Address
 
 	if strings.EqualFold(walletaddr, chat.Fromaddr) {
+		//ensure its not from a blocked user
+		var blockedUser entity.Blockeduser
+		blockedQuery := database.Connector.Where("blockedaddress = ?", chat.Fromaddr).Where("owneraddress = ?", chat.Toaddr).Find(&blockedUser)
+		if blockedQuery.RowsAffected > 0 {
+			fmt.Println("block user trying to send messages: ", chat.Fromaddr, chat.Toaddr)
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+
 		dbQuery := database.Connector.Create(&chat)
 		if dbQuery.RowsAffected == 0 {
 			fmt.Println(dbQuery.Error)
@@ -2540,6 +2549,36 @@ func DeleteChatitem(w http.ResponseWriter, r *http.Request) {
 	owner := Authuser.Address
 
 	dbQuery := database.Connector.Where("id = ?", id).Where("fromaddr = ?", owner).Delete(&chat)
+
+	if dbQuery.RowsAffected > 0 {
+		w.WriteHeader(http.StatusOK)
+	} else {
+		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
+// BlockUser godoc
+// @Summary     Block User From DMing (DM)
+// @Description Unblocking takes manual request from end user
+// @Tags        Security
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       address path string true "Address to Block"
+// @Success     204
+// @Router      /v1/block_user/{address} [get]
+func BlockUser(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	addressToBlock := vars["address"]
+
+	var blockedUser entity.Blockeduser
+	Authuser := auth.GetUserFromReqContext(r)
+	owner := Authuser.Address
+
+	blockedUser.Owneraddress = owner
+	blockedUser.Blockedaddress = addressToBlock
+
+	dbQuery := database.Connector.Create(&blockedUser)
 
 	if dbQuery.RowsAffected > 0 {
 		w.WriteHeader(http.StatusOK)
