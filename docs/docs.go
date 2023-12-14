@@ -85,6 +85,40 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/block_user/{address}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Unblocking takes manual request from end user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Security"
+                ],
+                "summary": "Block User From DMing (DM)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Address to Block",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
         "/v1/community": {
             "post": {
                 "security": [

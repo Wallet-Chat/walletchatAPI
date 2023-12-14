@@ -464,6 +464,27 @@ paths:
         a new nonce to sign
       tags:
       - Auth
+  /v1/block_user/{address}:
+    get:
+      consumes:
+      - application/json
+      description: Unblocking takes manual request from end user
+      parameters:
+      - description: Address to Block
+        in: path
+        name: address
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Block User From DMing (DM)
+      tags:
+      - Security
   /v1/community:
     post:
       consumes:
