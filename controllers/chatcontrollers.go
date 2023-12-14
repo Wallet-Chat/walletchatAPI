@@ -1098,7 +1098,7 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 				index := findStrIndexInArray(chat.Toaddr, tgSupportWalletArray)
 				chat_id := tgSupportChatIdsArray[index]
 
-				blockedUserIndex := findStrIndexInArray(chat.Fromaddr, tgSupportBlockedUsers)
+				blockedUserIndex := findStrIndexInArray(strings.ToLower(chat.Fromaddr), tgSupportBlockedUsers)
 
 				if blockedUserIndex < 0 {
 					//fmt.Println("sending to TG group message")
@@ -1355,7 +1355,7 @@ func UpdateTelegramNotifications() {
 				//see if its a block user request
 				if strings.EqualFold(updatedNotifsData.Result[i].Message.Text, "BLOCK_USER") {
 					fmt.Println("TG Admin Blocked User: ", origMsgSender)
-					tgSupportBlockedUsers = append(tgSupportBlockedUsers, origMsgSender)
+					tgSupportBlockedUsers = append(tgSupportBlockedUsers, strings.ToLower(origMsgSender))
 					telegramUpdateOffset = updatedNotifsData.Result[i].UpdateID + 1
 					return
 				}
