@@ -51,6 +51,8 @@ var tgSupportChatIdsArray []string
 var tgSupportAdminsCsvString = ""
 var tgSupportAdminsArray []string
 
+var tgSupportBlockedUsers []string
+
 var giveawayMessageCounter = 0
 
 func stringInSlice(a string, list []string) bool {
@@ -1096,10 +1098,14 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 				index := findStrIndexInArray(chat.Toaddr, tgSupportWalletArray)
 				chat_id := tgSupportChatIdsArray[index]
 
-				//fmt.Println("sending to TG group message")
-				var fromAddrSettings entity.Settings
-				database.Connector.Where("walletaddr = ?", chat.Fromaddr).Find(&fromAddrSettings)
-				SendTelegramMessage("_WalletChat Ticket #("+strconv.Itoa(fromAddrSettings.ID)+")_\r\n"+chat.Message, chat_id)
+				blockedUserIndex := findStrIndexInArray(chat.Fromaddr, tgSupportBlockedUsers)
+
+				if blockedUserIndex < 0 {
+					//fmt.Println("sending to TG group message")
+					var fromAddrSettings entity.Settings
+					database.Connector.Where("walletaddr = ?", chat.Fromaddr).Find(&fromAddrSettings)
+					SendTelegramMessage("_WalletChat Ticket #("+strconv.Itoa(fromAddrSettings.ID)+")_\r\n"+chat.Message, chat_id)
+				}
 			}
 			//manage support messages
 			// if strings.EqualFold(os.Getenv("SUPPORT_WALLET"), chat.Toaddr) {
@@ -1333,7 +1339,7 @@ func UpdateTelegramNotifications() {
 	json.Unmarshal(body, &updatedNotifsData)
 
 	for i := 0; i < len(updatedNotifsData.Result); i++ {
-		fmt.Println("full message: ", updatedNotifsData.Result[i])
+		//fmt.Println("full message: ", updatedNotifsData.Result[i])
 		if isFieldSet(updatedNotifsData.Result[i].Message.ReplyToMessage) {
 			//if its a reply message, we need to send the user the reply (but only permissioned admins can do this)
 			//TODO: need a different permission list per TG group
@@ -1345,6 +1351,14 @@ func UpdateTelegramNotifications() {
 				database.Connector.Where("id = ?", settingsIdMsgSender).Find(&origSenderSettings)
 				origMsgSender := origSenderSettings.Walletaddr
 				//fmt.Println("GD Admin Replied To Message from / with:", origMsgSender, updatedNotifsData.Result[i].Message)
+
+				//see if its a block user request
+				if strings.EqualFold(updatedNotifsData.Result[i].Message.Text, "BLOCK_USER") {
+					fmt.Println("TG Admin Blocked User: ", origMsgSender)
+					tgSupportBlockedUsers = append(tgSupportBlockedUsers, origMsgSender)
+					telegramUpdateOffset = updatedNotifsData.Result[i].UpdateID + 1
+					return
+				}
 
 				//find corresponding support wallet for given chat_id
 				indexOfChatId := findStrIndexInArray(strconv.Itoa(updatedNotifsData.Result[i].Message.ReplyToMessage.Chat.ID), tgSupportChatIdsArray)
