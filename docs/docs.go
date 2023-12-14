@@ -672,7 +672,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/deleteall_chatitems/{fromaddr}/{toaddr}": {
+        "/v1/deleteall_chatitems/{address}": {
             "delete": {
                 "security": [
                     {
@@ -689,19 +689,12 @@ const docTemplate = `{
                 "tags": [
                     "Unused/Legacy"
                 ],
-                "summary": "Delete All Chat Items (DMs) between FROM and TO given addresses",
+                "summary": "Delete All Chat Items (DMs) between sender (from JWT) given addresses",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "TO: Address",
-                        "name": "toaddr",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "FROM: Address",
-                        "name": "fromaddr",
+                        "description": "Delete convo with Wallet Address",
+                        "name": "address",
                         "in": "path",
                         "required": true
                     }

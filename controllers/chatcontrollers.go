@@ -2498,20 +2498,18 @@ func UpdateChatitemByOwner(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteAllChatitemsToAddressByOwner godoc
-// @Summary     Delete All Chat Items (DMs) between FROM and TO given addresses
+// @Summary     Delete All Chat Items (DMs) between sender (from JWT) given addresses
 // @Description Currently deletes all chat items between these two addresses
 // @Tags        Unused/Legacy
 // @Accept      json
 // @Produce     json
 // @Security    BearerAuth
-// @Param       toaddr   path string true "TO: Address"
-// @Param       fromaddr path string true "FROM: Address"
+// @Param       address   path string true "Delete convo with Wallet Address"
 // @Success     204
-// @Router      /v1/deleteall_chatitems/{fromaddr}/{toaddr} [delete]
+// @Router      /v1/deleteall_chatitems/{address} [delete]
 func DeleteAllChatitemsToAddressByOwner(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	to := vars["toaddr"]
-	//owner := vars["fromaddr"]
+	to := vars["address"]
 
 	var chat entity.Chatitem
 	Authuser := auth.GetUserFromReqContext(r)

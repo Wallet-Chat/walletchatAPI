@@ -839,20 +839,15 @@ paths:
       summary: Delete Settings Info
       tags:
       - Unused/Legacy
-  /v1/deleteall_chatitems/{fromaddr}/{toaddr}:
+  /v1/deleteall_chatitems/{address}:
     delete:
       consumes:
       - application/json
       description: Currently deletes all chat items between these two addresses
       parameters:
-      - description: 'TO: Address'
+      - description: Delete convo with Wallet Address
         in: path
-        name: toaddr
-        required: true
-        type: string
-      - description: 'FROM: Address'
-        in: path
-        name: fromaddr
+        name: address
         required: true
         type: string
       produces:
@@ -862,7 +857,7 @@ paths:
           description: No Content
       security:
       - BearerAuth: []
-      summary: Delete All Chat Items (DMs) between FROM and TO given addresses
+      summary: Delete All Chat Items (DMs) between sender (from JWT) given addresses
       tags:
       - Unused/Legacy
   /v1/get_bookmarks/{address}/:
