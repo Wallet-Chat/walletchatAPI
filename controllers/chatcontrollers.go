@@ -353,6 +353,31 @@ func GetUnreadMsgCntTotal(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(len(chat))
 }
 
+// GetUnreadMsgCntTotalExternal godoc
+// @Summary     Unread DM count - unauthenticated for user with Android App
+// @Description Unread DM count
+// @Tags        Inbox
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       address path      string true "Wallet Address"
+// @Success     200     {integer} int
+// @Router      /get_unread_cnt/{address} [get]
+func GetUnreadMsgCntTotalExternal(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	key := vars["address"]
+
+	var chat []entity.Chatitem
+	database.Connector.Where("toaddr = ?", key).Where("msgread != ?", true).Find(&chat)
+
+	//get group chat unread items as well
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(len(chat))
+}
+
 // GetUnreadMsgCntTotalByType godoc
 // @Summary     Get all unread messages TO a specific user, used for total count notification at top notification bar
 // @Description Get Each 1-on-1 Conversation, NFT and Community Chat For Display in Inbox
@@ -2595,6 +2620,34 @@ func BlockUser(w http.ResponseWriter, r *http.Request) {
 	if dbQuery.RowsAffected > 0 {
 		w.WriteHeader(http.StatusOK)
 	} else {
+		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
+// IsModerator godoc
+// @Summary     Used to check for Verified Tick
+// @Description Check to see if a wallet is a verified moderator for a given domain (company)
+// @Tags        Security
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       address path string true "Address to check if is moderator"
+// @Param       company path string true "domain/company to check"
+// @Success     204
+// @Router      /v1/is_moderator/{company}/{address} [get]
+func IsModerator(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	company := vars["company"]
+	address := vars["address"]
+
+	var moderator entity.Moderator
+	dbQuery := database.Connector.Where("address = ?", address).Where("company = ?", company).Find(&moderator)
+
+	if dbQuery.RowsAffected > 0 {
+		json.NewEncoder(w).Encode(true)
+		w.WriteHeader(http.StatusOK)
+	} else {
+		json.NewEncoder(w).Encode(false)
 		w.WriteHeader(http.StatusNoContent)
 	}
 }

@@ -88,6 +88,12 @@ type Blockeduser struct {
 	Blockedaddress string `json:"blockedaddress" validate:"required"` //*** REQUIRED INPUT ***
 }
 
+type Moderator struct {
+	Id      int    `gorm:"primary_key"`                 //AUTO-GENERATED (PRIMARY KEY)
+	Address string `json:"address" binding:"required"`  //*** REQUIRED INPUT ***
+	Company string `json:"company" validate:"required"` //*** REQUIRED INPUT ***
+}
+
 //potentially use this to keep track of user logins for DAU metrics
 type Logintime struct {
 	Id        int       `gorm:"primaryKey;autoIncrement"`

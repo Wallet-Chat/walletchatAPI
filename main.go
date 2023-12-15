@@ -53,6 +53,7 @@ func main() {
 
 	router.HandleFunc("/register", auth.RegisterHandler()).Methods("POST")
 	router.HandleFunc("/users/{address}/nonce", auth.UserNonceHandler()).Methods("GET")
+	router.HandleFunc("/get_unread_cnt/{address}", controllers.GetUnreadMsgCntTotalExternal).Methods("GET") //For Android app
 	router.HandleFunc("/verify_email/{email}/{code}", controllers.VerifyEmail).Methods("GET")
 	router.HandleFunc("/signin", auth.SigninHandler(jwtProvider)).Methods("POST")
 	router.HandleFunc("/resolve_name/{name}", controllers.ResolveName).Methods("GET")
@@ -177,6 +178,7 @@ func initaliseHandlers(router *mux.Router) {
 	//router.HandleFunc("/create_chatitem_tmp", controllers.CreateChatitemTmp).Methods("POST")
 	//router.HandleFunc("/getall_chatitems", controllers.GetAllChatitems).Methods("GET")
 	router.HandleFunc("/block_user/{address}", controllers.BlockUser).Methods("GET")
+	router.HandleFunc("/is_moderator/{company}/{address}", controllers.IsModerator).Methods("GET")
 
 	//unreadcnt per week4 requirements
 	router.HandleFunc("/unreadcount/{address}", controllers.GetUnreadcnt).Methods("GET", "OPTIONS")

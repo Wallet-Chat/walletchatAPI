@@ -413,6 +413,29 @@ info:
   title: WalletChat API
   version: "2.0"
 paths:
+  /get_unread_cnt/{address}:
+    get:
+      consumes:
+      - application/json
+      description: Unread DM count
+      parameters:
+      - description: Wallet Address
+        in: path
+        name: address
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+      security:
+      - BearerAuth: []
+      summary: Unread DM count - unauthenticated for user with Android App
+      tags:
+      - Inbox
   /signin:
     post:
       consumes:
@@ -1633,6 +1656,33 @@ paths:
       summary: Store Image in Bucket Storage
       tags:
       - DMs
+  /v1/is_moderator/{company}/{address}:
+    get:
+      consumes:
+      - application/json
+      description: Check to see if a wallet is a verified moderator for a given domain
+        (company)
+      parameters:
+      - description: Address to check if is moderator
+        in: path
+        name: address
+        required: true
+        type: string
+      - description: domain/company to check
+        in: path
+        name: company
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Used to check for Verified Tick
+      tags:
+      - Security
   /v1/is_owner/{contract}/{wallet}:
     get:
       consumes:
