@@ -269,7 +269,7 @@ func (s SigninPayload) Validate() error {
 	for _, domain := range domainList {
 		if strings.HasSuffix(message.GetDomain(), domain) {
 			domainMatch = true
-			fmt.Println("Signin From Domain: ", domain, message.GetAddress())
+			//fmt.Println("Signin From Domain: ", domain, message.GetAddress())
 			break
 		}
 	}

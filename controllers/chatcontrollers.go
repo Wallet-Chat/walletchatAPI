@@ -2645,7 +2645,7 @@ func IsModerator(w http.ResponseWriter, r *http.Request) {
 
 	if dbQuery.RowsAffected > 0 {
 		json.NewEncoder(w).Encode(true)
-		w.WriteHeader(http.StatusOK)
+		//w.WriteHeader(http.StatusOK)
 	} else {
 		json.NewEncoder(w).Encode(false)
 	}
