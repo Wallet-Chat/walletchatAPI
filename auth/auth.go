@@ -453,14 +453,15 @@ func AuthMiddleware(jwtProvider *JwtHmacProvider) func(next http.Handler) http.H
 
 				//count POST requests per user
 				if r.Method == "POST" {
-					SHORT_API_ID := authAdmin.Address //lets only grab the first 16 so any log doesn't contain full API keys
-					val, ok := apiTrackerCnt[SHORT_API_ID]
-					// If the key exists
-					if ok {
-						apiTrackerCnt[SHORT_API_ID] = val + 1
-					} else {
-						apiTrackerCnt[SHORT_API_ID] = 1
-					}
+					// TODO: this map needs a mutex or can (and was) causing kernel panic during concurrent writes
+					// SHORT_API_ID := authAdmin.Address //lets only grab the first 16 so any log doesn't contain full API keys
+					// val, ok := apiTrackerCnt[SHORT_API_ID]
+					// // If the key exists
+					// if ok {
+					// 	apiTrackerCnt[SHORT_API_ID] = val + 1
+					// } else {
+					// 	apiTrackerCnt[SHORT_API_ID] = 1
+					// }
 
 					//fmt.Println("POST Count Update for Addr: ", SHORT_API_ID, apiTrackerCnt[SHORT_API_ID])
 					wc_analytics.SendCustomEvent(authAdmin.Address, "POST_COUNT")
@@ -490,7 +491,7 @@ func AuthMiddleware(jwtProvider *JwtHmacProvider) func(next http.Handler) http.H
 
 			//count POST requests per user
 			if r.Method == "POST" {
-				apiTrackerCnt[Authuser.Address] = apiTrackerCnt[Authuser.Address] + 1
+				//apiTrackerCnt[Authuser.Address] = apiTrackerCnt[Authuser.Address] + 1 //TODO: need a mutex around map calls or it can kernel panic and restart
 				//fmt.Println("POST Count Update for Addr: ", Authuser.Address, apiTrackerCnt[Authuser.Address])
 				wc_analytics.SendCustomEvent(Authuser.Address, "POST_COUNT")
 			}
