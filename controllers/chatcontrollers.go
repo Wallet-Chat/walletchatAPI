@@ -40,8 +40,10 @@ import (
 )
 
 var telegramUpdateOffset = 0
-var throttleInboxCounterPerUser = make(map[string]int)
-var mutex = &sync.RWMutex{}
+var (
+	throttleInboxCounterPerUser = make(map[string]int)
+	mutex                       sync.RWMutex
+)
 
 // Retrieve the environment variable value with an array-like data as a comma-separated string
 var tgSupportWalletsCsvString = ""
