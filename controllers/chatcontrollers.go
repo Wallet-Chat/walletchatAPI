@@ -18,6 +18,7 @@ import (
 	"rest-go-demo/entity"
 	"rest-go-demo/referrals"
 	"rest-go-demo/wc_analytics"
+	"sync"
 
 	"strconv"
 	"strings"
@@ -40,6 +41,7 @@ import (
 
 var telegramUpdateOffset = 0
 var throttleInboxCounterPerUser = make(map[string]int)
+var mutex = &sync.RWMutex{}
 
 // Retrieve the environment variable value with an array-like data as a comma-separated string
 var tgSupportWalletsCsvString = ""
@@ -209,8 +211,15 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 	//TODO: need to throttle these 2 calls to auto-join?
 	//should auto-join them to the community chat
 	if strings.HasPrefix(key, "0x") || strings.HasSuffix(key, ".eth") {
+		//golang maps are not concurrently accessible, must use locks if read/writing in threads
+		mutex.Lock()
 		throttleInboxCounterPerUser[key]++
-		if throttleInboxCounterPerUser[key]%25 == 0 {
+		mutex.Unlock()
+
+		mutex.RLock()
+		updateUserInfo := throttleInboxCounterPerUser[key]%25 == 0
+		mutex.RUnlock()
+		if updateUserInfo {
 			AutoJoinCommunitiesByChainWithDelegates(key, "ethereum") //Moralis uses "eth" instead of "ethereum" but we change this at lower level
 			//AutoJoinCommunitiesByChainWithDelegates(key, "polygon")
 			AutoJoinPoapChats(key)
