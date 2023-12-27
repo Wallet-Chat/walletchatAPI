@@ -18,6 +18,7 @@ import (
 	"rest-go-demo/entity"
 	"rest-go-demo/referrals"
 	"rest-go-demo/wc_analytics"
+	"sync"
 
 	"strconv"
 	"strings"
@@ -39,7 +40,7 @@ import (
 )
 
 var telegramUpdateOffset = 0
-var throttleInboxCounterPerUser = make(map[string]int)
+var throttleInboxCounterPerUser = make(map[string]int64) //only access via mutex function!
 
 // Retrieve the environment variable value with an array-like data as a comma-separated string
 var tgSupportWalletsCsvString = ""
@@ -101,6 +102,21 @@ func GetLastMsgToOwner(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	json.NewEncoder(w).Encode(chatReturn)
+}
+
+var mu sync.Mutex
+
+func incrementAndCheck(key string) bool {
+	// Step 1: Acquire the lock at the beginning
+	mu.Lock()
+	// Step 2: Defer the unlock until the end, ensuring it happens even if there's an early return
+	defer mu.Unlock()
+
+	// Critical section: Increment the counter for the specified key
+	throttleInboxCounterPerUser[key]++
+
+	// Check if the incremented value is divisible by 25
+	return throttleInboxCounterPerUser[key]%25 == 0
 }
 
 // GetInboxByOwner godoc
@@ -210,8 +226,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 	//should auto-join them to the community chat
 	if strings.HasPrefix(key, "0x") || strings.HasSuffix(key, ".eth") {
 		//golang maps are not concurrently accessible, must use locks if read/writing in threads
-		throttleInboxCounterPerUser[key]++
-		updateUserInfo := throttleInboxCounterPerUser[key]%25 == 0
+		updateUserInfo := incrementAndCheck(key)
 		if updateUserInfo {
 			AutoJoinCommunitiesByChainWithDelegates(key, "ethereum") //Moralis uses "eth" instead of "ethereum" but we change this at lower level
 			//AutoJoinCommunitiesByChainWithDelegates(key, "polygon")
