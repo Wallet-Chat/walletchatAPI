@@ -3752,6 +3752,38 @@ func GetCommunityChatAfterTime(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(messages)
 }
 
+// GetCommunityChatPage godoc
+// @Summary     Get Community Chat Items When Scrolling by page
+// @Description Get Community Chat Items When Scrolling by page
+// @Tags        GroupChat
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       community path    string true "community slug"
+// @Param       pagenum   path    string true "page number to get (1-N)"
+// @Success     200     {array}   LandingPageItems
+// @Router      /v1/community_pagenum/{community}/{pagenum} [get]
+func GetCommunityChatPage(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	community := vars["community"]
+
+	pageNumber, _ := strconv.Atoi(vars["pagenum"])
+	if pageNumber < 1 {
+		pageNumber = 1
+	}
+
+	itemsPerPage := 100
+	// Calculate the offset based on the page number
+	offset := (pageNumber - 1) * itemsPerPage
+
+	var messages []entity.Groupchatitem
+	database.Connector.Where("nftaddr = ?", community).Order("id desc").Limit(itemsPerPage).Offset(offset).Find(&messages)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	json.NewEncoder(w).Encode(messages)
+}
+
 // IsOwner godoc
 // @Summary     Check if given wallet address owns an NFT from given contract address
 // @Description API user could check this directly via any third party service like NFTPort, Moralis as well

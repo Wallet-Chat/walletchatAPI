@@ -627,6 +627,36 @@ paths:
       summary: Change community access conditions
       tags:
       - GroupChat
+  /v1/community_pagenum/{community}/{pagenum}:
+    get:
+      consumes:
+      - application/json
+      description: Get Community Chat Items When Scrolling by page
+      parameters:
+      - description: community slug
+        in: path
+        name: community
+        required: true
+        type: string
+      - description: page number to get (1-N)
+        in: path
+        name: pagenum
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/controllers.LandingPageItems'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get Community Chat Items When Scrolling by page
+      tags:
+      - GroupChat
   /v1/create_bookmark:
     post:
       consumes:

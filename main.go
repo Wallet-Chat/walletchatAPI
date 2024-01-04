@@ -193,6 +193,7 @@ func initaliseHandlers(router *mux.Router) {
 	//community chat
 	router.HandleFunc("/community/{community}/{address}", controllers.GetCommunityChat).Methods("GET") //TODO: make common
 	router.HandleFunc("/community/{community}/{time}/{count}", controllers.GetCommunityChatAfterTime).Methods("GET")
+	router.HandleFunc("/community_pagenum/{community}/{pagenum}", controllers.GetCommunityChatPage).Methods("GET")
 	router.HandleFunc("/community", controllers.CreateCommunityChatItem).Methods("POST")
 	router.HandleFunc("/create_community", controllers.CreateCommunity).Methods("POST")
 	router.HandleFunc("/update_community", controllers.UpdateCommunity).Methods("POST")

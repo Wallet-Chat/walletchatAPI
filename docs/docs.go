@@ -341,6 +341,53 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/community_pagenum/{community}/{pagenum}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get Community Chat Items When Scrolling by page",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "GroupChat"
+                ],
+                "summary": "Get Community Chat Items When Scrolling by page",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "community slug",
+                        "name": "community",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "page number to get (1-N)",
+                        "name": "pagenum",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/controllers.LandingPageItems"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/v1/create_bookmark": {
             "post": {
                 "security": [
