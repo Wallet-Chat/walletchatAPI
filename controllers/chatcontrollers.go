@@ -3754,7 +3754,7 @@ func GetCommunityChatAfterTime(w http.ResponseWriter, r *http.Request) {
 
 // GetCommunityChatPage godoc
 // @Summary     Get Community Chat Items When Scrolling by page
-// @Description Get Community Chat Items When Scrolling by page
+// @Description Get Community Chat Items When Scrolling by page, get latest is page 1
 // @Tags        GroupChat
 // @Accept      json
 // @Produce     json

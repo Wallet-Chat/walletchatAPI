@@ -348,7 +348,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get Community Chat Items When Scrolling by page",
+                "description": "Get Community Chat Items When Scrolling by page, get latest is page 1",
                 "consumes": [
                     "application/json"
                 ],
