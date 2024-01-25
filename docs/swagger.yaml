@@ -1580,7 +1580,7 @@ paths:
             type: array
       security:
       - BearerAuth: []
-      summary: Store Image in DB for later user
+      summary: Store Image in SQL DB for later user
       tags:
       - Common
     put:
@@ -1640,8 +1640,8 @@ paths:
       consumes:
       - application/json
       description: |-
-        private image storage for photo uploads in DMS
-        imageid should follow format: <fromAddr>_<toAddr>_<random 10 digit number>
+        public image storage for photo uploads, still use GUID or random string to make it link-only private
+        imageid should follow format: <random 10 digit number>
         the random number is passed in instead of returned, to make it easier for the FE to save this in message data
       parameters:
       - description: Raw Images

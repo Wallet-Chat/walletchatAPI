@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -1226,29 +1227,26 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 			var dbResult = database.Connector.Where("walletaddr = ?", chat.Toaddr).Find(&settings)
 			wc_analytics.SendCustomEventWithSignupSite(Authuser.Address, "SEND_MESSAGE", settings.Signupsite)
 			if dbResult.RowsAffected > 0 && strings.EqualFold("true", settings.Verified) {
+				if strings.Contains(settings.Email, "@") && strings.EqualFold(settings.Notifydm, "true") {
+					var fromAddrname entity.Addrnameitem
+					database.Connector.Where("address = ?", chat.Fromaddr).Find(&fromAddrname)
+					var toAddrname entity.Addrnameitem
+					database.Connector.Where("address = ?", chat.Toaddr).Find(&toAddrname)
 
-				//disabiling DM notifications here for now, due to high farming accounts
-
-				// if strings.Contains(settings.Email, "@") && strings.EqualFold(settings.Notifydm, "true") {
-				// 	var fromAddrname entity.Addrnameitem
-				// 	database.Connector.Where("address = ?", chat.Fromaddr).Find(&fromAddrname)
-				// 	var toAddrname entity.Addrnameitem
-				// 	database.Connector.Where("address = ?", chat.Toaddr).Find(&toAddrname)
-
-				// 	from := mail.NewEmail("WalletChat Notifications", "contact@walletchat.fun")
-				// 	subject := "Message Waiting In WalletChat"
-				// 	to := mail.NewEmail(toAddrname.Name, settings.Email)
-				// 	plainTextContent := "You have a message from" + fromAddrname.Name + " : \r\n" + chat.Message + "\r\n Please login via the app at https://app.walletchat.fun to read!"
-				// 	htmlContent := email.NotificationEmailDM(toAddrname.Address, fromAddrname.Address, toAddrname.Name, fromAddrname.Name, settings.Email, chat.Message)
-				// 	message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
-				// 	client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
-				// 	response, err := client.Send(message)
-				// 	if err != nil {
-				// 		log.Println(err)
-				// 	} else {
-				// 		_ = response
-				// 	}
-				// }
+					from := mail.NewEmail("WalletChat Notifications", "contact@walletchat.fun")
+					subject := "Message Waiting In WalletChat"
+					to := mail.NewEmail(toAddrname.Name, settings.Email)
+					plainTextContent := "You have a message from" + fromAddrname.Name + " : \r\n" + chat.Message + "\r\n Please login via the app at https://app.walletchat.fun to read!"
+					htmlContent := email.NotificationEmailDM(toAddrname.Address, fromAddrname.Address, toAddrname.Name, fromAddrname.Name, settings.Email, chat.Message)
+					message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
+					client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
+					response, err := client.Send(message)
+					if err != nil {
+						log.Println(err)
+					} else {
+						_ = response
+					}
+				}
 			}
 			if dbResult.RowsAffected > 0 && settings.Telegramid != "" {
 				if strings.EqualFold(settings.Notifydm, "true") {
@@ -1953,7 +1951,7 @@ func GetBookmarkItems(w http.ResponseWriter, r *http.Request) {
 }
 
 // CreateImageItem godoc
-// @Summary     Store Image in DB for later user
+// @Summary     Store Image in SQL DB for later user
 // @Description Currently used for the WC HQ Logo, stores the base64 raw data of the profile image for a community
 // @Tags        Common
 // @Accept      json
@@ -1980,7 +1978,7 @@ func CreateImageItem(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// CreateImageItemPFP godoc
+// CreateRawImageItem godoc
 // @Summary     Store Image in Bucket Storage
 // @Description private image storage for photo uploads in DMS
 // @Description imageid should follow format: <fromAddr>_<toAddr>_<random 10 digit number>
@@ -2044,6 +2042,81 @@ func CreateRawImageItem(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		w.WriteHeader(http.StatusForbidden)
+	}
+}
+
+// CreatePublicImageItem godoc
+// @Summary     Store Image in Bucket Storage
+// @Description public image storage for photo uploads, still use GUID or random string to make it link-only private
+// @Description imageid should follow format: <random 10 digit number>
+// @Description the random number is passed in instead of returned, to make it easier for the FE to save this in message data
+// @Tags        DMs
+// @Accept      json
+// @Produce     json
+// @Security    BearerAuth
+// @Param       message body entity.ImageitemPhoto true "Raw Images"
+// @Success     200
+// @Router      /v1/imageraw [post]
+func CreatePublicImageItem(w http.ResponseWriter, r *http.Request) {
+	requestBody, _ := ioutil.ReadAll(r.Body)
+	var imageaddr entity.ImageitemPhoto
+	err_ := json.Unmarshal(requestBody, &imageaddr)
+	if err_ != nil {
+		w.WriteHeader(http.StatusNotAcceptable)
+		return
+	}
+
+	// Step 2: Define the parameters for the session you want to create.
+	key := "DO00CLQBPDAEHFUTYMGR"        // Access key pair. You can create access key pairs using the control panel or API.
+	secret := os.Getenv("SPACES_SECRET") // Secret access key defined through an environment variable.
+
+	s3Config := &aws.Config{
+		Credentials:      credentials.NewStaticCredentials(key, secret, ""), // Specifies your credentials.
+		Endpoint:         aws.String("https://sgp1.digitaloceanspaces.com"), // Find your endpoint in the control panel, under Settings. Prepend "https://".
+		S3ForcePathStyle: aws.Bool(false),                                   // // Configures to use subdomain/virtual calling format. Depending on your version, alternatively use o.UsePathStyle = false
+		Region:           aws.String("us-east-1"),                           // Must be "us-east-1" when creating new Spaces. Otherwise, use the region in your endpoint, such as "nyc3".
+	}
+
+	// Step 3: The new session validates your request and directs it to your Space's specified endpoint using the AWS SDK.
+	newSession, errs := session.NewSession(s3Config)
+	if errs != nil {
+		fmt.Println(errs.Error())
+	}
+	s3Client := s3.New(newSession)
+
+	//public image we want stored in raw so it can be rendered properly by any client
+	// Extract the base64 data without the header
+	dataParts := strings.Split(imageaddr.Base64data, ";base64,")
+	if len(dataParts) != 2 {
+		fmt.Println("Invalid base64 data format")
+		return
+	}
+
+	// Decode base64 data
+	decoded, errr := base64.StdEncoding.DecodeString(dataParts[1])
+	if errr != nil {
+		fmt.Println("Error decoding base64:", errr)
+		return
+	}
+
+	// Step 4: Define the parameters of the object you want to upload.
+	object := s3.PutObjectInput{
+		Bucket: aws.String("walletchat-pfp-storage"), // The path to the directory you want to upload the object to, starting with your Space name.
+		Key:    aws.String(imageaddr.Imageid),        // Object key, referenced whenever you want to access this file later.
+		Body:   bytes.NewReader(decoded),             // The object's contents.
+		ACL:    aws.String("public"),                 // Defines Access-control List (ACL) permissions, such as private or public.
+		Metadata: map[string]*string{ // Required. Defines metadata tags.
+			"x-amz-meta-my-key": aws.String("your-value"),
+		},
+	}
+
+	// Step 5: Run the PutObject function with your parameters, catching for errors.
+	_, err := s3Client.PutObject(&object)
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(http.StatusConflict)
+	} else {
+		w.WriteHeader(http.StatusCreated)
 	}
 }
 

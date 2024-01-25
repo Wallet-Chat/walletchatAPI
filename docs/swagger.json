@@ -1818,7 +1818,7 @@
                 "tags": [
                     "Common"
                 ],
-                "summary": "Store Image in DB for later user",
+                "summary": "Store Image in SQL DB for later user",
                 "parameters": [
                     {
                         "description": "Profile Thumbnail Pic",
@@ -1890,7 +1890,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "private image storage for photo uploads in DMS\nimageid should follow format: \u003cfromAddr\u003e_\u003ctoAddr\u003e_\u003crandom 10 digit number\u003e\nthe random number is passed in instead of returned, to make it easier for the FE to save this in message data",
+                "description": "public image storage for photo uploads, still use GUID or random string to make it link-only private\nimageid should follow format: \u003crandom 10 digit number\u003e\nthe random number is passed in instead of returned, to make it easier for the FE to save this in message data",
                 "consumes": [
                     "application/json"
                 ],
