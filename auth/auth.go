@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/ed25519"
 	"crypto/rand"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -306,6 +307,7 @@ func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 		requestBody, _ := ioutil.ReadAll(r.Body)
 		if err := json.Unmarshal(requestBody, &p); err != nil { // Parse []byte to the go struct pointer
 			fmt.Println("Can not unmarshal JSON in SigninHandler")
+			fmt.Println(r.Body)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -583,6 +585,29 @@ func ValidateMessageSignatureNearWallet(key, sig, msg string) bool {
 
 	// Verify the signature
 	valid := ed25519.Verify(keyBytes, msgBytes, sigBytes)
+	return valid
+}
+
+func ValidateMessageSignatureSolana(key, sig, msg string) bool {
+	msgBytes := []byte(msg)
+
+	// Decode the public key from the key argument
+	keyBytes, err := hex.DecodeString(key)
+	if err != nil {
+		fmt.Println("Solana Validate Error 1: ", err, key)
+		return false
+	}
+
+	// Verify the signature
+	sigBytes, err := base64.StdEncoding.DecodeString(sig)
+	if err != nil {
+		fmt.Println("Solana Validate Error 2: ", err, sig)
+		return false
+	}
+
+	// The following line checks whether the public key matches the signature
+	publicKey := ed25519.PublicKey(keyBytes)
+	valid := ed25519.Verify(publicKey, msgBytes, sigBytes)
 	return valid
 }
 
