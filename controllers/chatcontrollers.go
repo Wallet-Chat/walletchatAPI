@@ -1364,6 +1364,7 @@ func UpdateTelegramNotifications() {
 	)
 	if err != nil {
 		fmt.Println("update telegram error", err)
+		return
 	}
 
 	// Close the request at the end
