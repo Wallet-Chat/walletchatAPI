@@ -1328,20 +1328,21 @@ func SendTelegramMessage(text string, chatId string) (bool, error) {
 func isFieldSet(i interface{}) bool {
 	return !reflect.ValueOf(i).IsNil()
 }
-func extractAddress(input string) string {
-	// Define a regular expression to match the text after "WalletChat User: "
-	re := regexp.MustCompile(`WalletChat User: (.*)`)
 
-	// Find the first match in the input string
-	match := re.FindStringSubmatch(input)
+// func extractAddress(input string) string {
+// 	// Define a regular expression to match the text after "WalletChat User: "
+// 	re := regexp.MustCompile(`WalletChat User: (.*)`)
 
-	if len(match) >= 2 {
-		// Extract the text after the delimiter
-		return strings.TrimSpace(match[1])
-	}
+// 	// Find the first match in the input string
+// 	match := re.FindStringSubmatch(input)
 
-	return ""
-}
+// 	if len(match) >= 2 {
+// 		// Extract the text after the delimiter
+// 		return strings.TrimSpace(match[1])
+// 	}
+
+// 	return ""
+// }
 func extractNumber(input string) string {
 	re := regexp.MustCompile(`\((\d+)\)`)
 	match := re.FindStringSubmatch(input)
@@ -3309,7 +3310,7 @@ func GetOpenseaCollectionStats(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	contractAddr := vars["contract"]
 	slug := GetOpenseaCollectionSlug(contractAddr)
-	fmt.Println("slug: ", slug)
+	//fmt.Println("slug: ", slug)
 	//https://api.opensea.io/api/v2/collections/{collection_slug}/stats
 	url := "https://api.opensea.io/api/v2/collections/" + slug + "/stats"
 
@@ -3340,7 +3341,8 @@ func GetOpenseaCollectionStats(w http.ResponseWriter, r *http.Request) {
 func GetOpenseaAssetContract(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	contractAddr := vars["contract"]
-	url := "https://api.opensea.io/api/v2/chain/ethereum/contract/" + contractAddr
+	slug := GetOpenseaCollectionSlug(contractAddr)
+	url := "https://api.opensea.io/api/v2/collections/" + slug
 
 	// Create a new request using http
 	req, _ := http.NewRequest("GET", url, nil)
@@ -3493,7 +3495,7 @@ func GetTwitterCount(w http.ResponseWriter, r *http.Request) {
 
 func GetTwitterHandle(slug string) string {
 	//https://api.opensea.io/api/v2/collections/{collection_slug}
-	url := "https://api.opensea.io/api/v2/asset_contract/" + slug
+	url := "https://api.opensea.io/api/v2/collections/" + slug
 
 	// Create a new request using http
 	req, _ := http.NewRequest("GET", url, nil)
