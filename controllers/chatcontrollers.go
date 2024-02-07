@@ -3270,7 +3270,8 @@ func GetCommentsCount(w http.ResponseWriter, r *http.Request) {
 // }
 
 func GetOpenseaCollectionSlug(contractAddr string) string {
-	url := "https://api.opensea.io/api/v1/asset_contract/" + contractAddr
+	//url := "https://api.opensea.io/api/v1/asset_contract/" + contractAddr
+	url := "https://api.opensea.io/api/v2/chain/ethereum/contract/" + contractAddr
 
 	// Create a new request using http
 	req, _ := http.NewRequest("GET", url, nil)
@@ -3296,11 +3297,9 @@ func GetOpenseaCollectionSlug(contractAddr string) string {
 	}
 
 	// Access the "slug" field using the map
-	if collection, ok := data["collection"].(map[string]interface{}); ok {
-		if slug, ok := collection["slug"].(string); ok {
-			fmt.Println("Slug:", slug)
-			return slug
-		}
+	if collection, ok := data["collection"].(string); ok {
+		fmt.Println("Slug:", collection)
+		return collection
 	}
 
 	return ""
@@ -3311,7 +3310,8 @@ func GetOpenseaCollectionStats(w http.ResponseWriter, r *http.Request) {
 	contractAddr := vars["contract"]
 	slug := GetOpenseaCollectionSlug(contractAddr)
 	fmt.Println("slug: ", slug)
-	url := "https://api.opensea.io/api/v1/collection/" + slug + "/stats"
+	//https://api.opensea.io/api/v2/collections/{collection_slug}/stats
+	url := "https://api.opensea.io/api/v2/collections/" + slug + "/stats"
 
 	// Create a new request using http
 	req, _ := http.NewRequest("GET", url, nil)
@@ -3340,7 +3340,7 @@ func GetOpenseaCollectionStats(w http.ResponseWriter, r *http.Request) {
 func GetOpenseaAssetContract(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	contractAddr := vars["contract"]
-	url := "https://api.opensea.io/api/v1/asset_contract/" + contractAddr
+	url := "https://api.opensea.io/api/v2/chain/ethereum/contract/" + contractAddr
 
 	// Create a new request using http
 	req, _ := http.NewRequest("GET", url, nil)
@@ -3370,9 +3370,11 @@ func GetOpenseaAsset(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	nftaddr := vars["nftaddr"]
 	nftid := vars["nftid"]
-	address := vars["address"]
+	//address := vars["address"]
 	//https://api.opensea.io/api/v1/asset/${msg.nftAddr}/${msg.nftId}?account_address=${account}
-	url := "https://api.opensea.io/api/v1/asset/" + nftaddr + "/" + nftid + "/?account_address=" + address
+	//url := "https://api.opensea.io/api/v1/asset/" + nftaddr + "/" + nftid + "/?account_address=" + address
+	//https://api.opensea.io/api/v2/chain/{chain}/contract/{address}/nfts/{identifier}
+	url := "https://api.opensea.io/api/v2/chain/ethereum/contract/" + nftaddr + "/nfts/" + nftid
 
 	// Create a new request using http
 	req, _ := http.NewRequest("GET", url, nil)
@@ -3402,7 +3404,8 @@ func GetOpenseaAssetOwner(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	owner := vars["address"]
 	//https://api.opensea.io/api/v1/assets?owner=${account}
-	url := "https://api.opensea.io/api/v1/assets?owner=" + owner
+	//https://api.opensea.io/api/v2/chain/{chain}/account/{address}/nfts
+	url := "https://api.opensea.io/api/v2/chain/ethereum/account/" + owner + "/nfts"
 
 	// Create a new request using http
 	req, _ := http.NewRequest("GET", url, nil)
@@ -3432,7 +3435,9 @@ func GetOpenseaAssetOwnerENS(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	owner := vars["address"]
 	//https://api.opensea.io/api/v1/assets?owner=${account}&collection=ens
-	url := "https://api.opensea.io/api/v1/assets?owner=" + owner + "&collection=ens"
+	//url := "https://api.opensea.io/api/v1/assets?owner=" + owner + "&collection=ens"
+	//https://api.opensea.io/api/v2/chain/ethereum/account//nfts?collection=ens
+	url := "https://api.opensea.io/api/v2/chain/ethereum/account/" + owner + "/nfts?collection=ens"
 
 	// Create a new request using http
 	req, _ := http.NewRequest("GET", url, nil)
@@ -3461,8 +3466,8 @@ func GetTwitter(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	contract := vars["contract"]
 
-	//slug := GetOpeseaSlug(contract)
-	handle := GetTwitterHandle(contract)
+	slug := GetOpenseaCollectionSlug(contract)
+	handle := GetTwitterHandle(slug)
 	twitterID := GetTwitterID(handle)
 	tweets := GetTweetsFromAPI(twitterID)
 	formatted := FormatTwitterData(tweets)
@@ -3476,8 +3481,8 @@ func GetTwitterCount(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	contract := vars["contract"]
 
-	//slug := GetOpeseaSlug(contract)
-	handle := GetTwitterHandle(contract)
+	slug := GetOpenseaCollectionSlug(contract)
+	handle := GetTwitterHandle(slug)
 	twitterID := GetTwitterID(handle)
 	tweets := GetTweetsFromAPI(twitterID)
 
@@ -3486,8 +3491,9 @@ func GetTwitterCount(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(len(tweets.Data))
 }
 
-func GetTwitterHandle(contractAddr string) string {
-	url := "https://api.opensea.io/api/v1/asset_contract/" + contractAddr
+func GetTwitterHandle(slug string) string {
+	//https://api.opensea.io/api/v2/collections/{collection_slug}
+	url := "https://api.opensea.io/api/v2/asset_contract/" + slug
 
 	// Create a new request using http
 	req, _ := http.NewRequest("GET", url, nil)
