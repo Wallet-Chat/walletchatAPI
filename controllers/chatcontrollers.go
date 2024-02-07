@@ -1597,7 +1597,7 @@ func CreateCommunity(w http.ResponseWriter, r *http.Request) {
 	addrname.Name = communityInfo.Name //communityInfo.Title
 	//auto-generate the slug (unique URL safe group name)
 	slug := url.QueryEscape(addrname.Name)
-	fmt.Println("Slug: ", slug)
+	fmt.Println("Create Community Slug: ", slug)
 	addrname.Address = slug //Slug
 
 	var mappings []entity.Addrnameitem
@@ -3299,7 +3299,7 @@ func GetOpenseaCollectionSlug(contractAddr string) string {
 
 	// Access the "slug" field using the map
 	if collection, ok := data["collection"].(string); ok {
-		fmt.Println("Slug:", collection)
+		//fmt.Println("Slug:", collection)
 		return collection
 	}
 
