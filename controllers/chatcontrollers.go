@@ -77,7 +77,7 @@ func InitGlobals() {
 	tgSupportAdminsArray = strings.Split(tgSupportAdminsCsvString, ",")
 }
 
-//This function is used for MM Snaps specifically
+// This function is used for MM Snaps specifically
 // @Router /v1/get_latest_unread/{address} [get]
 func GetLastMsgToOwner(w http.ResponseWriter, r *http.Request) {
 	Authuser := auth.GetUserFromReqContext(r)
@@ -728,7 +728,7 @@ func GetNftChatFromAddress(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(chat)
 }
 
-//Could combine this with GetAll of we change FE to send in 0 or something for ALL
+// Could combine this with GetAll of we change FE to send in 0 or something for ALL
 // @Router /v1/get_n_chatitems/{fromaddr}/{toaddr}/{count} [get]
 func GetNChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -1341,8 +1341,8 @@ func isFieldSet(i interface{}) bool {
 // 		return strings.TrimSpace(match[1])
 // 	}
 
-// 	return ""
-// }
+//		return ""
+//	}
 func extractNumber(input string) string {
 	re := regexp.MustCompile(`\((\d+)\)`)
 	match := re.FindStringSubmatch(input)
@@ -1352,7 +1352,7 @@ func extractNumber(input string) string {
 	return match[1]
 }
 
-//TODO: should be done by webhook eventually so we don't have to loop, and can do additional verifications
+// TODO: should be done by webhook eventually so we don't have to loop, and can do additional verifications
 func UpdateTelegramNotifications() {
 	//poll for new users setting up telegram notifications (can be a webhook someday for better performance)
 	var err error
@@ -3045,6 +3045,7 @@ func ResolveName(w http.ResponseWriter, r *http.Request) {
 	nameToResolve := vars["name"]
 	// Authuser := auth.GetUserFromReqContext(r)
 	// key := Authuser.Address
+	fmt.Println("ENS: ", nameToResolve)
 
 	if strings.HasSuffix(nameToResolve, ".eth") {
 		url := "https://deep-index.moralis.io/api/v2/resolve/ens/" + nameToResolve
@@ -3337,7 +3338,7 @@ func GetOpenseaCollectionStats(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(parsed)
 }
 
-//mainly for internal use - API integrations should get own API key
+// mainly for internal use - API integrations should get own API key
 func GetOpenseaAssetContract(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	contractAddr := vars["contract"]
@@ -3367,7 +3368,7 @@ func GetOpenseaAssetContract(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(parsed)
 }
 
-//mainly for internal use - API integrations should get own API key
+// mainly for internal use - API integrations should get own API key
 func GetOpenseaAsset(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	nftaddr := vars["nftaddr"]
@@ -3401,7 +3402,7 @@ func GetOpenseaAsset(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(parsed)
 }
 
-//mainly for internal use - API integrations should get own API key
+// mainly for internal use - API integrations should get own API key
 func GetOpenseaAssetOwner(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	owner := vars["address"]
@@ -3432,7 +3433,7 @@ func GetOpenseaAssetOwner(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(parsed)
 }
 
-//mainly for internal use - API integrations should get own API key
+// mainly for internal use - API integrations should get own API key
 func GetOpenseaAssetOwnerENS(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	owner := vars["address"]
@@ -3897,7 +3898,7 @@ func IsOwner(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(result)
 }
 
-//internal
+// internal
 func GetOwnerNFTs(walletAddr string, chain string) MoralisOwnerOf {
 
 	//url := "https://eth-mainnet.alchemyapi.io/v2/${process.env.REACT_APP_ALCHEMY_API_KEY}/getOwnersForToken" + contractAddr
@@ -3985,7 +3986,7 @@ func IsOwnerOfNFT(contractAddr string, walletAddr string, chain string) bool {
 	return result
 }
 
-//internal - called from wrapper which checks DelegateCash as well
+// internal - called from wrapper which checks DelegateCash as well
 func IsOwnerOfNftLocal(contractAddr string, walletAddr string, chain string) bool {
 	//For now if we use Moralis, ethereum needs to be "eth"
 	if chain == "ethereum" {
@@ -4143,8 +4144,8 @@ func IsOnChain(contractAddr string, chain string) bool {
 	return returnVal
 }
 
-//this was just used to fix up users info after adding new column
-//not intended for extenal calls
+// this was just used to fix up users info after adding new column
+// not intended for extenal calls
 func FixUpBookmarks(w http.ResponseWriter, r *http.Request) {
 	var bookmarks []entity.Bookmarkitem
 	database.Connector.Find(&bookmarks)
@@ -4172,7 +4173,7 @@ func AutoJoinCommunities(w http.ResponseWriter, r *http.Request) {
 	AutoJoinPoapChats(walletAddr)
 }
 
-//internal use only
+// internal use only
 func AutoJoinCommunitiesByChainWithDelegates(walletAddr string, chain string) {
 	AutoJoinCommunitiesByChain(walletAddr, "", chain, walletAddr)
 
@@ -4191,8 +4192,8 @@ func AutoJoinCommunitiesByChainWithDelegates(walletAddr string, chain string) {
 	}
 }
 
-//internal use only
-//database.Connector.Where("walletaddr = ?", delegateAddr).Where("chain = ?", chain).Delete(&entity.Bookmarkitem{})
+// internal use only
+// database.Connector.Where("walletaddr = ?", delegateAddr).Where("chain = ?", chain).Delete(&entity.Bookmarkitem{})
 func AutoJoinCommunitiesByChain(walletAddr string, nftAddr string, chain string, delegateAddr string) {
 	//For now if we use Moralis, ethereum needs to be "eth"
 	if chain == "ethereum" {
@@ -4263,7 +4264,7 @@ func AutoJoinCommunitiesByChain(walletAddr string, nftAddr string, chain string,
 	}
 }
 
-//internal use only
+// internal use only
 func AutoJoinPoapChats(walletAddr string) {
 	//https://documentation.poap.tech/reference/getactionsscan-5
 	var poapInfo []POAPInfoByAddress = getPoapInfoByAddress(walletAddr)
@@ -4309,7 +4310,7 @@ func GetPoapsByAddr(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(result)
 }
 
-//internal use only
+// internal use only
 func getPoapInfoByAddress(walletAddr string) []POAPInfoByAddress {
 	var result []POAPInfoByAddress
 	url := "https://api.poap.tech/actions/scan/" + walletAddr
@@ -4512,12 +4513,12 @@ type MoralisContractInfoNFT struct {
 	} `json:"result"`
 }
 
-//Address -> Name lookup
+// Address -> Name lookup
 type BtcStacksName struct {
 	Names []string `json:"names"`
 }
 
-//Name -> address lookup
+// Name -> address lookup
 type BtcStacksAddress struct {
 	Address      string `json:"address"`
 	Blockchain   string `json:"blockchain"`
@@ -4667,7 +4668,7 @@ type TwitterTweetsData struct {
 	} `json:"meta"`
 }
 
-//formatted for use in client side per Mana
+// formatted for use in client side per Mana
 type TweetType struct {
 	Text        string `json:"text"`
 	ID          string `json:"id"`
