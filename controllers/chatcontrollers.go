@@ -3030,11 +3030,103 @@ func GetSettings(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(settings)
 }
 
-func TokenOverlap(w http.ResponseWriter, r *http.Request) {
+func Erc20TokenOverlap(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	tokenAddress := vars["contract_address"]
 
 	url := "https://api.dune.com/api/v1/query/3615247/execute"
+
+	// Create the POST request payload
+	payload := map[string]interface{}{
+		"query_parameters": map[string]string{
+			"token_address": tokenAddress,
+		},
+		"performance": "medium",
+	}
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		http.Error(w, "Error preparing request", http.StatusInternalServerError)
+		return
+	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		http.Error(w, "Error creating request", http.StatusInternalServerError)
+		return
+	}
+
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("X-Dune-API-Key", os.Getenv("DUNE_API_KEY"))
+	req.Header.Add("Content-Type", "application/json")
+
+	// Send the POST request
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		http.Error(w, "Error sending request", http.StatusInternalServerError)
+		return
+	}
+	defer res.Body.Close()
+
+	// Read and parse the response
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		http.Error(w, "Error reading response", http.StatusInternalServerError)
+		return
+	}
+
+	var response struct {
+		ExecutionID string `json:"execution_id"`
+		State       string `json:"state"`
+	}
+	if err := json.Unmarshal(body, &response); err != nil {
+		http.Error(w, "Error parsing response", http.StatusInternalServerError)
+		return
+	}
+
+	// Check the status of the execution periodically
+	for {
+		statusURL := "https://api.dune.com/api/v1/execution/" + response.ExecutionID + "/results"
+		statusReq, err := http.NewRequest("GET", statusURL, nil)
+		if err != nil {
+			http.Error(w, "Error creating status request", http.StatusInternalServerError)
+			return
+		}
+		statusReq.Header.Add("X-Dune-API-Key", os.Getenv("DUNE_API_KEY"))
+
+		statusRes, err := http.DefaultClient.Do(statusReq)
+		if err != nil {
+			http.Error(w, "Error sending status request", http.StatusInternalServerError)
+			return
+		}
+
+		statusBody, err := ioutil.ReadAll(statusRes.Body)
+		statusRes.Body.Close()
+		if err != nil {
+			http.Error(w, "Error reading status response", http.StatusInternalServerError)
+			return
+		}
+
+		var statusResponse struct {
+			IsExecutionFinished bool `json:"is_execution_finished"`
+		}
+		json.Unmarshal(statusBody, &statusResponse)
+
+		fmt.Println("requestID current status: ", response.ExecutionID, statusResponse)
+
+		if statusResponse.IsExecutionFinished {
+			// Once finished, respond with the final results
+			json.NewEncoder(w).Encode(string(statusBody))
+			break
+		}
+		time.Sleep(30 * time.Second)
+	}
+}
+
+func SolTokenOverlap(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	tokenAddress := vars["contract_address"]
+
+	url := "https://api.dune.com/api/v1/query/3623869/execute"
 
 	// Create the POST request payload
 	payload := map[string]interface{}{

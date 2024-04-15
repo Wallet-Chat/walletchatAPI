@@ -57,7 +57,8 @@ func main() {
 	router.HandleFunc("/verify_email/{email}/{code}", controllers.VerifyEmail).Methods("GET")
 	router.HandleFunc("/signin", auth.SigninHandler(jwtProvider)).Methods("POST")
 	router.HandleFunc("/resolve_name/{name}", controllers.ResolveName).Methods("GET")
-	router.HandleFunc("/token_overlap/{contract_address}", controllers.TokenOverlap).Methods("GET") //for custom GPT - not WC directly
+	router.HandleFunc("/ethereum_token_overlap/{contract_address}", controllers.Erc20TokenOverlap).Methods("GET") //for custom GPT - not WC directly
+	router.HandleFunc("/solana_token_overlap/{contract_address}", controllers.SolTokenOverlap).Methods("GET")     //for custom GPT - not WC directly
 	router.PathPrefix("/docs").Handler(httpSwagger.WrapHandler)
 	router.HandleFunc("/track_ga4/{event}/{email}/{addr}/{placeholder_photo}", controllers.TrackEventGA4).Methods("GET")
 	router.HandleFunc("/get_leaderboard_data", referrals.GetLeaderboardData).Methods("GET")
