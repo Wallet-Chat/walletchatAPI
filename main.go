@@ -115,8 +115,8 @@ func main() {
 	referrals.InitRandom()
 	twitter.InitSearchParams()
 
-	//handler := cors.Default().Handler(router)
-	handler := cors.AllowAll().Handler(router) //Live API overrides this anyway
+	handler := cors.Default().Handler(router)
+	//handler := cors.AllowAll().Handler(router) //Live API overrides this anyway
 	// c := cors.New(cors.Options{
 	// 	AllowedOrigins:   []string{"*"},
 	// 	AllowCredentials: true,
