@@ -103,27 +103,28 @@ func main() {
 	// starts the scheduler asynchronously
 	v.StartAsync()
 
-	//schedule twitter polling for users requesting referral codes
-	w := gocron.NewScheduler(time.UTC)
-	// set time
-	w.Every(100000).Seconds().Do(func() { referrals.GetLeaderboardDataCronJob() })
-	// starts the scheduler asynchronously
-	w.StartAsync()
+	// w := gocron.NewScheduler(time.UTC)
+	// // set time
+	// w.Every(100000).Seconds().Do(func() { referrals.GetLeaderboardDataCronJob() })
+	// // starts the scheduler asynchronously
+	// w.StartAsync()
 
 	controllers.InitGlobals()
 	controllers.InitRandom()
 	referrals.InitRandom()
 	twitter.InitSearchParams()
 
-	handler := cors.Default().Handler(router)
-	//handler := cors.AllowAll().Handler(router) //Live API overrides this anyway
+	//handler := cors.Default().Handler(router)
+	handler := cors.AllowAll().Handler(router) //Live API overrides this anyway
 	// c := cors.New(cors.Options{
-	// 	AllowedOrigins:   []string{"*"},
+	// 	AllowedOrigins: []string{"http://localhost:3002", "http://localhost:8080", "https://api.nftport.xyz", "https://app.walletchat.fun",
+	// 		"https://api.v2.walletchat.fun", "https://beta.walletchat.fun", "https://lit.walletchat.fun",
+	// 		"https://ledger.walletchat.fun"},
 	// 	AllowCredentials: true,
 	// 	// Enable Debugging for testing, consider disabling in production
 	// 	//Debug: true,
 	// })
-	// handler := c.Handler(router)
+	//handler := c.Handler(router)
 
 	//rate limit POST/PUT requests (We still use GET for polling, so we can't rate limit this yet)
 	lmt := tollbooth.NewLimiter(float64(5), nil)
