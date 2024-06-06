@@ -75,12 +75,12 @@ func main() {
 	initaliseHandlers(wsRouter)
 
 	//schedule daily notifications
-	s := gocron.NewScheduler(time.UTC)
+	//s := gocron.NewScheduler(time.UTC)
 	// set time
-	s.Every(1).Day().At("10:30").Do(func() { sendPeriodicNotifications() })
-	s.Every(1).Day().At("01:00").Do(func() { referrals.CreateDailyReferralCodes() })
+	//s.Every(1).Day().At("10:30").Do(func() { sendPeriodicNotifications() })
+	//s.Every(1).Day().At("01:00").Do(func() { referrals.CreateDailyReferralCodes() })
 	// starts the scheduler asynchronously
-	s.StartAsync()
+	//s.StartAsync()
 
 	//schedule telegram polling for new verified users (should be webhook someday)
 	t := gocron.NewScheduler(time.UTC)
