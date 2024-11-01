@@ -268,6 +268,9 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/redeem_referral_code/{code}", referrals.RedeemReferralCode).Methods("GET")
 	router.HandleFunc("/get_leaderboard_data", referrals.GetLeaderboardData).Methods("GET")
 	router.HandleFunc("/get_valid_referred_user", referrals.GetHasEnteredValidCode).Methods("GET")
+
+	//bookmarks
+	router.HandleFunc("/oura_register", controllers.RegisterOuraUser).Methods("POST")
 }
 
 func initDB() {
