@@ -112,6 +112,13 @@ func main() {
 	// // starts the scheduler asynchronously
 	// w.StartAsync()
 
+	//schedule twitter username polling for new verified users
+	oura := gocron.NewScheduler(time.UTC)
+	// set time
+	oura.Every(5).Seconds().Do(func() { controllers.FetchOuraData() })
+	// starts the scheduler asynchronously
+	oura.StartAsync()
+
 	controllers.InitGlobals()
 	controllers.InitRandom()
 	referrals.InitRandom()

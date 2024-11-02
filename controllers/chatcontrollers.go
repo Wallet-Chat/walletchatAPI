@@ -4633,6 +4633,41 @@ func RegisterOuraUser(w http.ResponseWriter, r *http.Request) {
 	// }
 }
 
+func FetchOuraData() {
+	var ourausers []entity.Ourauser
+	database.Connector.Find(&ourausers)
+
+	for _, ourauser := range ourausers {
+		url := "https://api.ouraring.com/v2/usercollection/daily_sleep"
+
+		// Create a Bearer string by appending string access token
+		bearer := "Bearer " + ourauser.Pac
+
+		// Create a new request using http
+		req, _ := http.NewRequest("GET", url, nil)
+
+		// add authorization header to the req
+		req.Header.Add("Authorization", bearer)
+
+		// Send req using http Client
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			fmt.Println("Error fetching oura data: ", err)
+			log.Println("Error on response.\n[ERROR] -", err)
+		}
+		defer resp.Body.Close()
+
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			fmt.Println("Error fetching oura data: ", err)
+			log.Println("Error while reading the response bytes:", err)
+		}
+
+		fmt.Println(body)
+	}
+}
+
 type POAPInfoByAddress struct {
 	Event struct {
 		ID          int    `json:"id"`
