@@ -4640,14 +4640,11 @@ func FetchOuraData() {
 	for _, ourauser := range ourausers {
 		url := "https://api.ouraring.com/v2/usercollection/daily_sleep"
 
-		// Create a Bearer string by appending string access token
-		bearer := "Bearer " + ourauser.Pac
-
 		// Create a new request using http
 		req, _ := http.NewRequest("GET", url, nil)
 
 		// add authorization header to the req
-		req.Header.Add("Authorization", bearer)
+		req.Header.Add("Authorization", ourauser.Pac)
 
 		// Send req using http Client
 		client := &http.Client{}
