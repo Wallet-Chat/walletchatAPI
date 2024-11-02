@@ -4618,7 +4618,7 @@ func WalletGuardCheck(w http.ResponseWriter, r *http.Request) {
 
 func RegisterOuraUser(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
-	var newUser entity.Oura
+	var newUser entity.Ourauser
 	json.Unmarshal(requestBody, &newUser)
 
 	// Authuser := auth.GetUserFromReqContext(r)

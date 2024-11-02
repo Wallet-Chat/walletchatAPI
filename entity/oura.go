@@ -1,6 +1,6 @@
 package entity
 
-type Oura struct {
+type Ourauser struct {
 	ID     int
 	Wallet string `json:"wallet"`
 	Oauth  string `json:"oauth"`
