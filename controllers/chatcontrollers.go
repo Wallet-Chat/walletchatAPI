@@ -4621,16 +4621,16 @@ func RegisterOuraUser(w http.ResponseWriter, r *http.Request) {
 	var newUser entity.Oura
 	json.Unmarshal(requestBody, &newUser)
 
-	Authuser := auth.GetUserFromReqContext(r)
-	if strings.EqualFold(Authuser.Address, newUser.Wallet) {
-		database.Connector.Create(&newUser)
-		w.Header().Set("Content-Type", "application/json")
-		w.Header().Set("X-Content-Type-Options", "nosniff")
-		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(newUser)
-	} else {
-		w.WriteHeader(http.StatusForbidden)
-	}
+	// Authuser := auth.GetUserFromReqContext(r)
+	// if strings.EqualFold(Authuser.Address, newUser.Wallet) {
+	database.Connector.Create(&newUser)
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(newUser)
+	// } else {
+	// 	w.WriteHeader(http.StatusForbidden)
+	// }
 }
 
 type POAPInfoByAddress struct {
