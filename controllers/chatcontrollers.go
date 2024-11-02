@@ -4664,7 +4664,9 @@ func FetchOuraData() {
 			log.Println("Error while reading the response bytes:", err)
 		}
 
-		fmt.Println(body)
+		// Convert the bytes to a string and print it
+		jsonString := string(body)
+		fmt.Println("Raw JSON string:", jsonString)
 	}
 }
 
