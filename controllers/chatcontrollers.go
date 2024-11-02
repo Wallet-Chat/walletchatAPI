@@ -4643,6 +4643,7 @@ func FetchOuraData() {
 		// Create a new request using http
 		req, _ := http.NewRequest("GET", url, nil)
 
+		fmt.Println("auth token:" + ourauser.Wallet + ourauser.Pac)
 		// add authorization header to the req
 		req.Header.Add("Authorization", ourauser.Pac)
 
