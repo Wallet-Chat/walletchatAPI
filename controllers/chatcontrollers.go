@@ -4655,13 +4655,24 @@ func FetchOuraData() {
 		if err != nil {
 			fmt.Println("Error fetching oura data: ", err)
 			log.Println("Error on response.\n[ERROR] -", err)
+			continue
 		}
 		defer resp.Body.Close()
 
+		// Check if the status code is 200 OK
+		if resp.StatusCode != http.StatusOK {
+			fmt.Printf("Server returned non-200 status: %d %s\n", resp.StatusCode, resp.Status)
+			body, _ := ioutil.ReadAll(resp.Body) // read response body to get error message, if any
+			fmt.Println("Error response body:", string(body))
+			continue
+		}
+
+		// Read the body bytes if status is 200 OK
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			fmt.Println("Error fetching oura data: ", err)
 			log.Println("Error while reading the response bytes:", err)
+			continue
 		}
 
 		// Convert the bytes to a string and print it
