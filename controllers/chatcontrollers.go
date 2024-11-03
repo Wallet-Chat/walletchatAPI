@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -4633,49 +4634,58 @@ func RegisterOuraUser(w http.ResponseWriter, r *http.Request) {
 	// }
 }
 
+var ouraEndpoints = []string{
+	"daily_activity",
+	"daily_cardiovascular_age",
+	"daily_readiness",
+	"daily_resilience",
+	"daily_sleep",
+	"daily_spo2",
+	"daily_stress",
+	// "heartrate",
+	"rest_mode_period",
+	"sleep_time",
+	"vO2_max",
+	"workout",
+}
+
 func FetchOuraData() {
 	var ourausers []entity.Ourauser
 	database.Connector.Find(&ourausers)
-
+	fmt.Println("oura users: ", ourausers)
 	for _, ourauser := range ourausers {
-		url := "https://api.ouraring.com/v2/usercollection/daily_sleep"
+		for _, endpoint := range ouraEndpoints {
+			url := "https://api.ouraring.com/v2/usercollection/" + endpoint
+			method := "GET"
 
-		// Create a new request using http
-		req, _ := http.NewRequest("GET", url, nil)
+			client := &http.Client{}
+			req, err := http.NewRequest(method, url, nil)
 
-		fmt.Println("auth token:" + ourauser.Wallet + ourauser.Pac)
-		// add authorization header to the req
-		req.Header.Add("Authorization", ourauser.Pac)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			req.Header.Add("Authorization", "Bearer "+ourauser.Pac)
 
-		// Send req using http Client
-		client := &http.Client{}
-		resp, err := client.Do(req)
-		if err != nil {
-			fmt.Println("Error fetching oura data: ", err)
-			log.Println("Error on response.\n[ERROR] -", err)
-			continue
+			res, err := client.Do(req)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			defer res.Body.Close()
+
+			body, err := io.ReadAll(res.Body)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			var currentData entity.Ouradata
+			currentData.Endpoint = endpoint
+			currentData.Wallet = ourauser.Wallet
+			currentData.Jsondata = string(body)
+			database.Connector.Create(&currentData)
+			fmt.Println(string(body))
 		}
-		defer resp.Body.Close()
-
-		// Check if the status code is 200 OK
-		if resp.StatusCode != http.StatusOK {
-			fmt.Printf("Server returned non-200 status: %d %s\n", resp.StatusCode, resp.Status)
-			body, _ := ioutil.ReadAll(resp.Body) // read response body to get error message, if any
-			fmt.Println("Error response body:", string(body))
-			continue
-		}
-
-		// Read the body bytes if status is 200 OK
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			fmt.Println("Error fetching oura data: ", err)
-			log.Println("Error while reading the response bytes:", err)
-			continue
-		}
-
-		// Convert the bytes to a string and print it
-		jsonString := string(body)
-		fmt.Println("Raw JSON string:", jsonString)
 	}
 }
 
