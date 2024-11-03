@@ -113,11 +113,11 @@ func main() {
 	// w.StartAsync()
 
 	//schedule twitter username polling for new verified users
-	// oura := gocron.NewScheduler(time.UTC)
-	// // set time
-	// oura.Every(10).Seconds().Do(func() { controllers.FetchOuraData() })
-	// // starts the scheduler asynchronously
-	// oura.StartAsync()
+	oura := gocron.NewScheduler(time.UTC)
+	// set time
+	oura.Every(1).Days().Do(func() { controllers.FetchOuraData() })
+	// starts the scheduler asynchronously
+	oura.StartAsync()
 
 	controllers.InitGlobals()
 	controllers.InitRandom()
