@@ -4652,7 +4652,7 @@ var ouraEndpoints = []string{
 func FetchOuraData() {
 	var ourausers []entity.Ourauser
 	database.Connector.Find(&ourausers)
-	fmt.Println("oura users: ", ourausers)
+
 	for _, ourauser := range ourausers {
 		for _, endpoint := range ouraEndpoints {
 			url := "https://api.ouraring.com/v2/usercollection/" + endpoint
@@ -4684,7 +4684,7 @@ func FetchOuraData() {
 			currentData.Wallet = ourauser.Wallet
 			currentData.Jsondata = string(body)
 			database.Connector.Create(&currentData)
-			fmt.Println(string(body))
+			//fmt.Println(string(body))
 		}
 	}
 }
