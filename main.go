@@ -62,7 +62,9 @@ func main() {
 	router.PathPrefix("/docs").Handler(httpSwagger.WrapHandler)
 	router.HandleFunc("/track_ga4/{event}/{email}/{addr}/{placeholder_photo}", controllers.TrackEventGA4).Methods("GET")
 	router.HandleFunc("/get_leaderboard_data", referrals.GetLeaderboardData).Methods("GET")
+	router.HandleFunc("/get_oura_leaderboard_data", referrals.GetOuraLeaderboardData).Methods("GET")
 	router.HandleFunc("/get_leaderboard_data/{address}", referrals.GetLeaderboardDataSingle).Methods("GET")
+	router.HandleFunc("/get__oura_leaderboard_data/{address}", referrals.GetOuraLeaderboardDataSingle).Methods("GET")
 	router.HandleFunc("/get_referral_code/{address}", referrals.GetReferralCodeAddr).Methods("GET")
 	//debugging
 	router.HandleFunc("/debug_print", controllers.DebugPrint).Methods("POST")

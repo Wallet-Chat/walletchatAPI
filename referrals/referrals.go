@@ -18,6 +18,7 @@ import (
 )
 
 var currentLeaderboard []ChatStatistics
+var currentOuraLeaderboard []OuraChatStatistics
 
 var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
@@ -34,6 +35,10 @@ func randSeq(n int) string {
 
 func GetLeaderboardDataGlobal() []ChatStatistics {
 	return currentLeaderboard
+}
+
+func GetOuraLeaderboardDataGlobal() []OuraChatStatistics {
+	return currentOuraLeaderboard
 }
 
 // GetInboxByOwner godoc
@@ -76,7 +81,7 @@ func GetReferralCodeAddr(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(code)
 }
 
-//just to test with mainly
+// just to test with mainly
 func CreateReferralCode(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	walletaddr := vars["address"]
@@ -111,7 +116,7 @@ func CreateReferralCode(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//not called from API - called upon new user signup
+// not called from API - called upon new user signup
 func CreateReferralCodeInternal(walletaddr string) {
 	fmt.Printf("Create 3 New Referral Codes for Wallet: %#v\n", walletaddr)
 
@@ -213,6 +218,11 @@ type ChatStatistics struct {
 	Points        int
 }
 
+type OuraChatStatistics struct {
+	Walletaddr string
+	Points     int
+}
+
 type ChatStatisticsReturn struct {
 	Walletaddr string
 	Username   string
@@ -243,6 +253,41 @@ func GetLeaderboardData(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(currentLeaderboard)
 }
 
+func GetOuraLeaderboardDataCronJob() {
+	var results []OuraChatStatistics
+	dbQuery := database.Connector.Raw("CALL get_oura_leaderboard_data()").Scan(&results)
+	//fmt.Println("get leaderboard: ", dbQuery.Error, results)
+
+	if dbQuery.Error != nil {
+		return
+	}
+
+	currentOuraLeaderboard = results
+}
+
+func GetOuraLeaderboardData(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	json.NewEncoder(w).Encode(currentOuraLeaderboard)
+}
+
+func GetOuraLeaderboardDataSingle(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	address := vars["address"]
+	var results OuraChatStatistics
+	for i := 0; i < len(currentOuraLeaderboard); i++ {
+		if strings.EqualFold(currentOuraLeaderboard[i].Walletaddr, address) {
+			//fmt.Println("get leaderboard single - found address: ", currentLeaderboard[i])
+			results = currentOuraLeaderboard[i]
+			break
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	json.NewEncoder(w).Encode(results)
+}
+
 func GetLeaderboardDataSingle(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	address := vars["address"]
@@ -260,8 +305,8 @@ func GetLeaderboardDataSingle(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(results)
 }
 
-//this is used upon login to check if a user has entered a valid code or not in the past
-//used similar to getting user name so we don't prompt them if its already set.
+// this is used upon login to check if a user has entered a valid code or not in the past
+// used similar to getting user name so we don't prompt them if its already set.
 func GetHasEnteredValidCode(w http.ResponseWriter, r *http.Request) {
 	Authuser := auth.GetUserFromReqContext(r)
 	walletaddr := Authuser.Address
