@@ -219,8 +219,8 @@ type ChatStatistics struct {
 }
 
 type OuraChatStatistics struct {
-	Walletaddr string
-	Points     int
+	Wallet      string
+	TotalPoints int
 }
 
 type ChatStatisticsReturn struct {
