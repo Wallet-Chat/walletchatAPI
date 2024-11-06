@@ -108,11 +108,14 @@ func main() {
 	// starts the scheduler asynchronously
 	v.StartAsync()
 
-	// w := gocron.NewScheduler(time.UTC)
+	w := gocron.NewScheduler(time.UTC)
 	// // set time
 	// w.Every(100000).Seconds().Do(func() { referrals.GetLeaderboardDataCronJob() })
 	// // starts the scheduler asynchronously
 	// w.StartAsync()
+	w.Every(1).Days().Do(func() { referrals.GetOuraLeaderboardDataCronJob() })
+	// starts the scheduler asynchronously
+	w.StartAsync()
 
 	//schedule twitter username polling for new verified users
 	oura := gocron.NewScheduler(time.UTC)
@@ -125,6 +128,7 @@ func main() {
 	controllers.InitRandom()
 	referrals.InitRandom()
 	twitter.InitSearchParams()
+	referrals.GetOuraLeaderboardDataCronJob()
 
 	//handler := cors.Default().Handler(router)
 	handler := cors.AllowAll().Handler(router) //Live API overrides this anyway
