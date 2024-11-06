@@ -276,7 +276,7 @@ func GetOuraLeaderboardDataSingle(w http.ResponseWriter, r *http.Request) {
 	address := vars["address"]
 	var results OuraChatStatistics
 	for i := 0; i < len(currentOuraLeaderboard); i++ {
-		if strings.EqualFold(currentOuraLeaderboard[i].Walletaddr, address) {
+		if strings.EqualFold(currentOuraLeaderboard[i].Wallet, address) {
 			//fmt.Println("get leaderboard single - found address: ", currentLeaderboard[i])
 			results = currentOuraLeaderboard[i]
 			break
