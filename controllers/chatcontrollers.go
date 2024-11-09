@@ -4660,7 +4660,7 @@ func RegisterOuraUser(w http.ResponseWriter, r *http.Request) {
 	// if strings.EqualFold(Authuser.Address, newUser.Wallet) {
 
 	//remove any only PAC
-	database.Connector.Where("wallet = ?", newUser).Delete(&newUser)
+	database.Connector.Where("wallet = ?", newUser.Wallet).Delete(&newUser)
 
 	database.Connector.Create(&newUser)
 	w.Header().Set("Content-Type", "application/json")
