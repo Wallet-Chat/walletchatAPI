@@ -4638,16 +4638,23 @@ func RegisterOuraUser(w http.ResponseWriter, r *http.Request) {
 	res, err := client.Do(req)
 	if err != nil {
 		w.WriteHeader(http.StatusForbidden)
+		fmt.Println("Error making request:", err)
 		return
 	}
 	defer res.Body.Close()
 
+	// Check if the response status code is not 200
+	if res.StatusCode != http.StatusOK {
+		fmt.Printf("Unexpected response code: %d\n", res.StatusCode)
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println("Test Register User Check: ", body)
+	fmt.Println("Test Register User Check: ", string(body))
 
 	// Authuser := auth.GetUserFromReqContext(r)
 	// if strings.EqualFold(Authuser.Address, newUser.Wallet) {
