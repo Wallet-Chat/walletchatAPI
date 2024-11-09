@@ -4661,6 +4661,13 @@ func RegisterOuraUser(w http.ResponseWriter, r *http.Request) {
 
 	//remove any only PAC
 	database.Connector.Where("wallet = ?", newUser.Wallet).Delete(&newUser)
+	var existinguser entity.Ourauser
+	var pacAlreadyExists = database.Connector.Where("pac = ?", newUser.Pac).Find(&existinguser)
+	if pacAlreadyExists.RowsAffected > 0 {
+		fmt.Println("PAC already registered: ", newUser.Wallet, newUser.Pac)
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
 
 	database.Connector.Create(&newUser)
 	w.Header().Set("Content-Type", "application/json")
