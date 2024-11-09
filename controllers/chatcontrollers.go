@@ -4659,8 +4659,6 @@ func RegisterOuraUser(w http.ResponseWriter, r *http.Request) {
 	// Authuser := auth.GetUserFromReqContext(r)
 	// if strings.EqualFold(Authuser.Address, newUser.Wallet) {
 
-	//remove any only PAC
-	database.Connector.Where("wallet = ?", newUser.Wallet).Delete(&newUser)
 	var existinguser entity.Ourauser
 	var pacAlreadyExists = database.Connector.Where("pac = ?", newUser.Pac).Find(&existinguser)
 	if pacAlreadyExists.RowsAffected > 0 {
@@ -4668,6 +4666,7 @@ func RegisterOuraUser(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
+	database.Connector.Where("wallet = ?", newUser.Wallet).Delete(&newUser)
 
 	database.Connector.Create(&newUser)
 	w.Header().Set("Content-Type", "application/json")
