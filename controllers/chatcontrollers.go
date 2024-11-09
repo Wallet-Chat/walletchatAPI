@@ -4622,6 +4622,32 @@ func RegisterOuraUser(w http.ResponseWriter, r *http.Request) {
 	var newUser entity.Ourauser
 	json.Unmarshal(requestBody, &newUser)
 
+	//verify its a real and valid API key
+	url := "https://api.ouraring.com/v2/usercollection/daily_activity"
+	method := "GET"
+
+	client := &http.Client{}
+	req, err := http.NewRequest(method, url, nil)
+
+	if err != nil {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+	req.Header.Add("Authorization", "Bearer "+newUser.Pac)
+
+	res, err := client.Do(req)
+	if err != nil {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+	defer res.Body.Close()
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
 	// Authuser := auth.GetUserFromReqContext(r)
 	// if strings.EqualFold(Authuser.Address, newUser.Wallet) {
 	database.Connector.Create(&newUser)
