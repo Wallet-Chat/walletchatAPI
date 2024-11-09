@@ -4666,7 +4666,15 @@ func RegisterOuraUser(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
-	database.Connector.Where("wallet = ?", newUser.Wallet).Delete(&newUser)
+	var existinguser2 entity.Ourauser
+	var walletAlreadyExists = database.Connector.Where("wallet = ?", newUser.Wallet).Find(&existinguser2)
+	if walletAlreadyExists.RowsAffected > 0 {
+		fmt.Println("wallet updated: ", newUser.Wallet, newUser.Pac)
+		database.Connector.Model(&entity.Ourauser{}).Where("wallet = ?", newUser.Wallet).Update("pac", newUser.Pac)
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(newUser)
+		return
+	}
 
 	database.Connector.Create(&newUser)
 	w.Header().Set("Content-Type", "application/json")
