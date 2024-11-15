@@ -4817,6 +4817,16 @@ func FetchOuraData() {
 	database.Connector.Find(&ourausers)
 
 	for _, ourauser := range ourausers {
+		// Create a buffer to hold the zip data
+		var buf bytes.Buffer
+		// Create a new zip writer
+		zipWriter := zip.NewWriter(&buf)
+
+		//DLP public Key
+		publicKey := GetDlpPublicKey()
+		fmt.Println("DLP encryption publicKey: ", publicKey)
+		//encrypt data client using signature of a fixed message (tbd - how to do as proxy?)
+
 		for _, endpoint := range ouraEndpoints {
 			url := "https://api.ouraring.com/v2/usercollection/" + endpoint
 			method := "GET"
@@ -4826,7 +4836,7 @@ func FetchOuraData() {
 
 			if err != nil {
 				fmt.Println(err)
-				return
+				break
 			}
 			req.Header.Add("Authorization", "Bearer "+ourauser.Pac)
 
@@ -4849,75 +4859,47 @@ func FetchOuraData() {
 			database.Connector.Create(&currentData)
 			//fmt.Println(string(body))
 
-			//Vana stuff:
-			//var vanaDlpContract = common.HexToAddress(os.Getenv("VANA_DLP_CONTRACT"))
-			//var vanaDataRegistryContract = common.HexToAddress(os.Getenv("VANA_DATA_REGISTRY_CONTRACT"))
-			//var vanaTeePoolContract = common.HexToAddress(os.Getenv("VANA_TEE_POOL_CONTRACT"))
-
-			//DLP public Key
-			publicKey := GetDlpPublicKey()
-			fmt.Println("DLP encryption publicKey: ", publicKey)
-			//encrypt data client using signature of a fixed message (tbd - how to do as proxy?)
-
-			//Store data to public storage link
-			// Data for account.json
-			accountData := map[string]string{
-				"name":  "user123",
-				"email": "user123@gmail.com",
-			}
-
-			// Data for activity.json
-			activityData := []map[string]interface{}{
-				{"score": 0.23, "timestamp": 1725893454951},
-				{"score": 0.27, "timestamp": 1725893454952},
-			}
-
-			// Create a buffer to hold the zip data
-			var buf bytes.Buffer
-
-			// Create a new zip writer
-			zipWriter := zip.NewWriter(&buf)
-
 			// Add account.json to the zip
-			if err := addFileToZip(zipWriter, "account.json", accountData); err != nil {
-				log.Fatalf("Failed to add account.json to zip: %v", err)
+			if err := addFileToZip(zipWriter, endpoint+".json", string(body)); err != nil {
+				log.Fatalf("Failed to add "+endpoint+".json to zip: %v", err)
 			}
-
-			// Add activity.json to the zip
-			if err := addFileToZip(zipWriter, "activity.json", activityData); err != nil {
-				log.Fatalf("Failed to add activity.json to zip: %v", err)
-			}
-
-			// Close the zip writer
-			if err := zipWriter.Close(); err != nil {
-				log.Fatalf("Failed to close zip writer: %v", err)
-			}
-
-			// Upload the zip file to DigitalOcean Spaces
-			fileUrl, err := SaveFileToSpaces(buf.Bytes(), "archive.zip")
-			if err != nil {
-				log.Fatalf("Failed to upload to DigitalOcean Spaces: %v", err)
-			}
-			fmt.Println("file stored at: ", fileUrl)
-
-			//get DLP public key for encryption
-			//getPubKey/masterkey
-
-			//encrypt the file encryption key with the DLP pub key
-
-			//function - addFileWithPermissions - blockchain RPC call
-			//parameters - (publicly accessible link to encrypted data, "permissions" is the encrypted encryption key)
-			// returns fileID (ex: file id is '601971')
-
-			//now get proof from TEE the file is valid / authentic
-			//teeFee = await teePoolContract.teeFee(); //get estimated required fee for proof?
-			//contributionProofTx = await teePoolContract.requestContributionProof(fileId, teeFee)
-			//getJobId and teeDetails (tbd)
-
-			//eventually ask a specific TEE to run the proof of contribution
-			//${jobDetails.teeUrl}/RunProof
-			return //just for local testing to do one run at a time
 		}
+
+		//Vana stuff:
+		//var vanaDlpContract = common.HexToAddress(os.Getenv("VANA_DLP_CONTRACT"))
+		//var vanaDataRegistryContract = common.HexToAddress(os.Getenv("VANA_DATA_REGISTRY_CONTRACT"))
+		//var vanaTeePoolContract = common.HexToAddress(os.Getenv("VANA_TEE_POOL_CONTRACT"))
+
+		//for now since we use PAC - we upload the whole dataset as one zip (cheaper to verify via TEE)
+		//in the future if users choose to only share specific data - we need to upload each endppoint separately.
+		// Upload the zip file to DigitalOcean Spaces
+		// Close the zip writer
+		if err := zipWriter.Close(); err != nil {
+			log.Fatalf("Failed to close zip writer: %v", err)
+		}
+
+		fileUrl, err := SaveFileToSpaces(buf.Bytes(), ourauser.Wallet+time.Now().Format("2006-01-02_15-04-05")+"_archive.zip")
+		if err != nil {
+			log.Fatalf("Failed to upload to DigitalOcean Spaces: %v", err)
+		}
+		fmt.Println("file stored at: ", fileUrl)
+
+		//get DLP public key for encryption
+		//getPubKey/masterkey
+
+		//encrypt the file encryption key with the DLP pub key
+
+		//function - addFileWithPermissions - blockchain RPC call
+		//parameters - (publicly accessible link to encrypted data, "permissions" is the encrypted encryption key)
+		// returns fileID (ex: file id is '601971')
+
+		//now get proof from TEE the file is valid / authentic
+		//teeFee = await teePoolContract.teeFee(); //get estimated required fee for proof?
+		//contributionProofTx = await teePoolContract.requestContributionProof(fileId, teeFee)
+		//getJobId and teeDetails (tbd)
+
+		//eventually ask a specific TEE to run the proof of contribution
+		//${jobDetails.teeUrl}/RunProof
 	}
 }
 
