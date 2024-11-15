@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"archive/zip"
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
@@ -29,9 +30,15 @@ import (
 	_ "rest-go-demo/docs"
 
 	goaway "github.com/TwiN/go-away"
+	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	ens "github.com/wealdtech/go-ens/v3"
 
+	vanaDlpContract "rest-go-demo/vanaDlpContract" // for demo
+	// for demo
+	// for demo
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -2121,6 +2128,46 @@ func CreatePublicImageItem(w http.ResponseWriter, r *http.Request) {
 	} else {
 		w.WriteHeader(http.StatusCreated)
 	}
+}
+
+func SaveFileToSpaces(fileData []byte, fileName string) (string, error) {
+	key := "DO00CLQBPDAEHFUTYMGR"        // Access key pair.
+	secret := os.Getenv("SPACES_SECRET") // Secret access key defined through an environment variable.
+
+	s3Config := &aws.Config{
+		Credentials:      credentials.NewStaticCredentials(key, secret, ""),
+		Endpoint:         aws.String("https://sgp1.digitaloceanspaces.com"),
+		S3ForcePathStyle: aws.Bool(false),
+		Region:           aws.String("us-east-1"), // Must be "us-east-1" when creating new Spaces.
+	}
+
+	// Create a new session
+	newSession, err := session.NewSession(s3Config)
+	if err != nil {
+		return "", fmt.Errorf("failed to create session: %v", err)
+	}
+	s3Client := s3.New(newSession)
+
+	// Define the parameters of the object you want to upload.
+	object := s3.PutObjectInput{
+		Bucket: aws.String("walletchat-pfp-storage"), // Change to your bucket name
+		Key:    aws.String(fileName),                 // Object key
+		Body:   bytes.NewReader(fileData),            // The object's contents
+		ACL:    aws.String("public-read"),            // Set to public-read for public access
+		Metadata: map[string]*string{ // Optional metadata
+			"x-amz-meta-my-key": aws.String("your-value"),
+		},
+	}
+
+	// Run the PutObject function with your parameters
+	_, err = s3Client.PutObject(&object)
+	if err != nil {
+		return "", fmt.Errorf("failed to upload file: %v", err)
+	}
+
+	// Construct the public URL
+	publicURL := fmt.Sprintf("https://%s.%s/%s", "walletchat-pfp-storage", "sgp1.digitaloceanspaces.com", fileName)
+	return publicURL, nil
 }
 
 // GetRawImageItem godoc
@@ -4686,6 +4733,49 @@ func RegisterOuraUser(w http.ResponseWriter, r *http.Request) {
 	// }
 }
 
+// Load the ABI from the file
+func loadABI(filePath string) (abi.ABI, error) {
+	// Read the ABI file
+	abiJSON, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return abi.ABI{}, err
+	}
+
+	// Parse the ABI
+	parsedABI, err := abi.JSON(strings.NewReader(string(abiJSON)))
+	if err != nil {
+		return abi.ABI{}, err
+	}
+
+	return parsedABI, nil
+}
+
+func GetDlpPublicKey() string {
+	// Connect to an vana mokshanode
+	client, err := ethclient.Dial(os.Getenv("VANA_RPC_URL"))
+	if err != nil {
+		fmt.Println(err)
+		return "nil"
+	}
+
+	// Create an instance of the contract
+	instance, err := vanaDlpContract.NewVanaDlpContract(common.HexToAddress(os.Getenv("VANA_DLP_CONTRACT")), client)
+	if err != nil {
+		fmt.Println(err)
+		return "nil"
+	}
+
+	// Call the contract method
+	var result string
+	result, err = instance.MasterKey(&bind.CallOpts{})
+	if err != nil {
+		fmt.Println(err)
+		return "nil"
+	}
+
+	return result
+}
+
 var ouraEndpoints = []string{
 	"daily_activity",
 	"daily_cardiovascular_age",
@@ -4699,6 +4789,27 @@ var ouraEndpoints = []string{
 	"sleep_time",
 	"vO2_max",
 	"workout",
+}
+
+func addFileToZip(zipWriter *zip.Writer, fileName string, data interface{}) error {
+	// Create a zip file header
+	header := &zip.FileHeader{
+		Name:   fileName,
+		Method: zip.Deflate, // Use Deflate compression
+	}
+
+	// Create the writer for the file in the zip
+	writer, err := zipWriter.CreateHeader(header)
+	if err != nil {
+		return err
+	}
+
+	// Encode the data to JSON and write it to the zip
+	if err := json.NewEncoder(writer).Encode(data); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func FetchOuraData() {
@@ -4722,14 +4833,14 @@ func FetchOuraData() {
 			res, err := client.Do(req)
 			if err != nil {
 				fmt.Println(err)
-				return
+				break
 			}
 			defer res.Body.Close()
 
 			body, err := io.ReadAll(res.Body)
 			if err != nil {
 				fmt.Println(err)
-				return
+				break
 			}
 			var currentData entity.Ouradata
 			currentData.Endpoint = endpoint
@@ -4737,6 +4848,75 @@ func FetchOuraData() {
 			currentData.Jsondata = string(body)
 			database.Connector.Create(&currentData)
 			//fmt.Println(string(body))
+
+			//Vana stuff:
+			//var vanaDlpContract = common.HexToAddress(os.Getenv("VANA_DLP_CONTRACT"))
+			//var vanaDataRegistryContract = common.HexToAddress(os.Getenv("VANA_DATA_REGISTRY_CONTRACT"))
+			//var vanaTeePoolContract = common.HexToAddress(os.Getenv("VANA_TEE_POOL_CONTRACT"))
+
+			//DLP public Key
+			publicKey := GetDlpPublicKey()
+			fmt.Println("DLP encryption publicKey: ", publicKey)
+			//encrypt data client using signature of a fixed message (tbd - how to do as proxy?)
+
+			//Store data to public storage link
+			// Data for account.json
+			accountData := map[string]string{
+				"name":  "user123",
+				"email": "user123@gmail.com",
+			}
+
+			// Data for activity.json
+			activityData := []map[string]interface{}{
+				{"score": 0.23, "timestamp": 1725893454951},
+				{"score": 0.27, "timestamp": 1725893454952},
+			}
+
+			// Create a buffer to hold the zip data
+			var buf bytes.Buffer
+
+			// Create a new zip writer
+			zipWriter := zip.NewWriter(&buf)
+
+			// Add account.json to the zip
+			if err := addFileToZip(zipWriter, "account.json", accountData); err != nil {
+				log.Fatalf("Failed to add account.json to zip: %v", err)
+			}
+
+			// Add activity.json to the zip
+			if err := addFileToZip(zipWriter, "activity.json", activityData); err != nil {
+				log.Fatalf("Failed to add activity.json to zip: %v", err)
+			}
+
+			// Close the zip writer
+			if err := zipWriter.Close(); err != nil {
+				log.Fatalf("Failed to close zip writer: %v", err)
+			}
+
+			// Upload the zip file to DigitalOcean Spaces
+			fileUrl, err := SaveFileToSpaces(buf.Bytes(), "archive.zip")
+			if err != nil {
+				log.Fatalf("Failed to upload to DigitalOcean Spaces: %v", err)
+			}
+			fmt.Println("file stored at: ", fileUrl)
+
+			//get DLP public key for encryption
+			//getPubKey/masterkey
+
+			//encrypt the file encryption key with the DLP pub key
+
+			//function - addFileWithPermissions - blockchain RPC call
+			//parameters - (publicly accessible link to encrypted data, "permissions" is the encrypted encryption key)
+			// returns fileID (ex: file id is '601971')
+
+			//now get proof from TEE the file is valid / authentic
+			//teeFee = await teePoolContract.teeFee(); //get estimated required fee for proof?
+			//contributionProofTx = await teePoolContract.requestContributionProof(fileId, teeFee)
+			//getJobId and teeDetails (tbd)
+
+			//eventually ask a specific TEE to run the proof of contribution
+			//${jobDetails.teeUrl}/RunProof
+			return //just for local testing to do one run at a time
 		}
 	}
 }

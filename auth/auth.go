@@ -157,7 +157,7 @@ func (p RegisterPayload) Validate() error {
 	return nil
 }
 
-//Legacy - not needed anymore
+// Legacy - not needed anymore
 func RegisterHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		requestBody, _ := ioutil.ReadAll(r.Body)
@@ -778,7 +778,7 @@ func renderJson(r *http.Request, w http.ResponseWriter, statusCode int, res inte
 	}
 }
 
-//call DelegateCash function
+// call DelegateCash function
 func GetDelegationsByDelegate(addressDelegateWallet string) []delegatecash.IDelegationRegistryDelegationInfo {
 	// Connect to an ethereum node
 	client, err := ethclient.Dial("https://mainnet.infura.io/v3/" + os.Getenv("INFURA_V3"))

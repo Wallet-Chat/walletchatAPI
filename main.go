@@ -129,6 +129,7 @@ func main() {
 	referrals.InitRandom()
 	twitter.InitSearchParams()
 	referrals.GetOuraLeaderboardDataCronJob()
+	//controllers.FetchOuraData() //delete this later
 
 	//handler := cors.Default().Handler(router)
 	handler := cors.AllowAll().Handler(router) //Live API overrides this anyway
