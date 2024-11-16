@@ -22,6 +22,7 @@ import (
 	"rest-go-demo/entity"
 	"rest-go-demo/referrals"
 	"rest-go-demo/vanaDataRegistryContract"
+	"rest-go-demo/vanaDlpContract"
 	"rest-go-demo/vanaencrypt"
 	"rest-go-demo/wc_analytics"
 	"sync"
