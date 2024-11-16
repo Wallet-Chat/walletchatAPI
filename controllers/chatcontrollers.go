@@ -3,7 +3,14 @@ package controllers
 import (
 	"archive/zip"
 	"bytes"
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/hmac"
+	cryptoRand "crypto/rand" // Alias for crypto/rand
+	"crypto/sha256"
+	"crypto/sha512"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -30,7 +37,7 @@ import (
 	_ "rest-go-demo/docs"
 
 	goaway "github.com/TwiN/go-away"
-	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/btcsuite/btcd/btcec/v2"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -4733,23 +4740,6 @@ func RegisterOuraUser(w http.ResponseWriter, r *http.Request) {
 	// }
 }
 
-// Load the ABI from the file
-func loadABI(filePath string) (abi.ABI, error) {
-	// Read the ABI file
-	abiJSON, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		return abi.ABI{}, err
-	}
-
-	// Parse the ABI
-	parsedABI, err := abi.JSON(strings.NewReader(string(abiJSON)))
-	if err != nil {
-		return abi.ABI{}, err
-	}
-
-	return parsedABI, nil
-}
-
 func GetDlpPublicKey() string {
 	// Connect to an vana mokshanode
 	client, err := ethclient.Dial(os.Getenv("VANA_RPC_URL"))
@@ -4812,6 +4802,147 @@ func addFileToZip(zipWriter *zip.Writer, fileName string, data interface{}) erro
 	return nil
 }
 
+func EncryptData(data []byte, hexKey string) ([]byte, error) {
+	fmt.Println("encrypting")
+	key, err := hex.DecodeString(hexKey)
+	if err != nil {
+		fmt.Println("invalid key")
+		return nil, err // Handle hex decoding error
+	}
+
+	if len(key) != 16 && len(key) != 24 && len(key) != 32 {
+		fmt.Println("invalid key length; must be 16, 24, or 32 bytes")
+	}
+
+	// Create a new AES cipher block
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		fmt.Println("invalid cipher create")
+		return nil, err
+	}
+
+	// Create a nonce for AES GCM
+	nonce := make([]byte, 12) // GCM standard nonce size
+	if _, err := io.ReadFull(cryptoRand.Reader, nonce); err != nil {
+		fmt.Println("invalid nonce")
+		return nil, err
+	}
+
+	// Create a GCM (Galois/Counter Mode) cipher
+	aesGCM, err := cipher.NewGCM(block)
+	if err != nil {
+		fmt.Println("invalid counter")
+		return nil, err
+	}
+
+	// Encrypt the data
+	ciphertext := aesGCM.Seal(nonce, nonce, data, nil)
+	fmt.Println("after ciphertext")
+
+	// Return the encrypted data as a byte slice
+	return ciphertext, nil
+}
+
+//code for encrypting EK to EEK
+
+// Ecies holds the encrypted result
+type Ecies struct {
+	IV             []byte
+	EphemPublicKey []byte
+	Ciphertext     []byte
+	MAC            []byte
+}
+
+// DeriveSharedSecret derives the shared secret using scalar multiplication
+func DeriveSharedSecret(privateKey *btcec.PrivateKey, publicKey *btcec.PublicKey) ([]byte, error) {
+	// Retrieve the X and Y coordinates of the public key
+	x := publicKey.X()
+	y := publicKey.Y()
+
+	// Perform scalar multiplication (private key * public key)
+	sharedX, _ := btcec.S256().ScalarMult(x, y, privateKey.Serialize())
+	return sharedX.Bytes(), nil
+}
+
+func EncryptWithPubKey(publicKeyTo []byte, msg []byte, opts map[string][]byte) (*Ecies, error) {
+	// Validate the provided public key
+	publicKey, err := btcec.ParsePubKey(publicKeyTo)
+	if err != nil {
+		return nil, fmt.Errorf("invalid public key: %v", err)
+	}
+
+	// Generate an ephemeral private key
+	ephemPrivKey, err := btcec.NewPrivateKey()
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate ephemeral private key: %v", err)
+	}
+	ephemPubKey := ephemPrivKey.PubKey()
+
+	// Derive the shared secret using scalar multiplication
+	sharedSecret, err := DeriveSharedSecret(ephemPrivKey, publicKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to derive shared secret: %v", err)
+	}
+
+	// Hash the shared secret
+	hash := sha512.Sum512(sharedSecret)
+
+	// Split the hash into encryption and MAC keys
+	encryptionKey := hash[:32]
+	macKey := hash[32:]
+
+	// Generate a random IV if not provided
+	iv := opts["iv"]
+	if iv == nil {
+		iv = generateRandomBytes(16)
+	}
+
+	// Encrypt the message using AES-CBC
+	block, err := aes.NewCipher(encryptionKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create AES cipher: %v", err)
+	}
+	mode := cipher.NewCBCEncrypter(block, iv)
+	ciphertext := make([]byte, len(msg))
+	mode.CryptBlocks(ciphertext, msg)
+
+	// Concatenate IV, ephemeral public key, and ciphertext for MAC
+	dataToMac := bytes.Buffer{}
+	dataToMac.Write(iv)
+	dataToMac.Write(ephemPubKey.SerializeUncompressed())
+	dataToMac.Write(ciphertext)
+
+	// Compute the MAC
+	mac := computeHMAC(macKey, dataToMac.Bytes())
+
+	// Return the encrypted result
+	return &Ecies{
+		IV:             iv,
+		EphemPublicKey: ephemPubKey.SerializeUncompressed(),
+		Ciphertext:     ciphertext,
+		MAC:            mac,
+	}, nil
+}
+
+// GenerateRandomBytes generates a random byte slice of the specified size
+func generateRandomBytes(size int) []byte {
+	b := make([]byte, size)
+	_, err := rand.Read(b)
+	if err != nil {
+		panic(fmt.Sprintf("failed to generate random bytes: %v", err))
+	}
+	return b
+}
+
+// ComputeHMAC computes an HMAC using SHA-256
+func computeHMAC(key, data []byte) []byte {
+	h := hmac.New(sha256.New, key)
+	h.Write(data)
+	return h.Sum(nil)
+}
+
+//EK to EEK end
+
 func FetchOuraData() {
 	var ourausers []entity.Ourauser
 	database.Connector.Find(&ourausers)
@@ -4823,8 +4954,8 @@ func FetchOuraData() {
 		zipWriter := zip.NewWriter(&buf)
 
 		//DLP public Key
-		publicKey := GetDlpPublicKey()
-		fmt.Println("DLP encryption publicKey: ", publicKey)
+		publicKeyForEEK := GetDlpPublicKey()
+		fmt.Println("DLP encryption publicKey: ", publicKeyForEEK)
 		//encrypt data client using signature of a fixed message (tbd - how to do as proxy?)
 
 		for _, endpoint := range ouraEndpoints {
@@ -4878,16 +5009,35 @@ func FetchOuraData() {
 			log.Fatalf("Failed to close zip writer: %v", err)
 		}
 
-		fileUrl, err := SaveFileToSpaces(buf.Bytes(), ourauser.Wallet+time.Now().Format("2006-01-02_15-04-05")+"_archive.zip")
+		encryptedData, err := EncryptData(buf.Bytes(), os.Getenv("VANA_INTRA_ENCRYPTION_KEY"))
+		if err != nil {
+			fmt.Println("encrypt data error: ", err)
+			break
+		}
+
+		fileUrl, err := SaveFileToSpaces(encryptedData, ourauser.Wallet+time.Now().Format("2006-01-02_15-04-05")+"_archive.zip")
+		//fileUrl, err := SaveFileToSpaces(buf.Bytes(), ourauser.Wallet+time.Now().Format("2006-01-02_15-04-05")+"_archive.zip")
 		if err != nil {
 			log.Fatalf("Failed to upload to DigitalOcean Spaces: %v", err)
 		}
 		fmt.Println("file stored at: ", fileUrl)
 
-		//get DLP public key for encryption
-		//getPubKey/masterkey
+		// Convert publicKeyForEEK to bytes
+		publicKeyBytes, err := hex.DecodeString(publicKeyForEEK[2:]) // Skip the "0x" prefix
+		if err != nil {
+			fmt.Println("Error converting publicKeyForEEK:", err)
+			return
+		}
+
+		// Convert VANA_INTRA_ENCRYPTION_KEY to bytes
+		vanaDlpKeyBytesEK, err := hex.DecodeString(os.Getenv("VANA_INTRA_ENCRYPTION_KEY"))
+		if err != nil {
+			fmt.Println("Error converting VANA_INTRA_ENCRYPTION_KEY:", err)
+			return
+		}
 
 		//encrypt the file encryption key with the DLP pub key
+		EncryptWithPubKey(publicKeyBytes, vanaDlpKeyBytesEK, nil)
 
 		//function - addFileWithPermissions - blockchain RPC call
 		//parameters - (publicly accessible link to encrypted data, "permissions" is the encrypted encryption key)
