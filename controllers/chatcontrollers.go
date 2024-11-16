@@ -2131,6 +2131,46 @@ func CreatePublicImageItem(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func SaveFileToSpaces(fileData []byte, fileName string) (string, error) {
+	key := "DO00CLQBPDAEHFUTYMGR"        // Access key pair.
+	secret := os.Getenv("SPACES_SECRET") // Secret access key defined through an environment variable.
+
+	s3Config := &aws.Config{
+		Credentials:      credentials.NewStaticCredentials(key, secret, ""),
+		Endpoint:         aws.String("https://sgp1.digitaloceanspaces.com"),
+		S3ForcePathStyle: aws.Bool(false),
+		Region:           aws.String("us-east-1"), // Must be "us-east-1" when creating new Spaces.
+	}
+
+	// Create a new session
+	newSession, err := session.NewSession(s3Config)
+	if err != nil {
+		return "", fmt.Errorf("failed to create session: %v", err)
+	}
+	s3Client := s3.New(newSession)
+
+	// Define the parameters of the object you want to upload.
+	object := s3.PutObjectInput{
+		Bucket: aws.String("walletchat-pfp-storage"), // Change to your bucket name
+		Key:    aws.String(fileName),                 // Object key
+		Body:   bytes.NewReader(fileData),            // The object's contents
+		ACL:    aws.String("public-read"),            // Set to public-read for public access
+		Metadata: map[string]*string{ // Optional metadata
+			"x-amz-meta-my-key": aws.String("your-value"),
+		},
+	}
+
+	// Run the PutObject function with your parameters
+	_, err = s3Client.PutObject(&object)
+	if err != nil {
+		return "", fmt.Errorf("failed to upload file: %v", err)
+	}
+
+	// Construct the public URL
+	publicURL := fmt.Sprintf("https://%s.%s/%s", "walletchat-pfp-storage", "sgp1.digitaloceanspaces.com", fileName)
+	return publicURL, nil
+}
+
 // GetRawImageItem godoc
 // @Summary     Store Image in Bucket Storage
 // @Description private image storage for photo uploads in DMs
@@ -4789,6 +4829,26 @@ var ouraEndpoints = []string{
 	"workout",
 }
 
+func addFileToZip(zipWriter *zip.Writer, fileName string, data interface{}) error {
+	// Create a zip file header
+	header := &zip.FileHeader{
+		Name:   fileName,
+		Method: zip.Deflate, // Use Deflate compression
+	}
+
+	// Create the writer for the file in the zip
+	writer, err := zipWriter.CreateHeader(header)
+	if err != nil {
+		return err
+	}
+
+	// Encode the data to JSON and write it to the zip
+	if err := json.NewEncoder(writer).Encode(data); err != nil {
+		return err
+	}
+
+	return nil
+}
 func FetchOuraData() {
 	var ourausers []entity.Ourauser
 	database.Connector.Find(&ourausers)
@@ -4800,8 +4860,8 @@ func FetchOuraData() {
 		zipWriter := zip.NewWriter(&buf)
 
 		//DLP public Key
-		publicKeyDlp := GetDlpPublicKey()
-		fmt.Println("DLP encryption publicKey: ", publicKeyDlp)
+		publicKeyForEEK := GetDlpPublicKey()
+		fmt.Println("DLP encryption publicKey: ", publicKeyForEEK)
 		//encrypt data client using signature of a fixed message (tbd - how to do as proxy?)
 
 		for _, endpoint := range ouraEndpoints {
@@ -4813,21 +4873,21 @@ func FetchOuraData() {
 
 			if err != nil {
 				fmt.Println(err)
-				return
+				break
 			}
 			req.Header.Add("Authorization", "Bearer "+ourauser.Pac)
 
 			res, err := client.Do(req)
 			if err != nil {
 				fmt.Println(err)
-				return
+				break
 			}
 			defer res.Body.Close()
 
 			body, err := io.ReadAll(res.Body)
 			if err != nil {
 				fmt.Println(err)
-				return
+				break
 			}
 			var currentData entity.Ouradata
 			currentData.Endpoint = endpoint
@@ -4868,7 +4928,7 @@ func FetchOuraData() {
 		fmt.Println("file stored at: ", fileUrl)
 
 		//get EEK with EK
-		vanaEEK, err := vanaencrypt.EncryptWithWalletPublicKey(os.Getenv("VANA_INTRA_ENCRYPTION_KEY"), publicKeyDlp)
+		vanaEEK, err := vanaencrypt.EncryptWithWalletPublicKey(os.Getenv("VANA_INTRA_ENCRYPTION_KEY"), publicKeyForEEK)
 		fmt.Println("EEK: ", vanaEEK)
 
 		//function - addFileWithPermissions - blockchain RPC call
