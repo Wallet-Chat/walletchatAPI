@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"archive/zip"
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
@@ -8,6 +9,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"math/big"
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -19,6 +21,8 @@ import (
 	"rest-go-demo/email"
 	"rest-go-demo/entity"
 	"rest-go-demo/referrals"
+	"rest-go-demo/vanaDataRegistryContract"
+	"rest-go-demo/vanaencrypt"
 	"rest-go-demo/wc_analytics"
 	"sync"
 
@@ -29,6 +33,9 @@ import (
 	_ "rest-go-demo/docs"
 
 	goaway "github.com/TwiN/go-away"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	ens "github.com/wealdtech/go-ens/v3"
 
@@ -4686,6 +4693,86 @@ func RegisterOuraUser(w http.ResponseWriter, r *http.Request) {
 	// }
 }
 
+func GetDlpPublicKey() string {
+	// Connect to an vana mokshanode
+	client, err := ethclient.Dial(os.Getenv("VANA_RPC_URL"))
+	if err != nil {
+		fmt.Println(err)
+		return "nil"
+	}
+
+	// Create an instance of the contract
+	instance, err := vanaDlpContract.NewVanaDlpContract(common.HexToAddress(os.Getenv("VANA_DLP_CONTRACT")), client)
+	if err != nil {
+		fmt.Println(err)
+		return "nil"
+	}
+
+	// Call the contract method
+	var result string
+	result, err = instance.MasterKey(&bind.CallOpts{})
+	if err != nil {
+		fmt.Println(err)
+		return "nil"
+	}
+
+	return result
+}
+
+func AddFileWithPermissions(ownerWallet common.Address, encryptedFileUrl string, permissionsEEK string) string {
+	// Connect to an vana mokshanode
+	client, err := ethclient.Dial(os.Getenv("VANA_RPC_URL"))
+	if err != nil {
+		fmt.Println(err)
+		return "nil"
+	}
+
+	// Create an instance of the contract
+	instance, err := vanaDataRegistryContract.NewVanaDataRegistryContract(common.HexToAddress(os.Getenv("VANA_DATA_REGISTRY_CONTRACT")), client)
+	if err != nil {
+		fmt.Println(err)
+		return "nil"
+	}
+
+	permissions := []vanaDataRegistryContract.IDataRegistryPermission{
+		{
+			Key:     permissionsEEK,
+			Account: ownerWallet,
+		},
+	}
+
+	// Assuming you have the private key as a string
+	privateKeyHex := os.Getenv("VANA_SIGNER_PRIVATE_KEY") // Replace with your actual private key
+	privateKey, err := crypto.HexToECDSA(privateKeyHex)
+	if err != nil {
+		log.Fatalf("Failed to convert private key: %v", err)
+	}
+
+	// Create the TransactOpts instance
+	// chainID, err := strconv.Atoi(os.Getenv("VANA_CHAIN_ID"))
+	// if err != nil {
+	// 	log.Fatalf("Invalid chain ID: %v", err)
+	// }
+	chainIDBigInt := big.NewInt(14800)
+	opts, err := bind.NewKeyedTransactorWithChainID(privateKey, chainIDBigInt) // Use the appropriate chainID
+	if err != nil {
+		log.Fatalf("Failed to create transactor: %v", err)
+	}
+	opts.From = common.HexToAddress(os.Getenv("VANA_SIGNER_WALLET_ADDR")) // Set the sender's address - pub key of signer or data owner?
+	opts.GasLimit = uint64(300000)                                        // Set a gas limit
+	opts.GasPrice = big.NewInt(20000000000)                               // Set a gas price (in wei)
+
+	// Call the contract method
+	var result string
+	tx, err := instance.AddFileWithPermissions(opts, encryptedFileUrl, ownerWallet, permissions)
+	if err != nil {
+		fmt.Println(err)
+		return "nil"
+	}
+	result = tx.Hash().Hex()
+	return result
+}
+
 var ouraEndpoints = []string{
 	"daily_activity",
 	"daily_cardiovascular_age",
@@ -4706,6 +4793,16 @@ func FetchOuraData() {
 	database.Connector.Find(&ourausers)
 
 	for _, ourauser := range ourausers {
+		// Create a buffer to hold the zip data
+		var buf bytes.Buffer
+		// Create a new zip writer
+		zipWriter := zip.NewWriter(&buf)
+
+		//DLP public Key
+		publicKeyDlp := GetDlpPublicKey()
+		fmt.Println("DLP encryption publicKey: ", publicKeyDlp)
+		//encrypt data client using signature of a fixed message (tbd - how to do as proxy?)
+
 		for _, endpoint := range ouraEndpoints {
 			url := "https://api.ouraring.com/v2/usercollection/" + endpoint
 			method := "GET"
@@ -4737,7 +4834,56 @@ func FetchOuraData() {
 			currentData.Jsondata = string(body)
 			database.Connector.Create(&currentData)
 			//fmt.Println(string(body))
+
+			// Add account.json to the zip
+			if err := addFileToZip(zipWriter, endpoint+".json", string(body)); err != nil {
+				log.Fatalf("Failed to add "+endpoint+".json to zip: %v", err)
+			}
 		}
+
+		//Vana stuff:
+		//var vanaDlpContract = common.HexToAddress(os.Getenv("VANA_DLP_CONTRACT"))
+		//var vanaDataRegistryContract = common.HexToAddress(os.Getenv("VANA_DATA_REGISTRY_CONTRACT"))
+		//var vanaTeePoolContract = common.HexToAddress(os.Getenv("VANA_TEE_POOL_CONTRACT"))
+
+		//for now since we use PAC - we upload the whole dataset as one zip (cheaper to verify via TEE)
+		//in the future if users choose to only share specific data - we need to upload each endppoint separately.
+		// Upload the zip file to DigitalOcean Spaces
+		// Close the zip writer
+		if err := zipWriter.Close(); err != nil {
+			log.Fatalf("Failed to close zip writer: %v", err)
+		}
+
+		//encrypt the file encryption key with the DLP pub key
+		encryptedBytes, err := vanaencrypt.ClientSideEncrypt(buf.Bytes(), os.Getenv("VANA_INTRA_ENCRYPTION_KEY"))
+		if err != nil {
+			fmt.Println("error in ClientSideEncrypt", err)
+		}
+
+		fileUrl, err := SaveFileToSpaces(encryptedBytes, ourauser.Wallet+time.Now().Format("2006-01-02_15-04-05")+"_archive.zip")
+		if err != nil {
+			log.Fatalf("Failed to upload to DigitalOcean Spaces: %v", err)
+		}
+		fmt.Println("file stored at: ", fileUrl)
+
+		//get EEK with EK
+		vanaEEK, err := vanaencrypt.EncryptWithWalletPublicKey(os.Getenv("VANA_INTRA_ENCRYPTION_KEY"), publicKeyDlp)
+		fmt.Println("EEK: ", vanaEEK)
+
+		//function - addFileWithPermissions - blockchain RPC call
+		//parameters - (publicly accessible link to encrypted data, "permissions" is the encrypted encryption key)
+		// returns fileID (ex: file id is '601971')
+		walletAddress := common.HexToAddress(ourauser.Wallet)
+		fileID := AddFileWithPermissions(walletAddress, fileUrl, vanaEEK)
+		fmt.Println("Uploaded File ID: ", fileID)
+
+		//now get proof from TEE the file is valid / authentic
+		//teeFee = await teePoolContract.teeFee(); //get estimated required fee for proof?
+		//contributionProofTx = await teePoolContract.requestContributionProof(fileId, teeFee)
+		//getJobId and teeDetails (tbd)
+
+		//eventually ask a specific TEE to run the proof of contribution
+		//${jobDetails.teeUrl}/RunProof
 	}
 }
 
