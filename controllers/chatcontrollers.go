@@ -4814,14 +4814,63 @@ func GetTeePrice() string {
 		return "nil"
 	}
 
+	// Create a call options object without a signer
+	callOpts := &bind.CallOpts{
+		Pending: false,            // Set to true if you want to query the pending state
+		From:    common.Address{}, // Optional: specify the address if needed
+	}
+
 	// Call the contract method
 	var result string
-	teeFee, err := instance.TeeFee(&bind.CallOpts{})
+	teeFee, err := instance.TeeFee(callOpts)
 	if err != nil {
-		fmt.Println("tee get fee error: ", err)
+		fmt.Println("tee getPrice fee error: ", err)
 		return "nil"
 	}
 	result = teeFee.String()
+
+	return result
+}
+
+func GetTeeContributionProof(fileId string) string {
+	// Connect to an vana mokshanode
+	client, err := ethclient.Dial(os.Getenv("VANA_RPC_URL"))
+	if err != nil {
+		fmt.Println(err)
+		return "nil"
+	}
+
+	// Create an instance of the contract
+	instance, err := vanaTeeContract.NewVanaTeeContract(common.HexToAddress(os.Getenv("VANA_TEE_POOL_CONTRACT")), client)
+	if err != nil {
+		fmt.Println(err)
+		return "nil"
+	}
+
+	// Assuming fileId is a string representation of a number
+	fileIdBigInt := new(big.Int)
+	fileIdBigInt.SetString(fileId, 10)
+
+	privateKey, err := crypto.HexToECDSA(os.Getenv("VANA_SIGNER_PRIVATE_KEY"))
+	if err != nil {
+		fmt.Println("invalid private key: %w", err)
+		return ""
+	}
+
+	opts, err := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(14800))
+	if err != nil {
+		fmt.Println("failed to create transactor: %w", err)
+		return ""
+	}
+
+	// Call the contract method
+	var result string
+	teePocTX, err := instance.RequestContributionProof(opts, fileIdBigInt)
+	if err != nil {
+		fmt.Println("tee getContributionProof error: ", err)
+		return "nil"
+	}
+	result = teePocTX.Hash().Hex()
 
 	return result
 }
@@ -5048,7 +5097,8 @@ func FetchOuraData() {
 		var teePrice = GetTeePrice()
 		fmt.Println("TEE Price: ", teePrice)
 
-		//contributionProofTx = await teePoolContract.requestContributionProof(fileId, teeFee)
+		var contributionProofTx = GetTeeContributionProof(fileID)
+		fmt.Println("TEE contribution proof tx: ", contributionProofTx)
 		//getJobId and teeDetails (tbd)
 
 		//eventually ask a specific TEE to run the proof of contribution
