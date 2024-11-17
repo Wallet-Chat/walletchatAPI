@@ -4832,6 +4832,77 @@ func GetTeePrice() string {
 	return result
 }
 
+func GetFileJobIDs(fileId string) []*big.Int {
+	// Connect to an vana mokshanode
+	client, err := ethclient.Dial(os.Getenv("VANA_RPC_URL"))
+	if err != nil {
+		fmt.Println(err)
+		return []*big.Int{}
+	}
+
+	// Create an instance of the contract
+	instance, err := vanaTeeContract.NewVanaTeeContract(common.HexToAddress(os.Getenv("VANA_TEE_POOL_CONTRACT")), client)
+	if err != nil {
+		fmt.Println(err)
+		return []*big.Int{}
+	}
+
+	// Create a call options object without a signer
+	callOpts := &bind.CallOpts{
+		Pending: false,            // Set to true if you want to query the pending state
+		From:    common.Address{}, // Optional: specify the address if needed
+	}
+
+	// Assuming fileId is a string representation of a number
+	fileIdBigInt := new(big.Int)
+	fileIdBigInt.SetString(fileId, 10)
+
+	// Call the contract method
+	getJobFileResult, err := instance.FileJobIds(callOpts, fileIdBigInt)
+	if err != nil {
+		fmt.Println("tee getFileJobIDs fee error: ", err)
+		return []*big.Int{}
+	}
+
+	return getJobFileResult
+}
+
+func GetTeeDetails(latestJobId big.Int) {
+	// Connect to an vana mokshanode
+	client, err := ethclient.Dial(os.Getenv("VANA_RPC_URL"))
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// Create an instance of the contract
+	instance, err := vanaTeeContract.NewVanaTeeContract(common.HexToAddress(os.Getenv("VANA_TEE_POOL_CONTRACT")), client)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// Create a call options object without a signer
+	callOpts := &bind.CallOpts{
+		Pending: false,            // Set to true if you want to query the pending state
+		From:    common.Address{}, // Optional: specify the address if needed
+	}
+
+	// Call the contract method
+	getJobFileResult, err := instance.Jobs(callOpts, &latestJobId)
+	if err != nil {
+		fmt.Println("tee getJobFileResult error: ", err, latestJobId)
+	}
+
+	// Call the contract method
+	getTeeInfoResult, err := instance.Tees(callOpts, getJobFileResult.TeeAddress)
+	if err != nil {
+		fmt.Println("tee getTeeInfoResult error: ", err)
+	}
+
+	//return
+	fmt.Println("Job File Result: ", getJobFileResult)
+	fmt.Println("Tee Info Result: ", getTeeInfoResult)
+}
+
 func GetTeeContributionProof(fileId string) string {
 	// Connect to an vana mokshanode
 	client, err := ethclient.Dial(os.Getenv("VANA_RPC_URL"))
@@ -5099,7 +5170,15 @@ func FetchOuraData() {
 
 		var contributionProofTx = GetTeeContributionProof(fileID)
 		fmt.Println("TEE contribution proof tx: ", contributionProofTx)
+
 		//getJobId and teeDetails (tbd)
+		var jobIDS = GetFileJobIDs(fileID)
+		fmt.Println("`Latest JobIDs for FileID ", jobIDS)
+
+		if len(jobIDS) > 1 {
+			latestJobId := jobIDS[len(jobIDS)-1]
+			GetTeeDetails(*latestJobId)
+		}
 
 		//eventually ask a specific TEE to run the proof of contribution
 		//${jobDetails.teeUrl}/RunProof
