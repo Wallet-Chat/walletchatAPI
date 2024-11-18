@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"bytes"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -4882,12 +4883,18 @@ func FetchOuraData() {
 		//get EEK with EK
 		vanaEEK, err := vanaencrypt.EncryptWithWalletPublicKey(os.Getenv("VANA_INTRA_ENCRYPTION_KEY"), publicKeyForEEK)
 		fmt.Println("EEK: ", vanaEEK)
+		finalDataEEK := append(vanaEEK["iv"],
+			append(vanaEEK["ephemPublicKey"],
+				append(vanaEEK["ciphertext"], vanaEEK["mac"]...)...)...)
+
+		// Return the final result as a hex string
+		hexDataEEK := hex.EncodeToString(finalDataEEK)
 
 		//function - addFileWithPermissions - blockchain RPC call
 		//parameters - (publicly accessible link to encrypted data, "permissions" is the encrypted encryption key)
 		// returns fileID (ex: file id is '601971')
 		walletAddress := common.HexToAddress(ourauser.Wallet)
-		txHash, err := vanatransact.AddFileWithPermissions(walletAddress, fileUrl, vanaEEK)
+		txHash, err := vanatransact.AddFileWithPermissions(walletAddress, fileUrl, hexDataEEK)
 		fmt.Println("Uploaded File TX and err: ", txHash, err)
 		var fileID = vanatransact.GetFileID(txHash)
 		fmt.Println("KL Uploaded File: ", fileID)
@@ -4906,11 +4913,22 @@ func FetchOuraData() {
 
 		if len(jobIDS) > 1 {
 			latestJobId := jobIDS[len(jobIDS)-1]
-			vanatransact.GetTeeDetails(*latestJobId)
-		}
+			teeUrl, teePublicKey := vanatransact.GetTeeDetails(*latestJobId)
 
-		//eventually ask a specific TEE to run the proof of contribution
-		//${jobDetails.teeUrl}/RunProof
+			//eventually ask a specific TEE to run the proof of contribution
+			//${jobDetails.teeUrl}/RunProof
+
+			//specific to the DLP proof code
+			envVars := map[string]string{
+				"USER_EMAIL": "user123@gmail.com", // Add USER_EMAIL to EnvVars
+			}
+			secrets := map[string]string{} //this would be API keys, etc needed in proof code
+
+			err := vanatransact.SendContributionProof(latestJobId, fileID, envVars, secrets, vanaEEK, teePublicKey, teeUrl)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
 	}
 }
 

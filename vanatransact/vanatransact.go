@@ -9,7 +9,12 @@ import (
 	"rest-go-demo/vanaDataRegistryContract"
 	"rest-go-demo/vanaDlpContract"
 	"rest-go-demo/vanaTeeContract"
+	"rest-go-demo/vanaencrypt"
 
+	"bytes"
+	"encoding/hex"
+	"encoding/json"
+	"net/http"
 	"time"
 
 	_ "rest-go-demo/docs"
@@ -150,7 +155,7 @@ func GetFileJobIDs(fileId string) []*big.Int {
 	return getJobFileResult
 }
 
-func GetTeeDetails(latestJobId big.Int) {
+func GetTeeDetails(latestJobId big.Int) (string, string) {
 	// Connect to an vana mokshanode
 	client, err := ethclient.Dial(os.Getenv("VANA_RPC_URL"))
 	if err != nil {
@@ -181,9 +186,10 @@ func GetTeeDetails(latestJobId big.Int) {
 		fmt.Println("tee getTeeInfoResult error: ", err)
 	}
 
-	//return
 	fmt.Println("Job File Result: ", getJobFileResult)
 	fmt.Println("Tee Info Result: ", getTeeInfoResult)
+	//return
+	return getTeeInfoResult.Url, getTeeInfoResult.PublicKey
 }
 
 func GetTeeContributionProof(fileId string) string {
@@ -282,4 +288,94 @@ func AddFileWithPermissions(ownerWallet common.Address, encryptedFileUrl string,
 	}
 
 	return tx.Hash().Hex(), nil
+}
+
+// Define the structure for the request body
+type RequestBody struct {
+	JobID               *big.Int          `json:"job_id"`
+	FileID              string            `json:"file_id"`
+	Nonce               string            `json:"nonce"`
+	ProofURL            string            `json:"proof_url"`
+	EncryptionSeed      string            `json:"encryption_seed"`
+	EnvVars             map[string]string `json:"env_vars"`
+	Secrets             map[string]string `json:"secrets"`
+	ValidatePermissions map[string][]byte `json:"validate_permissions"`
+	EncryptedKey        string            `json:"encrypted_encryption_key,omitempty"`
+	EncryptionKey       string            `json:"encryption_key,omitempty"`
+}
+
+// Define the structure for validate permissions
+// type ValidatePermission struct {
+// 	Address      string `json:"address"`
+// 	PublicKey    string `json:"public_key"`
+// 	IV           string `json:"iv"`
+// 	EphemeralKey string `json:"ephemeral_key"`
+// }
+
+// Function to send the contribution proof request
+func SendContributionProof(jobID *big.Int, fileID string, envVars map[string]string, secrets map[string]string, validatePermissions map[string][]byte, teePublicKey string, teeURL string) error {
+	// Create the request body
+	requestBody := RequestBody{
+		JobID:               jobID,
+		FileID:              fileID,
+		Nonce:               "1234",
+		ProofURL:            "https://github.com/vana-com/vana-satya-proof-template/releases/download/v24/gsc-my-proof-24.tar.gz",
+		EncryptionSeed:      os.Getenv("VANA_ENCRYPT_KEY_SEED"),
+		EnvVars:             envVars,
+		Secrets:             secrets,
+		ValidatePermissions: validatePermissions,
+	}
+
+	// If TEE public key is available, encrypt the encryption key
+	if teePublicKey != "" {
+		fmt.Println("Encrypting encryption key with TEE public key")
+		encryptedKey, err := vanaencrypt.EncryptWithWalletPublicKey(os.Getenv("VANA_INTRA_ENCRYPTION_KEY"), teePublicKey) // Implement this function
+		if err != nil {
+			fmt.Println("Error encrypting encryption key:", err)
+			fmt.Println("Warning: Failed to encrypt encryption key, falling back to direct encryption key")
+			requestBody.EncryptionKey = os.Getenv("VANA_INTRA_ENCRYPTION_KEY")
+		} else {
+			finalDataEEK := append(encryptedKey["iv"],
+				append(encryptedKey["ephemPublicKey"],
+					append(encryptedKey["ciphertext"], encryptedKey["mac"]...)...)...)
+
+			// Return the final result as a hex string
+			hexDataEEK := hex.EncodeToString(finalDataEEK)
+			requestBody.EncryptedKey = hexDataEEK
+			fmt.Println("Encryption key encrypted successfully")
+		}
+	} else {
+		fmt.Println("TEE public key not available, using direct encryption key")
+		requestBody.EncryptionKey = os.Getenv("VANA_INTRA_ENCRYPTION_KEY")
+	}
+
+	fmt.Println("Sending contribution proof request to TEE")
+	body, err := json.Marshal(requestBody)
+	if err != nil {
+		return fmt.Errorf("failed to marshal request body: %v", err)
+	}
+
+	// Make the HTTP POST request
+	client := &http.Client{Timeout: 10 * time.Second}
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/RunProof", teeURL), bytes.NewBuffer(body))
+	if err != nil {
+		return fmt.Errorf("failed to create request: %v", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to send request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		var errorData map[string]interface{}
+		if err := json.NewDecoder(resp.Body).Decode(&errorData); err != nil {
+			return fmt.Errorf("TEE request failed with status %d", resp.StatusCode)
+		}
+		return fmt.Errorf("TEE request failed: %v", errorData)
+	}
+
+	return nil
 }

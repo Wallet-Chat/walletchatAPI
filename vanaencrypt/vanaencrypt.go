@@ -148,20 +148,22 @@ func EncryptWithPubKey(publicKeyTo []byte, msg []byte, opts map[string][]byte) (
 }
 
 // EncryptWithWalletPublicKey encrypts data using a wallet public key and returns the encrypted data as a hex string.
-func EncryptWithWalletPublicKey(data string, publicKeyHex string) (string, error) {
+func EncryptWithWalletPublicKey(data string, publicKeyHex string) (map[string][]byte, error) {
+	empty := map[string][]byte{}
+
 	// Remove "0x" prefix if present
 	if len(publicKeyHex) > 2 && publicKeyHex[:2] == "0x" {
 		publicKeyHex = publicKeyHex[2:]
 	}
 
 	if len(publicKeyHex) == 0 {
-		return "", errors.New("public key is required")
+		return empty, errors.New("public key is required")
 	}
 
 	// Decode the public key from hex
 	publicKeyBytes, err := hex.DecodeString(publicKeyHex)
 	if err != nil {
-		return "", err
+		return empty, err
 	}
 
 	// Ensure the public key is in uncompressed format
@@ -175,16 +177,11 @@ func EncryptWithWalletPublicKey(data string, publicKeyHex string) (string, error
 	// Call the existing EncryptWithPubKey function
 	encryptedData, err := EncryptWithPubKey(publicKeyBytes, messageBytes, nil)
 	if err != nil {
-		return "", err
+		return empty, err
 	}
 
 	// Concatenate IV, ephemeral public key, ciphertext, and MAC
-	finalData := append(encryptedData["iv"],
-		append(encryptedData["ephemPublicKey"],
-			append(encryptedData["ciphertext"], encryptedData["mac"]...)...)...)
-
-	// Return the final result as a hex string
-	return hex.EncodeToString(finalData), nil
+	return encryptedData, nil
 }
 
 // ClientSideEncrypt encrypts the input bytes using a password and returns encrypted bytes.
