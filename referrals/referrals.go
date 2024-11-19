@@ -221,6 +221,7 @@ type ChatStatistics struct {
 type OuraChatStatistics struct {
 	Wallet      string
 	TotalPoints int
+	AvgSleep    string
 }
 
 type ChatStatisticsReturn struct {
