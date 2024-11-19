@@ -4897,7 +4897,7 @@ func FetchOuraData() {
 		txHash, err := vanatransact.AddFileWithPermissions(walletAddress, fileUrl, hexDataEEK)
 		fmt.Println("Uploaded File TX and err: ", txHash, err)
 		var fileID = vanatransact.GetFileID(txHash)
-		fmt.Println("KL Uploaded File: ", fileID)
+		//fmt.Println("Uploaded File: ", fileID)
 
 		//now get proof from TEE the file is valid / authentic
 		//teeFee = await teePoolContract.teeFee(); //get estimated required fee for proof?
@@ -4928,6 +4928,10 @@ func FetchOuraData() {
 			if err != nil {
 				fmt.Println(err)
 			}
+
+			//now request reward from DLP contract
+			txHashReward, err := vanatransact.RequestRewardFromDLP(fileID)
+			fmt.Println("Request Reward from DLP: ", txHashReward, err)
 		}
 	}
 }

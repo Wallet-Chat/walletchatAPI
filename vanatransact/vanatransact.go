@@ -290,6 +290,61 @@ func AddFileWithPermissions(ownerWallet common.Address, encryptedFileUrl string,
 	return tx.Hash().Hex(), nil
 }
 
+func RequestRewardFromDLP(fileId string) (string, error) {
+	client, err := ethclient.Dial(os.Getenv("VANA_RPC_URL"))
+	if err != nil {
+		return "", fmt.Errorf("failed to connect to RPC: %w", err)
+	}
+
+	contractAddress := common.HexToAddress(os.Getenv("VANA_DLP_CONTRACT"))
+	instance, err := vanaDlpContract.NewVanaDlpContract(contractAddress, client)
+	if err != nil {
+		return "", fmt.Errorf("failed to create contract instance: %w", err)
+	}
+
+	privateKey, err := crypto.HexToECDSA(os.Getenv("VANA_SIGNER_PRIVATE_KEY"))
+	if err != nil {
+		return "", fmt.Errorf("invalid private key: %w", err)
+	}
+
+	opts, err := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(14800))
+	if err != nil {
+		return "", fmt.Errorf("failed to create transactor: %w", err)
+	}
+	fileIdInt, ok := new(big.Int).SetString(fileId, 10)
+	if !ok {
+		return "", fmt.Errorf("failed to convert fileId to big.Int")
+	}
+
+	// Send transaction
+	tx, err := instance.RequestReward(opts, fileIdInt, big.NewInt(1))
+	if err != nil {
+		// Check revert reason
+		callMsg := ethereum.CallMsg{
+			From: opts.From,
+			To:   &contractAddress,
+			Data: tx.Data(),
+		}
+		result, callErr := client.CallContract(context.Background(), callMsg, nil)
+		if callErr == nil && len(result) > 0 {
+			return "", fmt.Errorf("transaction reverted: %s", string(result))
+		}
+		return "", fmt.Errorf("transaction failed: %w", err)
+	}
+
+	// Fetch receipt to ensure success
+	receipt, err := client.TransactionReceipt(context.Background(), tx.Hash())
+	if err != nil {
+		return tx.Hash().Hex(), fmt.Errorf("failed to fetch receipt: %w", err)
+	}
+
+	if receipt.Status == 0 {
+		return tx.Hash().Hex(), errors.New("transaction failed with status 0")
+	}
+
+	return tx.Hash().Hex(), nil
+}
+
 // Define the structure for the request body
 type RequestBody struct {
 	JobID               *big.Int          `json:"job_id"`
@@ -304,6 +359,19 @@ type RequestBody struct {
 	EncryptionKey       string            `json:"encryption_key,omitempty"`
 }
 
+type RequestBodyTest struct {
+	JobID               *big.Int                 `json:"job_id"`
+	FileID              string                   `json:"file_id"`
+	Nonce               string                   `json:"nonce"`
+	ProofURL            string                   `json:"proof_url"`
+	EncryptionSeed      string                   `json:"encryption_seed"`
+	EnvVars             map[string]string        `json:"env_vars"`
+	Secrets             map[string]string        `json:"secrets"`
+	ValidatePermissions []ValidatePermissionTest `json:"validate_permissions"`
+	EncryptedKey        string                   `json:"encrypted_encryption_key,omitempty"`
+	EncryptionKey       string                   `json:"encryption_key,omitempty"`
+}
+
 // Define the structure for validate permissions
 // type ValidatePermission struct {
 // 	Address      string `json:"address"`
@@ -311,6 +379,14 @@ type RequestBody struct {
 // 	IV           string `json:"iv"`
 // 	EphemeralKey string `json:"ephemeral_key"`
 // }
+
+// Define the structure for validate permissions
+type ValidatePermissionTest struct {
+	Address      string `json:"address"`
+	PublicKey    string `json:"public_key"`
+	IV           string `json:"iv"`
+	EphemeralKey string `json:"ephemeral_key"`
+}
 
 // Function to send the contribution proof request
 func SendContributionProof(jobID *big.Int, fileID string, envVars map[string]string, secrets map[string]string, validatePermissions map[string][]byte, teePublicKey string, teeURL string) error {
@@ -350,13 +426,18 @@ func SendContributionProof(jobID *big.Int, fileID string, envVars map[string]str
 	}
 
 	fmt.Println("Sending contribution proof request to TEE")
+
+	//test only:
+	//testReqBody, err := CreateRequestBody()
+
 	body, err := json.Marshal(requestBody)
 	if err != nil {
 		return fmt.Errorf("failed to marshal request body: %v", err)
 	}
+	fmt.Println("sending to RunProof: ", requestBody)
 
 	// Make the HTTP POST request
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := &http.Client{Timeout: 200 * time.Second}
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/RunProof", teeURL), bytes.NewBuffer(body))
 	if err != nil {
 		return fmt.Errorf("failed to create request: %v", err)
