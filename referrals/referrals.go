@@ -256,7 +256,7 @@ func GetLeaderboardData(w http.ResponseWriter, r *http.Request) {
 
 func GetOuraLeaderboardDataCronJob() {
 	var results []OuraChatStatistics
-	dbQuery := database.Connector.Raw("CALL get_oura_leaderboard_data()").Scan(&results)
+	dbQuery := database.Connector.Raw("CALL get_oura_leaderboard()").Scan(&results)
 	//fmt.Println("get leaderboard: ", dbQuery.Error, results)
 
 	if dbQuery.Error != nil {
