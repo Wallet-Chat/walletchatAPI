@@ -11,9 +11,9 @@ import (
 	"crypto/sha512"
 	"encoding/hex"
 	"errors"
+	"fmt"
 
-	"github.com/ProtonMail/go-crypto/openpgp"
-	"github.com/ProtonMail/go-crypto/openpgp/packet"
+	protonPgpCrypto "github.com/ProtonMail/gopenpgp/v3/crypto"
 	"github.com/ethereum/go-ethereum/crypto"
 )
 
@@ -81,7 +81,7 @@ func DerivePadded(privateKeyHex string, publicKeyHex string) ([]byte, error) {
 }
 
 // EncryptWithPubKey performs ECIES encryption using a public key.
-func EncryptWithPubKey(publicKeyTo []byte, msg []byte, opts map[string][]byte) (map[string][]byte, error) {
+func EncryptWithPubKey(publicKeyTo []byte, msg []byte, opts map[string][]byte, staticIV []byte, ephemPrivateKeyBytes []byte) (map[string][]byte, error) {
 	if len(publicKeyTo) == 0 || len(msg) == 0 {
 		return nil, errors.New("public key and message are required")
 	}
@@ -92,10 +92,10 @@ func EncryptWithPubKey(publicKeyTo []byte, msg []byte, opts map[string][]byte) (
 		return nil, err
 	}
 
-	// Generate an ephemeral private key
-	ephemPrivateKey, err := crypto.GenerateKey()
+	// Convert the 32-byte ephemeral private key to ECDSA private key
+	ephemPrivateKey, err := crypto.ToECDSA(ephemPrivateKeyBytes)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("invalid ephemeral private key")
 	}
 
 	ephemPublicKey := crypto.FromECDSAPub(&ephemPrivateKey.PublicKey)
@@ -111,14 +111,8 @@ func EncryptWithPubKey(publicKeyTo []byte, msg []byte, opts map[string][]byte) (
 	encryptionKey := hash[:32]
 	macKey := hash[32:]
 
-	// Generate IV
-	iv := opts["iv"]
-	if len(iv) == 0 {
-		iv = make([]byte, aes.BlockSize)
-		if _, err := rand.Read(iv); err != nil {
-			return nil, err
-		}
-	}
+	// Use the provided static IV
+	iv := staticIV // Use the static IV passed as a parameter
 
 	// Encrypt the message using AES-CBC
 	block, err := aes.NewCipher(encryptionKey)
@@ -148,7 +142,7 @@ func EncryptWithPubKey(publicKeyTo []byte, msg []byte, opts map[string][]byte) (
 }
 
 // EncryptWithWalletPublicKey encrypts data using a wallet public key and returns the encrypted data as a hex string.
-func EncryptWithWalletPublicKey(data string, publicKeyHex string) (map[string][]byte, error) {
+func EncryptWithWalletPublicKey(data string, publicKeyHex string) (map[string][]byte, []byte, error) {
 	empty := map[string][]byte{}
 
 	// Remove "0x" prefix if present
@@ -156,14 +150,10 @@ func EncryptWithWalletPublicKey(data string, publicKeyHex string) (map[string][]
 		publicKeyHex = publicKeyHex[2:]
 	}
 
-	if len(publicKeyHex) == 0 {
-		return empty, errors.New("public key is required")
-	}
-
 	// Decode the public key from hex
 	publicKeyBytes, err := hex.DecodeString(publicKeyHex)
 	if err != nil {
-		return empty, err
+		return empty, nil, err
 	}
 
 	// Ensure the public key is in uncompressed format
@@ -174,45 +164,74 @@ func EncryptWithWalletPublicKey(data string, publicKeyHex string) (map[string][]
 	// Convert data to bytes
 	messageBytes := []byte(data)
 
-	// Call the existing EncryptWithPubKey function
-	encryptedData, err := EncryptWithPubKey(publicKeyBytes, messageBytes, nil)
-	if err != nil {
-		return empty, err
+	// Initialize the static IV and ephemeral private key with random bytes
+	iv := make([]byte, 16) // 16 bytes for IV
+	if _, err := rand.Read(iv); err != nil {
+		return empty, nil, err
 	}
 
-	// Concatenate IV, ephemeral public key, ciphertext, and MAC
-	return encryptedData, nil
+	ephemPrivateKeyBytes := make([]byte, 32) // 32 bytes for ephemeral private key
+	if _, err := rand.Read(ephemPrivateKeyBytes); err != nil {
+		return empty, nil, err
+	}
+
+	//for test use known values to compare with web/example version
+	// iv = []byte{
+	// 	169, 138, 29, 49, 139, 11, 183, 51,
+	// 	167, 5, 144, 163, 203, 214, 217, 224,
+	// }
+	// ephemPrivateKeyBytes = []byte{
+	// 	147, 207, 81, 186, 169, 91, 245, 42,
+	// 	148, 220, 122, 136, 222, 82, 10, 86,
+	// 	230, 210, 241, 85, 15, 154, 77, 60,
+	// 	38, 91, 211, 211, 243, 2, 214, 203,
+	// }
+	//end hardcoded test values
+
+	// Call the existing EncryptWithPubKey function with the static IV and ephemeral private key
+	encryptedData, err := EncryptWithPubKey(publicKeyBytes, messageBytes, nil, iv, ephemPrivateKeyBytes)
+	if err != nil {
+		return empty, nil, err
+	}
+
+	// Convert encrypted data to hex string and print
+	for key, value := range encryptedData {
+		fmt.Printf("%s: %s\n", key, hex.EncodeToString(value))
+	}
+
+	// Return the encrypted data
+	return encryptedData, ephemPrivateKeyBytes, nil
 }
 
-// ClientSideEncrypt encrypts the input bytes using a password and returns encrypted bytes.
-func ClientSideEncrypt(inputBytes []byte, password string) ([]byte, error) {
-	if len(inputBytes) == 0 {
-		return nil, errors.New("input bytes cannot be empty")
-	}
-	if password == "" {
-		return nil, errors.New("password cannot be empty")
-	}
-
-	// Create OpenPGP message
-	config := &packet.Config{}
-	messageBuffer := new(bytes.Buffer)
-	messageWriter, err := openpgp.SymmetricallyEncrypt(messageBuffer, []byte(password), nil, config)
+func ClientSideEncrypt(data []byte, password string) ([]byte, error) {
+	// Create a password-protected keyring
+	passphrase := []byte(password)
+	pgp := protonPgpCrypto.PGP()
+	// Encrypt data with a password
+	encHandle, err := pgp.Encryption().Password(passphrase).New()
 	if err != nil {
-		return nil, err
+		fmt.Println("error during passphrase init!!!!!!!!!!!!!!!!!!")
 	}
-
-	_, err = messageWriter.Write(inputBytes)
+	pgpMessage, err := encHandle.Encrypt(data)
 	if err != nil {
-		return nil, err
+		fmt.Println("error during encryption!!!!!!!!!!!!!!!!!!")
 	}
+	armored, err := pgpMessage.ArmorBytes()
 
-	err = messageWriter.Close()
-	if err != nil {
-		return nil, err
-	}
+	return armored, err
+}
 
-	// Return encrypted bytes
-	return messageBuffer.Bytes(), nil
+func ClientSideDecrypt(data []byte, password string) ([]byte, error) {
+	// Create a password-protected keyring
+	passphrase := []byte(password)
+	pgp := protonPgpCrypto.PGP()
+
+	// Decrypt data with a password
+	decHandle, err := pgp.Decryption().Password(passphrase).New()
+	decrypted, err := decHandle.Decrypt(data, protonPgpCrypto.Armor)
+	myMessage := decrypted.Bytes()
+
+	return myMessage, err
 }
 
 // pad adds padding to the message to make its length a multiple of blockSize.

@@ -19,6 +19,7 @@ require (
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	github.com/0xsequence/ethkit v1.14.1 // indirect
 	github.com/ProtonMail/go-crypto v1.1.2 // indirect
+	github.com/ProtonMail/go-mime v0.0.0-20230322103455-7d82a3887f2f // indirect
 	github.com/StackExchange/wmi v0.0.0-20180116203802-5d049714c4a6 // indirect
 	github.com/TwiN/go-away v1.6.10 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
@@ -80,6 +81,8 @@ require (
 	blockwatch.cc/tzgo v1.15.0
 	github.com/0xsequence/go-sequence v0.12.8
 	github.com/KyleBanks/depth v1.2.1 // indirect
+	github.com/ProtonMail/gopenpgp/v2 v2.8.0
+	github.com/ProtonMail/gopenpgp/v3 v3.0.0
 	github.com/aws/aws-sdk-go v1.44.157
 	github.com/btcsuite/btcd/btcec/v2 v2.2.1 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.1.0 // indirect
