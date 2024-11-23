@@ -4885,8 +4885,28 @@ func FetchOuraData() {
 		// 	fmt.Println("error: ", err)
 		// }
 
+		// iv := []byte{
+		// 	169, 138, 29, 49, 139, 11, 183, 51,
+		// 	167, 5, 144, 163, 203, 214, 217, 224,
+		// }
+		// ephemPrivateKeyBytes := []byte{
+		// 	147, 207, 81, 186, 169, 91, 245, 42,
+		// 	148, 220, 122, 136, 222, 82, 10, 86,
+		// 	230, 210, 241, 85, 15, 154, 77, 60,
+		// 	38, 91, 211, 211, 243, 2, 214, 203,
+		// }
+		// Initialize the IV and ephemeral private key with random bytes if was not provided
+		iv := make([]byte, 16) // 16 bytes for IV
+		if _, err := rand.Read(iv); err != nil {
+			continue
+		}
+		ephemPrivateKeyBytes := make([]byte, 32) // 32 bytes for ephemeral private key
+		if _, err := rand.Read(ephemPrivateKeyBytes); err != nil {
+			continue
+		}
+
 		//get EEK with EK
-		vanaDlpEEK, _, _ := vanaencrypt.EncryptWithWalletPublicKey(os.Getenv("VANA_INTRA_ENCRYPTION_KEY"), publicKeyDLP)
+		vanaDlpEEK, _, _ := vanaencrypt.EncryptWithWalletPublicKey(os.Getenv("VANA_INTRA_ENCRYPTION_KEY"), publicKeyDLP, iv, ephemPrivateKeyBytes)
 		finalDlpEEK := append(vanaDlpEEK["iv"],
 			append(vanaDlpEEK["ephemPublicKey"],
 				append(vanaDlpEEK["ciphertext"], vanaDlpEEK["mac"]...)...)...)
@@ -4928,9 +4948,10 @@ func FetchOuraData() {
 
 			//ask a specific TEE to run the proof of contribution
 			//${jobDetails.teeUrl}/RunProof
-			err := vanatransact.SendContributionProof(latestJobId, fileID, publicKeyDLP, envVars, secrets, teePublicKey, teeUrl)
+			err := vanatransact.SendContributionProof(latestJobId, fileID, publicKeyDLP, envVars, secrets, teePublicKey, teeUrl, iv, ephemPrivateKeyBytes)
 			if err != nil {
-				fmt.Println(err)
+				fmt.Println("Error in SendContributionProof", err)
+				continue
 			}
 
 			//now request reward from DLP contract

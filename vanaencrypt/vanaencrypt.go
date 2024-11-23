@@ -142,7 +142,7 @@ func EncryptWithPubKey(publicKeyTo []byte, msg []byte, opts map[string][]byte, s
 }
 
 // EncryptWithWalletPublicKey encrypts data using a wallet public key and returns the encrypted data as a hex string.
-func EncryptWithWalletPublicKey(data string, publicKeyHex string) (map[string][]byte, []byte, error) {
+func EncryptWithWalletPublicKey(data string, publicKeyHex string, iv []byte, ephemPrivateKeyBytes []byte) (map[string][]byte, []byte, error) {
 	empty := map[string][]byte{}
 
 	// Remove "0x" prefix if present
@@ -164,15 +164,21 @@ func EncryptWithWalletPublicKey(data string, publicKeyHex string) (map[string][]
 	// Convert data to bytes
 	messageBytes := []byte(data)
 
-	// Initialize the static IV and ephemeral private key with random bytes
-	iv := make([]byte, 16) // 16 bytes for IV
-	if _, err := rand.Read(iv); err != nil {
-		return empty, nil, err
+	// Initialize the IV and ephemeral private key with random bytes if was not provided
+	if len(iv) != 16 {
+		fmt.Println("Creating Random IV")
+		iv = make([]byte, 16) // 16 bytes for IV
+		if _, err := rand.Read(iv); err != nil {
+			return empty, nil, err
+		}
 	}
 
-	ephemPrivateKeyBytes := make([]byte, 32) // 32 bytes for ephemeral private key
-	if _, err := rand.Read(ephemPrivateKeyBytes); err != nil {
-		return empty, nil, err
+	if len(ephemPrivateKeyBytes) != 32 {
+		fmt.Println("Creating Random ephemeralPrivKey")
+		ephemPrivateKeyBytes = make([]byte, 32) // 32 bytes for ephemeral private key
+		if _, err := rand.Read(ephemPrivateKeyBytes); err != nil {
+			return empty, nil, err
+		}
 	}
 
 	//for test use known values to compare with web/example version
@@ -195,9 +201,9 @@ func EncryptWithWalletPublicKey(data string, publicKeyHex string) (map[string][]
 	}
 
 	// Convert encrypted data to hex string and print
-	for key, value := range encryptedData {
-		fmt.Printf("%s: %s\n", key, hex.EncodeToString(value))
-	}
+	// for key, value := range encryptedData {
+	// 	fmt.Printf("%s: %s\n", key, hex.EncodeToString(value))
+	// }
 
 	// Return the encrypted data
 	return encryptedData, ephemPrivateKeyBytes, nil

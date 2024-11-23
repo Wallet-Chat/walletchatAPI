@@ -10,8 +10,11 @@ import (
 	"rest-go-demo/vanaDataRegistryContract"
 	"rest-go-demo/vanaDlpContract"
 	"rest-go-demo/vanaTeeContract"
+	"rest-go-demo/vanaencrypt"
+	"strings"
 
 	"bytes"
+	"encoding/hex"
 	"encoding/json"
 	"net/http"
 	"time"
@@ -125,6 +128,7 @@ func GetTeePrice() string {
 }
 
 func GetFileJobIDs(fileId string) []*big.Int {
+	//fmt.Println("get file job ids for fileId: ", fileId)
 	// Connect to an vana mokshanode
 	client, err := ethclient.Dial(os.Getenv("VANA_RPC_URL"))
 	if err != nil {
@@ -197,6 +201,7 @@ func GetTeeDetails(latestJobId big.Int) (string, string) {
 }
 
 func GetTeeContributionProof(fileId string) string {
+	//fmt.Println("get TEE contribution proof for fileId: ", fileId)
 	// Connect to an vana mokshanode
 	client, err := ethclient.Dial(os.Getenv("VANA_RPC_URL"))
 	if err != nil {
@@ -295,7 +300,30 @@ func AddFileWithPermissions(ownerWallet common.Address, encryptedFileUrl string,
 	return tx.Hash().Hex(), nil
 }
 
+func convertHexStringToBigInt(fileId string) (*big.Int, error) {
+	// Trim whitespace
+	fileId = strings.TrimSpace(fileId)
+
+	// Remove "0x" prefix if present
+	if strings.HasPrefix(fileId, "0x") {
+		fileId = fileId[2:]
+	}
+
+	// Convert hexadecimal string to big.Int
+	fileIdInt, ok := new(big.Int).SetString(fileId, 16)
+	if !ok {
+		return nil, fmt.Errorf("failed to convert fileId to big.Int: %s", fileId)
+	}
+
+	return fileIdInt, nil
+}
+
 func RequestRewardFromDLP(fileId string) (string, error) {
+	bigFileID, err := convertHexStringToBigInt(fileId)
+	if err != nil {
+		return "", fmt.Errorf("failed to convert fileID to bigint %w", err)
+	}
+	fmt.Println("Requesting Reward for FileID: ", bigFileID)
 	client, err := ethclient.Dial(os.Getenv("VANA_RPC_URL"))
 	if err != nil {
 		return "", fmt.Errorf("failed to connect to RPC: %w", err)
@@ -316,24 +344,21 @@ func RequestRewardFromDLP(fileId string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to create transactor: %w", err)
 	}
-	fileIdInt, ok := new(big.Int).SetString(fileId, 10)
-	if !ok {
-		return "", fmt.Errorf("failed to convert fileId to big.Int")
-	}
 
 	// Send transaction
-	tx, err := instance.RequestReward(opts, fileIdInt, big.NewInt(1))
+	tx, err := instance.RequestReward(opts, bigFileID, big.NewInt(1))
 	if err != nil {
-		// Check revert reason
-		callMsg := ethereum.CallMsg{
-			From: opts.From,
-			To:   &contractAddress,
-			Data: tx.Data(),
-		}
-		result, callErr := client.CallContract(context.Background(), callMsg, nil)
-		if callErr == nil && len(result) > 0 {
-			return "", fmt.Errorf("transaction reverted: %s", string(result))
-		}
+		fmt.Println("request reward err", err, opts.From, tx)
+		// // Check revert reason
+		// callMsg := ethereum.CallMsg{
+		// 	From: opts.From,
+		// 	To:   &contractAddress,
+		// 	Data: tx.Data(),
+		// }
+		// result, callErr := client.CallContract(context.Background(), callMsg, nil)
+		// if callErr == nil && len(result) > 0 {
+		// 	return "", fmt.Errorf("transaction reverted: %s", string(result))
+		// }
 		return "", fmt.Errorf("transaction failed: %w", err)
 	}
 
@@ -346,7 +371,7 @@ func RequestRewardFromDLP(fileId string) (string, error) {
 	if receipt.Status == 0 {
 		return tx.Hash().Hex(), errors.New("transaction failed with status 0")
 	}
-
+	fmt.Println("Received Reward from DLP tx hash: ", tx.Hash().Hex())
 	return tx.Hash().Hex(), nil
 }
 
@@ -381,7 +406,7 @@ type ValidatePermissionTest struct {
 }
 
 // Function to send the contribution proof request
-func SendContributionProof(jobID *big.Int, fileID string, dlpPubKey string, envVars map[string]string, secrets map[string]string, teePublicKey string, teeURL string) error {
+func SendContributionProof(jobID *big.Int, fileID string, dlpPubKey string, envVars map[string]string, secrets map[string]string, teePublicKey string, teeURL string, iv []byte, emphemKeyPrivBytes []byte) error {
 	// Create the request body
 
 	// Convert hex string to big.Int
@@ -403,43 +428,43 @@ func SendContributionProof(jobID *big.Int, fileID string, dlpPubKey string, envV
 	}
 
 	// If TEE public key is available, encrypt the encryption key
-	// if teePublicKey != "" {
-	// 	fmt.Println("Encrypting encryption key with TEE public key: ", teePublicKey)
-	// 	//test only:
-	// 	//teePublicKey = "0xad1013116ea75ceb61b9f13a55cff6937a807b8e575dc2e2ccf7c1c115eab9d046e4a6507e235f3496481712c9a5be1fd37fcd018a70140b255a1abb16d9c678"
+	if teePublicKey != "" {
+		fmt.Println("Encrypting encryption key with TEE public key: ", teePublicKey)
+		//test only:
+		//teePublicKey = "0xad1013116ea75ceb61b9f13a55cff6937a807b8e575dc2e2ccf7c1c115eab9d046e4a6507e235f3496481712c9a5be1fd37fcd018a70140b255a1abb16d9c678"
 
-	// 	//TODO, encryption phrase here is actually user signature which we should pass in as well not hard code
-	// 	encryptedKey, ephemeralKeyPriv, err := vanaencrypt.EncryptWithWalletPublicKey(os.Getenv("VANA_INTRA_ENCRYPTION_KEY"), teePublicKey) // Implement this function
+		//TODO, encryption phrase here is actually user signature which we should pass in as well not hard code
+		encryptedKey, ephemeralKeyPriv, err := vanaencrypt.EncryptWithWalletPublicKey(os.Getenv("VANA_INTRA_ENCRYPTION_KEY"), teePublicKey, iv, emphemKeyPrivBytes) // Implement this function
 
-	// 	// Set ValidatePermissions after encryptKey is populated
-	// 	requestBody.ValidatePermissions = []ValidatePermissionTest{
-	// 		{
-	// 			Address:      os.Getenv("VANA_DLP_CONTRACT"),
-	// 			PublicKey:    dlpPubKey,
-	// 			IV:           hex.EncodeToString(encryptedKey["iv"]),
-	// 			EphemeralKey: hex.EncodeToString(ephemeralKeyPriv),
-	// 		},
-	// 	}
+		// Set ValidatePermissions after encryptKey is populated
+		requestBody.ValidatePermissions = []ValidatePermissionTest{
+			{
+				Address:      os.Getenv("VANA_DLP_CONTRACT"),
+				PublicKey:    dlpPubKey,
+				IV:           hex.EncodeToString(encryptedKey["iv"]),
+				EphemeralKey: hex.EncodeToString(ephemeralKeyPriv),
+			},
+		}
 
-	// 	if err != nil {
-	// 		fmt.Println("Error encrypting encryption key:", err)
-	// 		fmt.Println("Warning: Failed to encrypt encryption key, falling back to direct encryption key")
-	// 		requestBody.EncryptionKey = os.Getenv("VANA_INTRA_ENCRYPTION_KEY")
-	// 	} else {
-	// 		finalDataTeeEEK := append(encryptedKey["iv"],
-	// 			append(encryptedKey["ephemPublicKey"],
-	// 				append(encryptedKey["ciphertext"], encryptedKey["mac"]...)...)...)
+		if err != nil {
+			fmt.Println("Error encrypting encryption key:", err)
+			fmt.Println("Warning: Failed to encrypt encryption key, falling back to direct encryption key")
+			requestBody.EncryptionKey = os.Getenv("VANA_INTRA_ENCRYPTION_KEY")
+		} else {
+			finalDataTeeEEK := append(encryptedKey["iv"],
+				append(encryptedKey["ephemPublicKey"],
+					append(encryptedKey["ciphertext"], encryptedKey["mac"]...)...)...)
 
-	// 		// Return the final result as a hex string
-	// 		hexDataTeeEEK := hex.EncodeToString(finalDataTeeEEK)
-	// 		requestBody.EncryptedEncryptionKey = hexDataTeeEEK
-	// 		fmt.Println("Encryption key encrypted successfully for TEE: ", hexDataTeeEEK)
-	// 	}
-	// } else {
-	// 	fmt.Println("TEE public key not available, using direct encryption key")
-	// 	requestBody.EncryptionKey = os.Getenv("VANA_INTRA_ENCRYPTION_KEY")
-	// }
-	requestBody.EncryptionKey = os.Getenv("VANA_INTRA_ENCRYPTION_KEY") //TODO - need to debug above code with Vana team
+			// Return the final result as a hex string
+			hexDataTeeEEK := hex.EncodeToString(finalDataTeeEEK)
+			requestBody.EncryptedEncryptionKey = hexDataTeeEEK
+			fmt.Println("Encryption key encrypted successfully for TEE: ", hexDataTeeEEK)
+		}
+	} else {
+		fmt.Println("TEE public key not available, using direct encryption key")
+		requestBody.EncryptionKey = os.Getenv("VANA_INTRA_ENCRYPTION_KEY")
+	}
+	//requestBody.EncryptionKey = os.Getenv("VANA_INTRA_ENCRYPTION_KEY") //TODO - need to debug above code with Vana team
 
 	fmt.Println("Sending contribution proof request to TEE")
 
@@ -483,8 +508,6 @@ func SendContributionProof(jobID *big.Int, fileID string, dlpPubKey string, envV
 		}
 		return fmt.Errorf("TEE request failed: %v", json.NewDecoder(resp.Body))
 	}
-
-	fmt.Println("return values from /RunProof: ", resp.Body)
 
 	return nil
 }
