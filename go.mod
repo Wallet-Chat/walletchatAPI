@@ -18,9 +18,12 @@ require (
 	cloud.google.com/go/compute v1.19.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	github.com/0xsequence/ethkit v1.14.1 // indirect
+	github.com/ProtonMail/go-crypto v1.1.2 // indirect
+	github.com/ProtonMail/go-mime v0.0.0-20230322103455-7d82a3887f2f // indirect
 	github.com/StackExchange/wmi v0.0.0-20180116203802-5d049714c4a6 // indirect
 	github.com/TwiN/go-away v1.6.10 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
+	github.com/cloudflare/circl v1.3.7 // indirect
 	github.com/dchest/uniuri v0.0.0-20200228104902-7aecb25e1fe5 // indirect
 	github.com/deckarep/golang-set v1.8.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1 v1.0.3 // indirect
@@ -65,7 +68,7 @@ require (
 	go.opencensus.io v0.24.0 // indirect
 	golang.org/x/oauth2 v0.7.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/text v0.9.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 // indirect
 	google.golang.org/grpc v1.54.0 // indirect
@@ -78,6 +81,8 @@ require (
 	blockwatch.cc/tzgo v1.15.0
 	github.com/0xsequence/go-sequence v0.12.8
 	github.com/KyleBanks/depth v1.2.1 // indirect
+	github.com/ProtonMail/gopenpgp/v2 v2.8.0
+	github.com/ProtonMail/gopenpgp/v3 v3.0.0
 	github.com/aws/aws-sdk-go v1.44.157
 	github.com/btcsuite/btcd/btcec/v2 v2.2.1 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.1.0 // indirect
@@ -96,9 +101,9 @@ require (
 	github.com/segmentio/analytics-go/v3 v3.2.1
 	github.com/sendgrid/sendgrid-go v3.12.0+incompatible
 	github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe // indirect
-	golang.org/x/crypto v0.1.0 // indirect
-	golang.org/x/net v0.9.0 // indirect
-	golang.org/x/sys v0.7.0 // indirect
+	golang.org/x/crypto v0.17.0 // indirect
+	golang.org/x/net v0.10.0 // indirect
+	golang.org/x/sys v0.16.0 // indirect
 	golang.org/x/tools v0.6.0 // indirect
 	google.golang.org/api v0.122.0
 	gopkg.in/yaml.v2 v2.4.0 // indirect
