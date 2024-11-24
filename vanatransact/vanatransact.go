@@ -406,7 +406,7 @@ type ValidatePermissionTest struct {
 }
 
 // Function to send the contribution proof request
-func SendContributionProof(jobID *big.Int, fileID string, dlpPubKey string, envVars map[string]string, secrets map[string]string, teePublicKey string, teeURL string, iv []byte, emphemKeyPrivBytes []byte) error {
+func SendContributionProof(jobID *big.Int, fileID string, dlpPubKey string, envVars map[string]string, secrets map[string]string, teePublicKey string, teeURL string, iv []byte, emphemKeyPrivBytes []byte, signature string) error {
 	// Create the request body
 
 	// Convert hex string to big.Int
@@ -434,7 +434,7 @@ func SendContributionProof(jobID *big.Int, fileID string, dlpPubKey string, envV
 		//teePublicKey = "0xad1013116ea75ceb61b9f13a55cff6937a807b8e575dc2e2ccf7c1c115eab9d046e4a6507e235f3496481712c9a5be1fd37fcd018a70140b255a1abb16d9c678"
 
 		//TODO, encryption phrase here is actually user signature which we should pass in as well not hard code
-		encryptedKey, ephemeralKeyPriv, err := vanaencrypt.EncryptWithWalletPublicKey(os.Getenv("VANA_INTRA_ENCRYPTION_KEY"), teePublicKey, iv, emphemKeyPrivBytes) // Implement this function
+		encryptedKey, ephemeralKeyPriv, err := vanaencrypt.EncryptWithWalletPublicKey(signature, teePublicKey, iv, emphemKeyPrivBytes) // Implement this function
 
 		// Set ValidatePermissions after encryptKey is populated
 		requestBody.ValidatePermissions = []ValidatePermissionTest{
@@ -449,7 +449,7 @@ func SendContributionProof(jobID *big.Int, fileID string, dlpPubKey string, envV
 		if err != nil {
 			fmt.Println("Error encrypting encryption key:", err)
 			fmt.Println("Warning: Failed to encrypt encryption key, falling back to direct encryption key")
-			requestBody.EncryptionKey = os.Getenv("VANA_INTRA_ENCRYPTION_KEY")
+			requestBody.EncryptionKey = signature
 		} else {
 			finalDataTeeEEK := append(encryptedKey["iv"],
 				append(encryptedKey["ephemPublicKey"],
@@ -462,9 +462,9 @@ func SendContributionProof(jobID *big.Int, fileID string, dlpPubKey string, envV
 		}
 	} else {
 		fmt.Println("TEE public key not available, using direct encryption key")
-		requestBody.EncryptionKey = os.Getenv("VANA_INTRA_ENCRYPTION_KEY")
+		requestBody.EncryptionKey = signature
 	}
-	//requestBody.EncryptionKey = os.Getenv("VANA_INTRA_ENCRYPTION_KEY") //TODO - need to debug above code with Vana team
+	//requestBody.EncryptionKey = signature //TODO - need to debug above code with Vana team
 
 	fmt.Println("Sending contribution proof request to TEE")
 

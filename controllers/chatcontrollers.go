@@ -4696,10 +4696,10 @@ func RegisterOuraUser(w http.ResponseWriter, r *http.Request) {
 	}
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println(err, string(body))
 		return
 	}
-	fmt.Println("Test Register User Check: ", string(body))
+	//fmt.Println("Test Register User Check: ", string(body))
 
 	// Authuser := auth.GetUserFromReqContext(r)
 	// if strings.EqualFold(Authuser.Address, newUser.Wallet) {
@@ -4867,7 +4867,7 @@ func FetchOuraData() {
 		}
 
 		//encrypt the file encryption key with the users signature (TODO fill this based on user signature)
-		encryptedBytes, err := vanaencrypt.ClientSideEncrypt(zipData, os.Getenv("VANA_INTRA_ENCRYPTION_KEY"))
+		encryptedBytes, err := vanaencrypt.ClientSideEncrypt(zipData, ourauser.Signature)
 		if err != nil {
 			fmt.Println("error in ClientSideEncrypt", err)
 		}
@@ -4880,7 +4880,7 @@ func FetchOuraData() {
 		fmt.Println("file stored at: ", fileUrl)
 
 		//for test
-		// err = FetchAndDecryptFile(fileUrl, os.Getenv("VANA_INTRA_ENCRYPTION_KEY"))
+		// err = FetchAndDecryptFile(fileUrl, ourauser.Signature)
 		// if err != nil {
 		// 	fmt.Println("error: ", err)
 		// }
@@ -4906,7 +4906,7 @@ func FetchOuraData() {
 		}
 
 		//get EEK with EK
-		vanaDlpEEK, _, _ := vanaencrypt.EncryptWithWalletPublicKey(os.Getenv("VANA_INTRA_ENCRYPTION_KEY"), publicKeyDLP, iv, ephemPrivateKeyBytes)
+		vanaDlpEEK, _, _ := vanaencrypt.EncryptWithWalletPublicKey(ourauser.Signature, publicKeyDLP, iv, ephemPrivateKeyBytes)
 		finalDlpEEK := append(vanaDlpEEK["iv"],
 			append(vanaDlpEEK["ephemPublicKey"],
 				append(vanaDlpEEK["ciphertext"], vanaDlpEEK["mac"]...)...)...)
@@ -4918,7 +4918,7 @@ func FetchOuraData() {
 		//function - addFileWithPermissions - blockchain RPC call
 		//parameters - (publicly accessible link to encrypted data, "permissions" is the encrypted encryption key)
 		// returns fileID (ex: file id is '601971')
-		walletAddress := common.HexToAddress("0xF97d0EA6B00bF2776781d1618BD099931163b902") //ourauser.Wallet)
+		walletAddress := common.HexToAddress(ourauser.Wallet) //ourauser.Wallet)
 		txHash, err := vanatransact.AddFileWithPermissions(walletAddress, fileUrl, hexDataDlpEEK)
 		fmt.Println("Uploaded File TX and err: ", txHash, err)
 		var fileID = vanatransact.GetFileID(txHash)
@@ -4948,7 +4948,7 @@ func FetchOuraData() {
 
 			//ask a specific TEE to run the proof of contribution
 			//${jobDetails.teeUrl}/RunProof
-			err := vanatransact.SendContributionProof(latestJobId, fileID, publicKeyDLP, envVars, secrets, teePublicKey, teeUrl, iv, ephemPrivateKeyBytes)
+			err := vanatransact.SendContributionProof(latestJobId, fileID, publicKeyDLP, envVars, secrets, teePublicKey, teeUrl, iv, ephemPrivateKeyBytes, ourauser.Signature)
 			if err != nil {
 				fmt.Println("Error in SendContributionProof", err)
 				continue
