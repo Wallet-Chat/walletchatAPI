@@ -4803,6 +4803,10 @@ func FetchOuraData() {
 	database.Connector.Find(&ourausers)
 
 	for _, ourauser := range ourausers {
+		//skip test users
+		if len(ourauser.Signature) < 1 {
+			continue
+		}
 		// Create a buffer to hold the zip data
 		var zipFileBuf bytes.Buffer
 		// Create a new zip writer
