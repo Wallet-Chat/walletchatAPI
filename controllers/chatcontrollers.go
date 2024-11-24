@@ -4860,14 +4860,8 @@ func FetchOuraData() {
 		//for now since we use PAC - we upload the whole dataset as one zip (cheaper to verify via TEE)
 		//in the future if users choose to only share specific data - we need to upload each endpoint separately.
 
-		// Open the zip file (for testing alg and formatting)
-		zipData, err := os.ReadFile("archive.zip")
-		if err != nil {
-			log.Fatalf("Failed to read zip file data: %v", err)
-		}
-
 		//encrypt the file encryption key with the users signature (TODO fill this based on user signature)
-		encryptedBytes, err := vanaencrypt.ClientSideEncrypt(zipData, ourauser.Signature)
+		encryptedBytes, err := vanaencrypt.ClientSideEncrypt(zipFileBuf.Bytes(), ourauser.Signature)
 		if err != nil {
 			fmt.Println("error in ClientSideEncrypt", err)
 		}
