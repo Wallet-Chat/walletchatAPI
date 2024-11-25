@@ -4711,11 +4711,28 @@ func RegisterOuraUser(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
+
+	publicKeyPEM := `-----BEGIN PUBLIC KEY-----
+	MIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEA4129oK+dUEalpqP5aT/M
+	A6yhFbAjNppOidQuVgeSgEPquXLlJrdLoomHGhzugbBYeKS6lceEDM3oygFdCGhT
+	sly26Ws8qyUIGlk0/JGf4mRHd9RMs0uOF50/mB4abNM/mA/k8cO46+UmXOK2rwEL
+	U2rPb5tWVzxjPqs8Aw9eT1n7UlvOXxFc4ChyIHX/plfbkKK1R1+PYhtBHeQT8aW1
+	o7wLsbbnkCGh2iahJaNacMWmUZ9YygdPg2DICQLK2KbZfZHhhylBjDzuBgjUzNai
+	ikVHzrR6f9eTihYjmpx8Br5Ubhj3lVt45nAXFidxMBe1e7IILNVl9C57sqV+nPFM
+	2s5ad/r3TDjOZ23e0FGBVsyG+lJwn9q/kx4kjSFsO8fNzJ7wUczVnfW+akox2rMX
+	rnvdxUhpAAEtJZme5+pnS6Fr4Zi8mUBPt9kC/mHTtbPQoLsX+FeBs/u+rpXe4xBr
+	+QhqShKWQ+4HzwQHCc5h9d4pqZEKK8UnpdeJ0c/QTqcVAgMBAAE=
+	-----END PUBLIC KEY-----`
+
+	encryptedSecret, _ := vanaencrypt.EncryptSecretForProof(publicKeyPEM, []byte(newUser.Pac))
+	newUser.Encryptedpac = encryptedSecret
+
 	var existinguser2 entity.Ourauser
 	var walletAlreadyExists = database.Connector.Where("wallet = ?", newUser.Wallet).Find(&existinguser2)
 	if walletAlreadyExists.RowsAffected > 0 {
 		fmt.Println("wallet updated: ", newUser.Wallet, newUser.Pac)
 		database.Connector.Model(&entity.Ourauser{}).Where("wallet = ?", newUser.Wallet).Update("pac", newUser.Pac)
+		database.Connector.Model(&entity.Ourauser{}).Where("wallet = ?", newUser.Wallet).Update("encrypted_pac", newUser.Encryptedpac)
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(newUser)
 		return
@@ -4746,7 +4763,7 @@ var ouraEndpoints = []string{
 	"workout",
 }
 
-func addFileToZip(zipWriter *zip.Writer, fileName string, data interface{}) error {
+func addFileToZip(zipWriter *zip.Writer, fileName string, data []byte) error {
 	// Create a zip file header
 	header := &zip.FileHeader{
 		Name:   fileName,
@@ -4759,8 +4776,9 @@ func addFileToZip(zipWriter *zip.Writer, fileName string, data interface{}) erro
 		return err
 	}
 
-	// Encode the data to JSON and write it to the zip
-	if err := json.NewEncoder(writer).Encode(data); err != nil {
+	// Write the raw JSON bytes (data) to the zip
+	_, err = writer.Write(data)
+	if err != nil {
 		return err
 	}
 
@@ -4807,6 +4825,7 @@ func FetchOuraData() {
 		if len(ourauser.Signature) < 1 {
 			continue
 		}
+		fmt.Println("Fetching Daily Data for: ", ourauser.Wallet)
 		// Create a buffer to hold the zip data
 		var zipFileBuf bytes.Buffer
 		// Create a new zip writer
@@ -4816,14 +4835,12 @@ func FetchOuraData() {
 		publicKeyDLP := vanatransact.GetDlpPublicKey()
 		fmt.Println("DLP encryption publicKey: ", publicKeyDLP)
 		//encrypt data client using signature of a fixed message (tbd - how to do as proxy?)
-
 		for _, endpoint := range ouraEndpoints {
 			url := "https://api.ouraring.com/v2/usercollection/" + endpoint
 			method := "GET"
 
 			client := &http.Client{}
 			req, err := http.NewRequest(method, url, nil)
-
 			if err != nil {
 				fmt.Println(err)
 				break
@@ -4842,15 +4859,29 @@ func FetchOuraData() {
 				fmt.Println(err)
 				break
 			}
+
+			// Decode the JSON body into a generic interface
+			var jsonData interface{}
+			if err := json.Unmarshal(body, &jsonData); err != nil {
+				fmt.Println("Failed to unmarshal JSON:", err)
+				break
+			}
+
+			// Marshal the JSON data with indentation
+			formattedJSON, err := json.MarshalIndent(jsonData, "", "  ")
+			if err != nil {
+				fmt.Println("Failed to marshal JSON with indentation:", err)
+				break
+			}
+
 			var currentData entity.Ouradata
 			currentData.Endpoint = endpoint
 			currentData.Wallet = ourauser.Wallet
-			currentData.Jsondata = string(body)
+			currentData.Jsondata = string(formattedJSON)
 			database.Connector.Create(&currentData)
-			//fmt.Println(string(body))
 
-			// Add account.json to the zip
-			if err := addFileToZip(zipWriter, endpoint+".json", string(body)); err != nil {
+			// Add formatted JSON to the zip
+			if err := addFileToZip(zipWriter, endpoint+".json", formattedJSON); err != nil {
 				log.Fatalf("Failed to add "+endpoint+".json to zip: %v", err)
 			}
 		}
@@ -4864,8 +4895,14 @@ func FetchOuraData() {
 		//for now since we use PAC - we upload the whole dataset as one zip (cheaper to verify via TEE)
 		//in the future if users choose to only share specific data - we need to upload each endpoint separately.
 
+		// Open the zip file (for testing alg and formatting)
+		zipData, err := os.ReadFile("archive.zip")
+		if err != nil {
+			log.Fatalf("Failed to read zip file data: %v", err)
+		}
+
 		//encrypt the file encryption key with the users signature (TODO fill this based on user signature)
-		encryptedBytes, err := vanaencrypt.ClientSideEncrypt(zipFileBuf.Bytes(), ourauser.Signature)
+		encryptedBytes, err := vanaencrypt.ClientSideEncrypt(zipData, ourauser.Signature)
 		if err != nil {
 			fmt.Println("error in ClientSideEncrypt", err)
 		}
@@ -4939,10 +4976,15 @@ func FetchOuraData() {
 			teeUrl, teePublicKey := vanatransact.GetTeeDetails(*latestJobId)
 
 			//specific to the DLP proof code
-			envVars := map[string]string{
-				"USER_EMAIL": "user123@gmail.com", // Add USER_EMAIL to EnvVars
-			}
-			secrets := map[string]string{} //this would be API keys, etc needed in proof code
+			envVars := map[string]string{}
+			// envVars := map[string]string{
+			// 	"USER_EMAIL": "user123@gmail.com", // Add USER_EMAIL to EnvVars
+			// }
+
+			//encryptedSecret, _ := vanaencrypt.EncryptSecretForProof(publicKeyPEM, []byte("user123@gmail.com"))
+			secrets := map[string]string{
+				"USER_EMAIL": ourauser.Encryptedpac, // Add USER_EMAIL to EnvVars
+			} //this would be API keys, etc needed in proof code
 
 			//ask a specific TEE to run the proof of contribution
 			//${jobDetails.teeUrl}/RunProof

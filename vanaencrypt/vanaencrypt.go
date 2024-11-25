@@ -7,9 +7,12 @@ import (
 	"crypto/ecdsa"
 	"crypto/hmac"
 	"crypto/rand"
+	"crypto/rsa"
 	"crypto/sha256"
 	"crypto/sha512"
+	"crypto/x509"
 	"encoding/hex"
+	"encoding/pem"
 	"errors"
 	"fmt"
 
@@ -245,4 +248,72 @@ func pad(msg []byte, blockSize int) []byte {
 	padding := blockSize - len(msg)%blockSize
 	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
 	return append(msg, padtext...)
+}
+
+// EncryptWithPGPPublicKey encrypts the given data using the provided PGP public key.
+func EncryptWithPGPPublicKey(publicKeyPEM string, data []byte) (string, error) {
+	// Load the public key from the PEM string
+	publicKey, err := protonPgpCrypto.NewKeyFromArmored(publicKeyPEM)
+	if err != nil {
+		fmt.Println("Error parsing public key:", err)
+		fmt.Println("Public Key Content:\n", publicKeyPEM)
+		return "", err
+	}
+
+	pgp := protonPgpCrypto.PGP()
+	// Encrypt plaintext message using a public key
+	encHandle, err := pgp.Encryption().Recipient(publicKey).New()
+	if err != nil {
+		fmt.Println("error during EncryptWithPGPPublicKey 2")
+		return "", err
+	}
+	pgpMessage, err := encHandle.Encrypt(data)
+	if err != nil {
+		fmt.Println("error during EncryptWithPGPPublicKey 3")
+		return "", err
+	}
+	armored, err := pgpMessage.ArmorBytes()
+	if err != nil {
+		fmt.Println("error during EncryptWithPGPPublicKey 4")
+		return "", err
+	}
+
+	return hex.EncodeToString(armored), nil
+}
+
+func EncryptSecretForProof(publicKey string, data []byte) (string, error) {
+	// Parse the public key from PEM
+	block, _ := pem.Decode([]byte(publicKey))
+	if block == nil || block.Type != "PUBLIC KEY" {
+		fmt.Println("failed to decode PEM block containing public key")
+		return "", errors.New("failed to decode PEM block containing public key")
+	}
+
+	// Parse the public key into rsa.PublicKey
+	pub, err := x509.ParsePKIXPublicKey(block.Bytes)
+	if err != nil {
+		fmt.Println("failed to parse public key: ", err)
+		return "", errors.New("failed to parse public key")
+	}
+	rsaPub, ok := pub.(*rsa.PublicKey)
+	if !ok {
+		fmt.Println("not an RSA public key")
+		return "", errors.New("not an RSA public key")
+	}
+
+	// Hash for OAEP padding
+	hash := sha256.New()
+
+	// Encrypt the plaintext using RSA-OAEP with SHA-256
+	ciphertext, err := rsa.EncryptOAEP(hash, rand.Reader, rsaPub, []byte(data), nil)
+	if err != nil {
+		fmt.Println("encryption failed: ", err)
+		return "", errors.New("encryption failed")
+	}
+
+	// Convert to hex string (similar to OpenSSL's xxd -p)
+	hexString := fmt.Sprintf("%x", ciphertext)
+
+	fmt.Println("Encrypted Hex String:", hexString)
+	return hexString, nil
 }
