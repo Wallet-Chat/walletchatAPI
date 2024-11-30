@@ -28,19 +28,19 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
-func GetDlpPublicKey() string {
+func GetDlpPublicKey() (string, error) {
 	// Connect to an vana mokshanode
 	client, err := ethclient.Dial(os.Getenv("VANA_RPC_URL"))
 	if err != nil {
 		fmt.Println(err)
-		return "nil"
+		return "", err
 	}
 
 	// Create an instance of the contract
 	instance, err := vanaDlpContract.NewVanaDlpContract(common.HexToAddress(os.Getenv("VANA_DLP_CONTRACT")), client)
 	if err != nil {
 		fmt.Println(err)
-		return "nil"
+		return "", err
 	}
 
 	// Call the contract method
@@ -48,10 +48,10 @@ func GetDlpPublicKey() string {
 	result, err = instance.MasterKey(&bind.CallOpts{})
 	if err != nil {
 		fmt.Println(err)
-		return "nil"
+		return "", err
 	}
 
-	return result
+	return result, nil
 }
 
 func GetFileID(txHash string) string {
