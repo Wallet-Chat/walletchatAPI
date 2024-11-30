@@ -4833,7 +4833,10 @@ func FetchOuraData() {
 		zipWriter := zip.NewWriter(&zipFileBuf)
 
 		//DLP public Key
-		publicKeyDLP := vanatransact.GetDlpPublicKey()
+		publicKeyDLP, err := vanatransact.GetDlpPublicKey()
+		if err != nil {
+			continue
+		}
 		fmt.Println("DLP encryption publicKey: ", publicKeyDLP)
 		//encrypt data client using signature of a fixed message (tbd - how to do as proxy?)
 		for _, endpoint := range ouraEndpoints {
@@ -4897,13 +4900,13 @@ func FetchOuraData() {
 		//in the future if users choose to only share specific data - we need to upload each endpoint separately.
 
 		// Open the zip file (for testing alg and formatting)
-		// zipData, err := os.ReadFile("archive.zip")
-		// if err != nil {
-		// 	log.Fatalf("Failed to read zip file data: %v", err)
-		// }
+		zipData, err := os.ReadFile("archive.zip")
+		if err != nil {
+			log.Fatalf("Failed to read zip file data: %v", err)
+		}
 
 		//encrypt the file encryption key with the users signature (TODO fill this based on user signature)
-		encryptedBytes, err := vanaencrypt.ClientSideEncrypt(zipFileBuf.Bytes(), ourauser.Signature)
+		encryptedBytes, err := vanaencrypt.ClientSideEncrypt(zipData, ourauser.Signature)
 		if err != nil {
 			fmt.Println("error in ClientSideEncrypt", err)
 		}
@@ -4977,15 +4980,16 @@ func FetchOuraData() {
 			teeUrl, teePublicKey := vanatransact.GetTeeDetails(*latestJobId)
 
 			//specific to the DLP proof code
-			envVars := map[string]string{}
-			// envVars := map[string]string{
-			// 	"USER_EMAIL": "user123@gmail.com", // Add USER_EMAIL to EnvVars
-			// }
+			//envVars := map[string]string{}
+			envVars := map[string]string{
+				"USER_EMAIL": "user123@gmail.com", // Add USER_EMAIL to EnvVars
+			}
 
+			secrets := map[string]string{}
 			//encryptedSecret, _ := vanaencrypt.EncryptSecretForProof(publicKeyPEM, []byte("user123@gmail.com"))
-			secrets := map[string]string{
-				"USER_EMAIL": ourauser.Encryptedpac, // Add USER_EMAIL to EnvVars
-			} //this would be API keys, etc needed in proof code
+			// secrets := map[string]string{
+			// 	"USER_EMAIL": ourauser.Encryptedpac, // Add USER_EMAIL to EnvVars
+			// } //this would be API keys, etc needed in proof code
 
 			//ask a specific TEE to run the proof of contribution
 			//${jobDetails.teeUrl}/RunProof
