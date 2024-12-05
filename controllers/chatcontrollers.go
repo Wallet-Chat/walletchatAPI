@@ -2496,6 +2496,9 @@ func OuraCreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("updating addr->name item: %s <-> %s\n", addrNameItem.Address, addrNameItem.Name)
 	}
 
+	//this isn't great long-term, but for smaller table it allows new usernames to show up in table instead of waiting for once daily update
+	referrals.GetOuraLeaderboardDataCronJob()
+
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(http.StatusOK)
