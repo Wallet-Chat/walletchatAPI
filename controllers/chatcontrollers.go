@@ -2476,6 +2476,30 @@ func GetAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(addrname)
 }
+func OuraCreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
+	requestBody, _ := ioutil.ReadAll(r.Body)
+	var addrNameItem entity.Addrnameitem
+	err := json.Unmarshal(requestBody, &addrNameItem)
+	if err != nil {
+		fmt.Println("unmarshal error: ", err)
+	}
+
+	var addrnameDB entity.Addrnameitem
+	var dbQuery = database.Connector.Where("address = ?", addrNameItem.Address).Find(&addrnameDB)
+	if dbQuery.RowsAffected == 0 {
+		database.Connector.Create(&addrNameItem)
+	} else {
+		database.Connector.Model(&entity.Addrnameitem{}).
+			Where("address = ?", addrNameItem.Address).
+			Update("name", addrNameItem.Name)
+
+		fmt.Printf("updating addr->name item: %s <-> %s\n", addrNameItem.Address, addrNameItem.Name)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.WriteHeader(http.StatusOK)
+}
 
 // func UpdateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 // 	requestBody, _ := ioutil.ReadAll(r.Body)

@@ -65,6 +65,9 @@ func main() {
 	router.HandleFunc("/get_oura_leaderboard_data", referrals.GetOuraLeaderboardData).Methods("GET")
 	router.HandleFunc("/get_leaderboard_data/{address}", referrals.GetLeaderboardDataSingle).Methods("GET")
 	router.HandleFunc("/get_oura_leaderboard_data/{address}", referrals.GetOuraLeaderboardDataSingle).Methods("GET")
+	//naming addresses (users or NFT collections)
+	router.HandleFunc("/name", controllers.OuraCreateAddrNameItem).Methods("POST")
+	router.HandleFunc("/name/{address}", controllers.GetAddrNameItem).Methods("GET")
 	router.HandleFunc("/get_referral_code/{address}", referrals.GetReferralCodeAddr).Methods("GET")
 	//debugging
 	router.HandleFunc("/debug_print", controllers.DebugPrint).Methods("POST")
