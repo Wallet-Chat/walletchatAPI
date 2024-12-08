@@ -36,7 +36,7 @@ type DataLiquidityPoolImplementationInitParams struct {
 	DataRegistryAddress common.Address
 	TeePoolAddress      common.Address
 	Name                string
-	MasterKey           string
+	PublicKey           string
 	ProofInstruction    string
 	FileRewardFactor    *big.Int
 }
@@ -57,7 +57,7 @@ type IDataLiquidityPoolFileResponse struct {
 
 // VanaDlpContractMetaData contains all meta data concerning the VanaDlpContract contract.
 var VanaDlpContractMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"}],\"name\":\"AddressEmptyCode\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"AddressInsufficientBalance\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ECDSAInvalidSignature\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"length\",\"type\":\"uint256\"}],\"name\":\"ECDSAInvalidSignatureLength\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"name\":\"ECDSAInvalidSignatureS\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"ERC1967InvalidImplementation\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ERC1967NonPayable\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EnforcedPause\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ExpectedPause\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FailedInnerCall\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FileAlreadyAdded\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidAttestator\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidInitialization\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidProof\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotInitializing\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"OwnableInvalidOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"OwnableUnauthorizedAccount\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ReentrancyGuardReentrantCall\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"SafeERC20FailedOperation\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"UUPSUnauthorizedCallContext\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"slot\",\"type\":\"bytes32\"}],\"name\":\"UUPSUnsupportedProxiableUUID\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"fileId\",\"type\":\"uint256\"}],\"name\":\"FileInvalidated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newFileRewardFactor\",\"type\":\"uint256\"}],\"name\":\"FileRewardFactorUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"fileId\",\"type\":\"uint256\"}],\"name\":\"FileValidated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"version\",\"type\":\"uint64\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"newMasterKey\",\"type\":\"string\"}],\"name\":\"MasterKeyUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferStarted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Paused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"newProofInstruction\",\"type\":\"string\"}],\"name\":\"ProofInstructionUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"contributorAddress\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"fileId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"proofIndex\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"rewardAmount\",\"type\":\"uint256\"}],\"name\":\"RewardRequested\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Unpaused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"Upgraded\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"UPGRADE_INTERFACE_VERSION\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"acceptOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"contributorsRewardAmount\",\"type\":\"uint256\"}],\"name\":\"addRewardsForContributors\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"contributorAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"contributorFiles\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"fileId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"proofIndex\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"rewardAmount\",\"type\":\"uint256\"}],\"internalType\":\"structIDataLiquidityPool.FileResponse\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"contributorAddress\",\"type\":\"address\"}],\"name\":\"contributorInfo\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"contributorAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"filesListCount\",\"type\":\"uint256\"}],\"internalType\":\"structIDataLiquidityPool.ContributorInfoResponse\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"contributors\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"contributorAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"filesListCount\",\"type\":\"uint256\"}],\"internalType\":\"structIDataLiquidityPool.ContributorInfoResponse\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"contributorsCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"dataRegistry\",\"outputs\":[{\"internalType\":\"contractIDataRegistry\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"fileRewardFactor\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"fileId\",\"type\":\"uint256\"}],\"name\":\"files\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"fileId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"proofIndex\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"rewardAmount\",\"type\":\"uint256\"}],\"internalType\":\"structIDataLiquidityPool.FileResponse\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"filesListAt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"filesListCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"ownerAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"dataRegistryAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"teePoolAddress\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"masterKey\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"proofInstruction\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"fileRewardFactor\",\"type\":\"uint256\"}],\"internalType\":\"structDataLiquidityPoolImplementation.InitParams\",\"name\":\"params\",\"type\":\"tuple\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"masterKey\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes[]\",\"name\":\"data\",\"type\":\"bytes[]\"}],\"name\":\"multicall\",\"outputs\":[{\"internalType\":\"bytes[]\",\"name\":\"results\",\"type\":\"bytes[]\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"paused\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pendingOwner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"proofInstruction\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"proxiableUUID\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"fileId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"proofIndex\",\"type\":\"uint256\"}],\"name\":\"requestReward\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"teePool\",\"outputs\":[{\"internalType\":\"contractITeePool\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"token\",\"outputs\":[{\"internalType\":\"contractIERC20\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalContributorsRewardAmount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"newFileRewardFactor\",\"type\":\"uint256\"}],\"name\":\"updateFileRewardFactor\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"newMasterKey\",\"type\":\"string\"}],\"name\":\"updateMasterKey\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"newProofInstruction\",\"type\":\"string\"}],\"name\":\"updateProofInstruction\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newTeePool\",\"type\":\"address\"}],\"name\":\"updateTeePool\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"upgradeToAndCall\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"version\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"}],\"name\":\"AddressEmptyCode\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"AddressInsufficientBalance\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ECDSAInvalidSignature\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"length\",\"type\":\"uint256\"}],\"name\":\"ECDSAInvalidSignatureLength\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"name\":\"ECDSAInvalidSignatureS\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"ERC1967InvalidImplementation\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ERC1967NonPayable\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EnforcedPause\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ExpectedPause\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FailedInnerCall\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FileAlreadyAdded\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidAttestator\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidInitialization\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidProof\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotInitializing\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"OwnableInvalidOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"OwnableUnauthorizedAccount\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ReentrancyGuardReentrantCall\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"SafeERC20FailedOperation\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"UUPSUnauthorizedCallContext\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"slot\",\"type\":\"bytes32\"}],\"name\":\"UUPSUnsupportedProxiableUUID\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"fileId\",\"type\":\"uint256\"}],\"name\":\"FileInvalidated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newFileRewardFactor\",\"type\":\"uint256\"}],\"name\":\"FileRewardFactorUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"fileId\",\"type\":\"uint256\"}],\"name\":\"FileValidated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"version\",\"type\":\"uint64\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferStarted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Paused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"newProofInstruction\",\"type\":\"string\"}],\"name\":\"ProofInstructionUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"newPublicKey\",\"type\":\"string\"}],\"name\":\"PublicKeyUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"contributorAddress\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"fileId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"proofIndex\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"rewardAmount\",\"type\":\"uint256\"}],\"name\":\"RewardRequested\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newTeePool\",\"type\":\"address\"}],\"name\":\"TeePoolUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Unpaused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"Upgraded\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"UPGRADE_INTERFACE_VERSION\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"acceptOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"contributorsRewardAmount\",\"type\":\"uint256\"}],\"name\":\"addRewardsForContributors\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"contributorAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"contributorFiles\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"fileId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"proofIndex\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"rewardAmount\",\"type\":\"uint256\"}],\"internalType\":\"structIDataLiquidityPool.FileResponse\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"contributorAddress\",\"type\":\"address\"}],\"name\":\"contributorInfo\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"contributorAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"filesListCount\",\"type\":\"uint256\"}],\"internalType\":\"structIDataLiquidityPool.ContributorInfoResponse\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"contributors\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"contributorAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"filesListCount\",\"type\":\"uint256\"}],\"internalType\":\"structIDataLiquidityPool.ContributorInfoResponse\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"contributorsCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"dataRegistry\",\"outputs\":[{\"internalType\":\"contractIDataRegistry\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"fileRewardFactor\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"fileId\",\"type\":\"uint256\"}],\"name\":\"files\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"fileId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"proofIndex\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"rewardAmount\",\"type\":\"uint256\"}],\"internalType\":\"structIDataLiquidityPool.FileResponse\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"filesListAt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"filesListCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"ownerAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"dataRegistryAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"teePoolAddress\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"publicKey\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"proofInstruction\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"fileRewardFactor\",\"type\":\"uint256\"}],\"internalType\":\"structDataLiquidityPoolImplementation.InitParams\",\"name\":\"params\",\"type\":\"tuple\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes[]\",\"name\":\"data\",\"type\":\"bytes[]\"}],\"name\":\"multicall\",\"outputs\":[{\"internalType\":\"bytes[]\",\"name\":\"results\",\"type\":\"bytes[]\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"paused\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pendingOwner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"proofInstruction\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"proxiableUUID\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"publicKey\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"fileId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"proofIndex\",\"type\":\"uint256\"}],\"name\":\"requestReward\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"teePool\",\"outputs\":[{\"internalType\":\"contractITeePool\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"token\",\"outputs\":[{\"internalType\":\"contractIERC20\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalContributorsRewardAmount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"newFileRewardFactor\",\"type\":\"uint256\"}],\"name\":\"updateFileRewardFactor\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"newProofInstruction\",\"type\":\"string\"}],\"name\":\"updateProofInstruction\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"newPublicKey\",\"type\":\"string\"}],\"name\":\"updatePublicKey\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newTeePool\",\"type\":\"address\"}],\"name\":\"updateTeePool\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"upgradeToAndCall\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"version\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"}]",
 }
 
 // VanaDlpContractABI is the input ABI used to generate the binding from.
@@ -516,37 +516,6 @@ func (_VanaDlpContract *VanaDlpContractCallerSession) FilesListCount() (*big.Int
 	return _VanaDlpContract.Contract.FilesListCount(&_VanaDlpContract.CallOpts)
 }
 
-// MasterKey is a free data retrieval call binding the contract method 0x8afe35b9.
-//
-// Solidity: function masterKey() view returns(string)
-func (_VanaDlpContract *VanaDlpContractCaller) MasterKey(opts *bind.CallOpts) (string, error) {
-	var out []interface{}
-	err := _VanaDlpContract.contract.Call(opts, &out, "masterKey")
-
-	if err != nil {
-		return *new(string), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(string)).(*string)
-
-	return out0, err
-
-}
-
-// MasterKey is a free data retrieval call binding the contract method 0x8afe35b9.
-//
-// Solidity: function masterKey() view returns(string)
-func (_VanaDlpContract *VanaDlpContractSession) MasterKey() (string, error) {
-	return _VanaDlpContract.Contract.MasterKey(&_VanaDlpContract.CallOpts)
-}
-
-// MasterKey is a free data retrieval call binding the contract method 0x8afe35b9.
-//
-// Solidity: function masterKey() view returns(string)
-func (_VanaDlpContract *VanaDlpContractCallerSession) MasterKey() (string, error) {
-	return _VanaDlpContract.Contract.MasterKey(&_VanaDlpContract.CallOpts)
-}
-
 // Name is a free data retrieval call binding the contract method 0x06fdde03.
 //
 // Solidity: function name() view returns(string)
@@ -731,6 +700,37 @@ func (_VanaDlpContract *VanaDlpContractSession) ProxiableUUID() ([32]byte, error
 // Solidity: function proxiableUUID() view returns(bytes32)
 func (_VanaDlpContract *VanaDlpContractCallerSession) ProxiableUUID() ([32]byte, error) {
 	return _VanaDlpContract.Contract.ProxiableUUID(&_VanaDlpContract.CallOpts)
+}
+
+// PublicKey is a free data retrieval call binding the contract method 0x63ffab31.
+//
+// Solidity: function publicKey() view returns(string)
+func (_VanaDlpContract *VanaDlpContractCaller) PublicKey(opts *bind.CallOpts) (string, error) {
+	var out []interface{}
+	err := _VanaDlpContract.contract.Call(opts, &out, "publicKey")
+
+	if err != nil {
+		return *new(string), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(string)).(*string)
+
+	return out0, err
+
+}
+
+// PublicKey is a free data retrieval call binding the contract method 0x63ffab31.
+//
+// Solidity: function publicKey() view returns(string)
+func (_VanaDlpContract *VanaDlpContractSession) PublicKey() (string, error) {
+	return _VanaDlpContract.Contract.PublicKey(&_VanaDlpContract.CallOpts)
+}
+
+// PublicKey is a free data retrieval call binding the contract method 0x63ffab31.
+//
+// Solidity: function publicKey() view returns(string)
+func (_VanaDlpContract *VanaDlpContractCallerSession) PublicKey() (string, error) {
+	return _VanaDlpContract.Contract.PublicKey(&_VanaDlpContract.CallOpts)
 }
 
 // TeePool is a free data retrieval call binding the contract method 0xd503d4e4.
@@ -1067,27 +1067,6 @@ func (_VanaDlpContract *VanaDlpContractTransactorSession) UpdateFileRewardFactor
 	return _VanaDlpContract.Contract.UpdateFileRewardFactor(&_VanaDlpContract.TransactOpts, newFileRewardFactor)
 }
 
-// UpdateMasterKey is a paid mutator transaction binding the contract method 0x62baff9f.
-//
-// Solidity: function updateMasterKey(string newMasterKey) returns()
-func (_VanaDlpContract *VanaDlpContractTransactor) UpdateMasterKey(opts *bind.TransactOpts, newMasterKey string) (*types.Transaction, error) {
-	return _VanaDlpContract.contract.Transact(opts, "updateMasterKey", newMasterKey)
-}
-
-// UpdateMasterKey is a paid mutator transaction binding the contract method 0x62baff9f.
-//
-// Solidity: function updateMasterKey(string newMasterKey) returns()
-func (_VanaDlpContract *VanaDlpContractSession) UpdateMasterKey(newMasterKey string) (*types.Transaction, error) {
-	return _VanaDlpContract.Contract.UpdateMasterKey(&_VanaDlpContract.TransactOpts, newMasterKey)
-}
-
-// UpdateMasterKey is a paid mutator transaction binding the contract method 0x62baff9f.
-//
-// Solidity: function updateMasterKey(string newMasterKey) returns()
-func (_VanaDlpContract *VanaDlpContractTransactorSession) UpdateMasterKey(newMasterKey string) (*types.Transaction, error) {
-	return _VanaDlpContract.Contract.UpdateMasterKey(&_VanaDlpContract.TransactOpts, newMasterKey)
-}
-
 // UpdateProofInstruction is a paid mutator transaction binding the contract method 0x7ba24aa5.
 //
 // Solidity: function updateProofInstruction(string newProofInstruction) returns()
@@ -1107,6 +1086,27 @@ func (_VanaDlpContract *VanaDlpContractSession) UpdateProofInstruction(newProofI
 // Solidity: function updateProofInstruction(string newProofInstruction) returns()
 func (_VanaDlpContract *VanaDlpContractTransactorSession) UpdateProofInstruction(newProofInstruction string) (*types.Transaction, error) {
 	return _VanaDlpContract.Contract.UpdateProofInstruction(&_VanaDlpContract.TransactOpts, newProofInstruction)
+}
+
+// UpdatePublicKey is a paid mutator transaction binding the contract method 0x1dc6fa5e.
+//
+// Solidity: function updatePublicKey(string newPublicKey) returns()
+func (_VanaDlpContract *VanaDlpContractTransactor) UpdatePublicKey(opts *bind.TransactOpts, newPublicKey string) (*types.Transaction, error) {
+	return _VanaDlpContract.contract.Transact(opts, "updatePublicKey", newPublicKey)
+}
+
+// UpdatePublicKey is a paid mutator transaction binding the contract method 0x1dc6fa5e.
+//
+// Solidity: function updatePublicKey(string newPublicKey) returns()
+func (_VanaDlpContract *VanaDlpContractSession) UpdatePublicKey(newPublicKey string) (*types.Transaction, error) {
+	return _VanaDlpContract.Contract.UpdatePublicKey(&_VanaDlpContract.TransactOpts, newPublicKey)
+}
+
+// UpdatePublicKey is a paid mutator transaction binding the contract method 0x1dc6fa5e.
+//
+// Solidity: function updatePublicKey(string newPublicKey) returns()
+func (_VanaDlpContract *VanaDlpContractTransactorSession) UpdatePublicKey(newPublicKey string) (*types.Transaction, error) {
+	return _VanaDlpContract.Contract.UpdatePublicKey(&_VanaDlpContract.TransactOpts, newPublicKey)
 }
 
 // UpdateTeePool is a paid mutator transaction binding the contract method 0x4f33f79d.
@@ -1707,140 +1707,6 @@ func (_VanaDlpContract *VanaDlpContractFilterer) ParseInitialized(log types.Log)
 	return event, nil
 }
 
-// VanaDlpContractMasterKeyUpdatedIterator is returned from FilterMasterKeyUpdated and is used to iterate over the raw logs and unpacked data for MasterKeyUpdated events raised by the VanaDlpContract contract.
-type VanaDlpContractMasterKeyUpdatedIterator struct {
-	Event *VanaDlpContractMasterKeyUpdated // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *VanaDlpContractMasterKeyUpdatedIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(VanaDlpContractMasterKeyUpdated)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(VanaDlpContractMasterKeyUpdated)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *VanaDlpContractMasterKeyUpdatedIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *VanaDlpContractMasterKeyUpdatedIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// VanaDlpContractMasterKeyUpdated represents a MasterKeyUpdated event raised by the VanaDlpContract contract.
-type VanaDlpContractMasterKeyUpdated struct {
-	NewMasterKey string
-	Raw          types.Log // Blockchain specific contextual infos
-}
-
-// FilterMasterKeyUpdated is a free log retrieval operation binding the contract event 0xcf6a9cc9de7d6a2f9488bac950d70cd0eff6bd12d21289198406960d6003de21.
-//
-// Solidity: event MasterKeyUpdated(string newMasterKey)
-func (_VanaDlpContract *VanaDlpContractFilterer) FilterMasterKeyUpdated(opts *bind.FilterOpts) (*VanaDlpContractMasterKeyUpdatedIterator, error) {
-
-	logs, sub, err := _VanaDlpContract.contract.FilterLogs(opts, "MasterKeyUpdated")
-	if err != nil {
-		return nil, err
-	}
-	return &VanaDlpContractMasterKeyUpdatedIterator{contract: _VanaDlpContract.contract, event: "MasterKeyUpdated", logs: logs, sub: sub}, nil
-}
-
-// WatchMasterKeyUpdated is a free log subscription operation binding the contract event 0xcf6a9cc9de7d6a2f9488bac950d70cd0eff6bd12d21289198406960d6003de21.
-//
-// Solidity: event MasterKeyUpdated(string newMasterKey)
-func (_VanaDlpContract *VanaDlpContractFilterer) WatchMasterKeyUpdated(opts *bind.WatchOpts, sink chan<- *VanaDlpContractMasterKeyUpdated) (event.Subscription, error) {
-
-	logs, sub, err := _VanaDlpContract.contract.WatchLogs(opts, "MasterKeyUpdated")
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(VanaDlpContractMasterKeyUpdated)
-				if err := _VanaDlpContract.contract.UnpackLog(event, "MasterKeyUpdated", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseMasterKeyUpdated is a log parse operation binding the contract event 0xcf6a9cc9de7d6a2f9488bac950d70cd0eff6bd12d21289198406960d6003de21.
-//
-// Solidity: event MasterKeyUpdated(string newMasterKey)
-func (_VanaDlpContract *VanaDlpContractFilterer) ParseMasterKeyUpdated(log types.Log) (*VanaDlpContractMasterKeyUpdated, error) {
-	event := new(VanaDlpContractMasterKeyUpdated)
-	if err := _VanaDlpContract.contract.UnpackLog(event, "MasterKeyUpdated", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
 // VanaDlpContractOwnershipTransferStartedIterator is returned from FilterOwnershipTransferStarted and is used to iterate over the raw logs and unpacked data for OwnershipTransferStarted events raised by the VanaDlpContract contract.
 type VanaDlpContractOwnershipTransferStartedIterator struct {
 	Event *VanaDlpContractOwnershipTransferStarted // Event containing the contract specifics and raw log
@@ -2415,6 +2281,140 @@ func (_VanaDlpContract *VanaDlpContractFilterer) ParseProofInstructionUpdated(lo
 	return event, nil
 }
 
+// VanaDlpContractPublicKeyUpdatedIterator is returned from FilterPublicKeyUpdated and is used to iterate over the raw logs and unpacked data for PublicKeyUpdated events raised by the VanaDlpContract contract.
+type VanaDlpContractPublicKeyUpdatedIterator struct {
+	Event *VanaDlpContractPublicKeyUpdated // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *VanaDlpContractPublicKeyUpdatedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(VanaDlpContractPublicKeyUpdated)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(VanaDlpContractPublicKeyUpdated)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *VanaDlpContractPublicKeyUpdatedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *VanaDlpContractPublicKeyUpdatedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// VanaDlpContractPublicKeyUpdated represents a PublicKeyUpdated event raised by the VanaDlpContract contract.
+type VanaDlpContractPublicKeyUpdated struct {
+	NewPublicKey string
+	Raw          types.Log // Blockchain specific contextual infos
+}
+
+// FilterPublicKeyUpdated is a free log retrieval operation binding the contract event 0x0ba4a7233a2cfb937aa9644f11f49345b443fe8d5ab3494a1879faa500728d3e.
+//
+// Solidity: event PublicKeyUpdated(string newPublicKey)
+func (_VanaDlpContract *VanaDlpContractFilterer) FilterPublicKeyUpdated(opts *bind.FilterOpts) (*VanaDlpContractPublicKeyUpdatedIterator, error) {
+
+	logs, sub, err := _VanaDlpContract.contract.FilterLogs(opts, "PublicKeyUpdated")
+	if err != nil {
+		return nil, err
+	}
+	return &VanaDlpContractPublicKeyUpdatedIterator{contract: _VanaDlpContract.contract, event: "PublicKeyUpdated", logs: logs, sub: sub}, nil
+}
+
+// WatchPublicKeyUpdated is a free log subscription operation binding the contract event 0x0ba4a7233a2cfb937aa9644f11f49345b443fe8d5ab3494a1879faa500728d3e.
+//
+// Solidity: event PublicKeyUpdated(string newPublicKey)
+func (_VanaDlpContract *VanaDlpContractFilterer) WatchPublicKeyUpdated(opts *bind.WatchOpts, sink chan<- *VanaDlpContractPublicKeyUpdated) (event.Subscription, error) {
+
+	logs, sub, err := _VanaDlpContract.contract.WatchLogs(opts, "PublicKeyUpdated")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(VanaDlpContractPublicKeyUpdated)
+				if err := _VanaDlpContract.contract.UnpackLog(event, "PublicKeyUpdated", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParsePublicKeyUpdated is a log parse operation binding the contract event 0x0ba4a7233a2cfb937aa9644f11f49345b443fe8d5ab3494a1879faa500728d3e.
+//
+// Solidity: event PublicKeyUpdated(string newPublicKey)
+func (_VanaDlpContract *VanaDlpContractFilterer) ParsePublicKeyUpdated(log types.Log) (*VanaDlpContractPublicKeyUpdated, error) {
+	event := new(VanaDlpContractPublicKeyUpdated)
+	if err := _VanaDlpContract.contract.UnpackLog(event, "PublicKeyUpdated", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
 // VanaDlpContractRewardRequestedIterator is returned from FilterRewardRequested and is used to iterate over the raw logs and unpacked data for RewardRequested events raised by the VanaDlpContract contract.
 type VanaDlpContractRewardRequestedIterator struct {
 	Event *VanaDlpContractRewardRequested // Event containing the contract specifics and raw log
@@ -2572,6 +2572,140 @@ func (_VanaDlpContract *VanaDlpContractFilterer) WatchRewardRequested(opts *bind
 func (_VanaDlpContract *VanaDlpContractFilterer) ParseRewardRequested(log types.Log) (*VanaDlpContractRewardRequested, error) {
 	event := new(VanaDlpContractRewardRequested)
 	if err := _VanaDlpContract.contract.UnpackLog(event, "RewardRequested", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// VanaDlpContractTeePoolUpdatedIterator is returned from FilterTeePoolUpdated and is used to iterate over the raw logs and unpacked data for TeePoolUpdated events raised by the VanaDlpContract contract.
+type VanaDlpContractTeePoolUpdatedIterator struct {
+	Event *VanaDlpContractTeePoolUpdated // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *VanaDlpContractTeePoolUpdatedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(VanaDlpContractTeePoolUpdated)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(VanaDlpContractTeePoolUpdated)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *VanaDlpContractTeePoolUpdatedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *VanaDlpContractTeePoolUpdatedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// VanaDlpContractTeePoolUpdated represents a TeePoolUpdated event raised by the VanaDlpContract contract.
+type VanaDlpContractTeePoolUpdated struct {
+	NewTeePool common.Address
+	Raw        types.Log // Blockchain specific contextual infos
+}
+
+// FilterTeePoolUpdated is a free log retrieval operation binding the contract event 0x496c74a108597a960a3e602b872823b2e82840913e9b0fc10bc921bc68412b7c.
+//
+// Solidity: event TeePoolUpdated(address newTeePool)
+func (_VanaDlpContract *VanaDlpContractFilterer) FilterTeePoolUpdated(opts *bind.FilterOpts) (*VanaDlpContractTeePoolUpdatedIterator, error) {
+
+	logs, sub, err := _VanaDlpContract.contract.FilterLogs(opts, "TeePoolUpdated")
+	if err != nil {
+		return nil, err
+	}
+	return &VanaDlpContractTeePoolUpdatedIterator{contract: _VanaDlpContract.contract, event: "TeePoolUpdated", logs: logs, sub: sub}, nil
+}
+
+// WatchTeePoolUpdated is a free log subscription operation binding the contract event 0x496c74a108597a960a3e602b872823b2e82840913e9b0fc10bc921bc68412b7c.
+//
+// Solidity: event TeePoolUpdated(address newTeePool)
+func (_VanaDlpContract *VanaDlpContractFilterer) WatchTeePoolUpdated(opts *bind.WatchOpts, sink chan<- *VanaDlpContractTeePoolUpdated) (event.Subscription, error) {
+
+	logs, sub, err := _VanaDlpContract.contract.WatchLogs(opts, "TeePoolUpdated")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(VanaDlpContractTeePoolUpdated)
+				if err := _VanaDlpContract.contract.UnpackLog(event, "TeePoolUpdated", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseTeePoolUpdated is a log parse operation binding the contract event 0x496c74a108597a960a3e602b872823b2e82840913e9b0fc10bc921bc68412b7c.
+//
+// Solidity: event TeePoolUpdated(address newTeePool)
+func (_VanaDlpContract *VanaDlpContractFilterer) ParseTeePoolUpdated(log types.Log) (*VanaDlpContractTeePoolUpdated, error) {
+	event := new(VanaDlpContractTeePoolUpdated)
+	if err := _VanaDlpContract.contract.UnpackLog(event, "TeePoolUpdated", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log

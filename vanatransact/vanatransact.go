@@ -21,7 +21,6 @@ import (
 
 	_ "rest-go-demo/docs"
 
-	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -45,7 +44,7 @@ func GetDlpPublicKey() (string, error) {
 
 	// Call the contract method
 	var result string
-	result, err = instance.MasterKey(&bind.CallOpts{})
+	result, err = instance.PublicKey(&bind.CallOpts{})
 	if err != nil {
 		fmt.Println(err)
 		return "", err
@@ -277,15 +276,15 @@ func AddFileWithPermissions(ownerWallet common.Address, encryptedFileUrl string,
 	tx, err := instance.AddFileWithPermissions(opts, encryptedFileUrl, ownerWallet, permissions)
 	if err != nil {
 		// Check revert reason
-		callMsg := ethereum.CallMsg{
-			From: opts.From,
-			To:   &contractAddress,
-			Data: tx.Data(),
-		}
-		result, callErr := client.CallContract(context.Background(), callMsg, nil)
-		if callErr == nil && len(result) > 0 {
-			return "", fmt.Errorf("transaction reverted: %s", string(result))
-		}
+		// callMsg := ethereum.CallMsg{
+		// 	From: opts.From,
+		// 	To:   &contractAddress,
+		// 	Data: tx.Data(),
+		// }
+		// result, callErr := client.CallContract(context.Background(), callMsg, nil)
+		// if callErr == nil && len(result) > 0 {
+		// 	return "", fmt.Errorf("transaction reverted: %s", string(result))
+		// }
 		return "", fmt.Errorf("transaction failed: %w", err)
 	}
 
@@ -379,8 +378,8 @@ func RequestRewardFromDLP(fileId string) (string, error) {
 
 // Define the structure for the request body
 type RequestBody struct {
-	JobID                  string                   `json:"job_id"`
-	FileID                 string                   `json:"file_id"`
+	JobID                  *big.Int                 `json:"job_id"`
+	FileID                 *big.Int                 `json:"file_id"`
 	Nonce                  string                   `json:"nonce"`
 	ProofURL               string                   `json:"proof_url"`
 	EncryptionSeed         string                   `json:"encryption_seed"`
@@ -415,12 +414,12 @@ func SendContributionProof(jobID *big.Int, fileID string, dlpPubKey string, envV
 	fileIDBigInt := new(big.Int)
 	fileIDBigInt.SetString(fileID[2:], 16) // Skip the "0x" prefix
 	// Convert big.Int to string representation of the integer
-	fileIDint := fileIDBigInt.String()
+	//fileIDint := fileIDBigInt.String()
 
 	// Initialize the request body with empty ValidatePermissions
 	requestBody := RequestBody{
-		JobID:               jobID.String(),
-		FileID:              fileIDint,
+		JobID:               jobID,
+		FileID:              fileIDBigInt,
 		Nonce:               "1234",
 		ProofURL:            "https://github.com/vana-com/vana-satya-proof-template/releases/download/v24/gsc-my-proof-24.tar.gz",
 		EncryptionSeed:      os.Getenv("VANA_ENCRYPT_KEY_SEED"),

@@ -10,6 +10,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"math/big"
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -4998,11 +4999,64 @@ func FetchOuraData() {
 		var contributionProofTx = vanatransact.GetTeeContributionProof(fileID)
 		fmt.Println("TEE contribution proof tx: ", contributionProofTx)
 
-		//getJobId and teeDetails (tbd)
-		var jobIDS = vanatransact.GetFileJobIDs(fileID)
-		fmt.Println("`Latest JobIDs for FileID ", jobIDS)
+		time.Sleep(15 * time.Second)
+		// Call the API to fetch transaction logs
+		url := "https://api.moksha.vanascan.io/api/v2/transactions/" + contributionProofTx + "/logs"
+		resp, err := http.Get(url)
+		if err != nil {
+			log.Println("Error fetching transaction logs:", err)
+			return // Handle the error appropriately
+		}
+		defer resp.Body.Close()
 
-		if len(jobIDS) > 1 {
+		// Read the response body
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Println("Error reading response body:", err)
+			return // Handle the error appropriately
+		}
+		fmt.Println(string(body))
+
+		// Define a struct to match the JSON response
+		type Response struct {
+			Items []struct {
+				Decoded struct {
+					Parameters []struct {
+						Name  string `json:"name"`
+						Value string `json:"value"`
+					} `json:"parameters"`
+				} `json:"decoded"`
+			} `json:"items"`
+		}
+
+		// Unmarshal the JSON response into the struct
+		var responseData Response
+		if err := json.Unmarshal(body, &responseData); err != nil {
+			log.Println("Error unmarshalling JSON:", err)
+			return // Handle the error appropriately
+		}
+
+		// Extract the jobId from the response
+		if len(responseData.Items) > 0 {
+			for _, param := range responseData.Items[0].Decoded.Parameters {
+				if param.Name == "jobId" {
+					log.Println("Job ID from TX log:", param.Value)
+					break
+				}
+			}
+		} else {
+			log.Println("No items found in the response.")
+		}
+
+		//getJobId and teeDetails (tbd)
+		fileIDBigInt := new(big.Int)
+		fileIDBigInt.SetString(fileID[2:], 16) // Skip the "0x" prefix
+		// Convert big.Int to string representation of the integer
+		fileIDstr := fileIDBigInt.String()
+		var jobIDS = vanatransact.GetFileJobIDs(fileIDstr)
+		fmt.Println("`Latest JobIDs for FileID ", jobIDS, fileIDstr)
+
+		if len(jobIDS) > 0 {
 			latestJobId := jobIDS[len(jobIDS)-1]
 			teeUrl, teePublicKey := vanatransact.GetTeeDetails(*latestJobId)
 
