@@ -217,8 +217,9 @@ func GetTeeContributionProof(fileId string) string {
 	}
 
 	// Assuming fileId is a string representation of a number
-	fileIdBigInt := new(big.Int)
-	fileIdBigInt.SetString(fileId, 10)
+	// Convert hex string to big.Int
+	fileIDBigInt := new(big.Int)
+	fileIDBigInt.SetString(fileId[2:], 16) // Skip the "0x" prefix
 
 	privateKey, err := crypto.HexToECDSA(os.Getenv("VANA_SIGNER_PRIVATE_KEY"))
 	if err != nil {
@@ -234,7 +235,8 @@ func GetTeeContributionProof(fileId string) string {
 
 	// Call the contract method
 	var result string
-	teePocTX, err := instance.RequestContributionProof(opts, fileIdBigInt)
+	fmt.Println("RequestContributionProof Proof for File: ", fileId, fileIDBigInt)
+	teePocTX, err := instance.RequestContributionProof(opts, fileIDBigInt)
 	if err != nil {
 		fmt.Println("tee getContributionProof error: ", err)
 		return "nil"
