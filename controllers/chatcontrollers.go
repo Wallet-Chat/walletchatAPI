@@ -5062,15 +5062,17 @@ func FetchOuraData() {
 
 			//specific to the DLP proof code
 			//envVars := map[string]string{}
-			envVars := map[string]string{
-				"USER_EMAIL": "user123@gmail.com", // Add USER_EMAIL to EnvVars
-			}
+			//need this for testing archive.zip manually!
+			// envVars := map[string]string{
+			// 	"USER_EMAIL": "user123@gmail.com", // Add USER_EMAIL to EnvVars
+			// }
+			envVars := map[string]string{}
 
-			secrets := map[string]string{}
+			//secrets := map[string]string{}
 			//encryptedSecret, _ := vanaencrypt.EncryptSecretForProof(publicKeyPEM, []byte("user123@gmail.com"))
-			// secrets := map[string]string{
-			// 	"USER_EMAIL": ourauser.Encryptedpac, // Add USER_EMAIL to EnvVars
-			// } //this would be API keys, etc needed in proof code
+			secrets := map[string]string{
+				"USER_API_KEY": ourauser.Encryptedpac, // Add USER_EMAIL to EnvVars
+			} //this would be API keys, etc needed in proof code
 
 			//ask a specific TEE to run the proof of contribution
 			//${jobDetails.teeUrl}/RunProof

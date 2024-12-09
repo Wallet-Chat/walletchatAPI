@@ -418,10 +418,11 @@ func SendContributionProof(jobID *big.Int, fileID string, dlpPubKey string, envV
 
 	// Initialize the request body with empty ValidatePermissions
 	requestBody := RequestBody{
-		JobID:               jobID,
-		FileID:              fileIDBigInt,
-		Nonce:               "1234",
-		ProofURL:            "https://github.com/vana-com/vana-satya-proof-template/releases/download/v24/gsc-my-proof-24.tar.gz",
+		JobID:    jobID,
+		FileID:   fileIDBigInt,
+		Nonce:    "13",
+		ProofURL: "https://github.com/Wallet-Chat/vana-satya-proof-template-py/releases/download/v2/my-proof-2.tar.gz",
+		//ProofURL:            "https://github.com/vana-com/vana-satya-proof-template/releases/download/v24/gsc-my-proof-24.tar.gz",
 		EncryptionSeed:      os.Getenv("VANA_ENCRYPT_KEY_SEED"),
 		EnvVars:             envVars,
 		Secrets:             secrets,
