@@ -4987,9 +4987,41 @@ func FetchOuraData() {
 		// returns fileID (ex: file id is '601971')
 		walletAddress := common.HexToAddress(ourauser.Wallet) //ourauser.Wallet)
 		txHash, err := vanatransact.AddFileWithPermissions(walletAddress, fileUrl, hexDataDlpEEK)
-		fmt.Println("Uploaded File TX and err: ", txHash, err)
+		if err != nil {
+			fmt.Println("Uploaded File  err: ", txHash, err)
+			continue
+		}
+		fmt.Println("Uploaded File TX: ", txHash)
 		var fileID = vanatransact.GetFileID(txHash)
 		//fmt.Println("Uploaded File: ", fileID)
+
+		// ** BEGIN TEST CODE ** test that the DLP can decrypt the file: TEST CODE ONLY
+		// privKey, _ := hex.DecodeString(os.Getenv("VANA_SIGNER_PRIVATE_KEY"))
+		// decryptedDlpEEK, err := vanaencrypt.DecryptWithPrivKey(privKey, vanaDlpEEK)
+		// if err != nil {
+		// 	fmt.Println("Error in testing decryption of EEK to get back user signature: ", err)
+		// }
+		// // Convert the ASCII byte array back to a string
+		// asciiString := string(decryptedDlpEEK)
+		// // Remove the "0x" prefix if present
+		// if len(asciiString) > 2 && asciiString[:2] == "0x" {
+		// 	asciiString = asciiString[2:]
+		// }
+		// // Decode the cleaned hex string back to bytes
+		// decodedBytes, err := hex.DecodeString(asciiString)
+		// if err != nil {
+		// 	fmt.Println("Error decoding hex:", err)
+		// 	return
+		// }
+		// // Convert the decoded bytes to the final hex representation
+		// finalHex := fmt.Sprintf("0x%x", decodedBytes)
+		// fmt.Println("decrypted EEK: ", finalHex)
+		// fmt.Println("Orig user sig: ", ourauser.Signature)
+		// err = FetchAndDecryptFile(fileUrl, finalHex)
+		// if err != nil {
+		// 	fmt.Println("error: ", err)
+		// }
+		//** END ** test that the DLP can decrypt the file: TEST CODE ONLY
 
 		//now get proof from TEE the file is valid / authentic
 		//teeFee = await teePoolContract.teeFee(); //get estimated required fee for proof?

@@ -289,14 +289,14 @@ func AddFileWithPermissions(ownerWallet common.Address, encryptedFileUrl string,
 	}
 
 	// Fetch receipt to ensure success
-	receipt, err := client.TransactionReceipt(context.Background(), tx.Hash())
-	if err != nil {
-		return tx.Hash().Hex(), fmt.Errorf("failed to fetch receipt: %w", err)
-	}
+	// receipt, err := client.TransactionReceipt(context.Background(), tx.Hash())
+	// if err != nil {
+	// 	return tx.Hash().Hex(), fmt.Errorf("failed to fetch receipt: %w", err)
+	// }
 
-	if receipt.Status == 0 {
-		return tx.Hash().Hex(), errors.New("transaction failed with status 0")
-	}
+	// if receipt.Status == 0 {
+	// 	return tx.Hash().Hex(), errors.New("transaction failed with status 0")
+	// }
 
 	return tx.Hash().Hex(), nil
 }

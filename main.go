@@ -105,11 +105,11 @@ func main() {
 	u.StartAsync()
 
 	//schedule twitter polling for users requesting referral codes
-	v := gocron.NewScheduler(time.UTC)
+	//v := gocron.NewScheduler(time.UTC)
 	// set time
-	v.Every(62).Seconds().Do(func() { twitter.SearchForUserReferralCodeTweets() })
+	//v.Every(62).Seconds().Do(func() { twitter.SearchForUserReferralCodeTweets() })
 	// starts the scheduler asynchronously
-	v.StartAsync()
+	//v.StartAsync()
 
 	w := gocron.NewScheduler(time.UTC)
 	// // set time

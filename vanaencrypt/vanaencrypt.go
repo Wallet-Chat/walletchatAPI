@@ -212,6 +212,103 @@ func EncryptWithWalletPublicKey(data string, publicKeyHex string, iv []byte, eph
 	return encryptedData, ephemPrivateKeyBytes, nil
 }
 
+func DecryptWithPrivKey(privateKeyBytes []byte, encryptedData map[string][]byte) ([]byte, error) {
+	// Validate input
+	if len(privateKeyBytes) == 0 {
+		return nil, errors.New("private key is required")
+	}
+	if encryptedData == nil {
+		return nil, errors.New("encrypted data is required")
+	}
+
+	// Extract encrypted components
+	iv := encryptedData["iv"]
+	ephemPublicKeyBytes := encryptedData["ephemPublicKey"]
+	ciphertext := encryptedData["ciphertext"]
+	mac := encryptedData["mac"]
+
+	// Ensure all components are present
+	if iv == nil || ephemPublicKeyBytes == nil || ciphertext == nil || mac == nil {
+		return nil, errors.New("incomplete encrypted data")
+	}
+
+	// Convert the 32-byte private key to ECDSA private key
+	privateKey, err := crypto.ToECDSA(privateKeyBytes)
+	if err != nil {
+		return nil, errors.New("invalid private key")
+	}
+
+	// Load the ephemeral public key
+	ephemPublicKey, err := crypto.UnmarshalPubkey(ephemPublicKeyBytes)
+	if err != nil {
+		return nil, errors.New("invalid ephemeral public key")
+	}
+
+	// Derive the shared secret
+	sharedSecret, err := GenerateSharedSecret(privateKey, ephemPublicKey)
+	if err != nil {
+		return nil, err
+	}
+
+	// Hash the shared secret to derive encryption and MAC keys
+	hash := sha512.Sum512(sharedSecret)
+	encryptionKey := hash[:32]
+	macKey := hash[32:]
+
+	// Verify MAC for integrity
+	dataToMac := bytes.Join([][]byte{iv, ephemPublicKeyBytes, ciphertext}, []byte{})
+	h := hmac.New(sha256.New, macKey)
+	h.Write(dataToMac)
+	calculatedMac := h.Sum(nil)
+	if !hmac.Equal(calculatedMac, mac) {
+		return nil, errors.New("MAC verification failed")
+	}
+
+	// Decrypt the ciphertext using AES-CBC
+	block, err := aes.NewCipher(encryptionKey)
+	if err != nil {
+		return nil, err
+	}
+	if len(ciphertext)%aes.BlockSize != 0 {
+		return nil, errors.New("ciphertext is not a multiple of the block size")
+	}
+
+	plaintextPadded := make([]byte, len(ciphertext))
+	mode := cipher.NewCBCDecrypter(block, iv)
+	mode.CryptBlocks(plaintextPadded, ciphertext)
+
+	// Unpad the plaintext
+	plaintext, err := unpad(plaintextPadded, aes.BlockSize)
+	if err != nil {
+		return nil, err
+	}
+
+	return plaintext, nil
+}
+
+// Helper function for PKCS#7 padding removal
+func unpad(data []byte, blockSize int) ([]byte, error) {
+	if len(data) == 0 {
+		return nil, errors.New("data is empty")
+	}
+	if len(data)%blockSize != 0 {
+		return nil, errors.New("data is not a multiple of the block size")
+	}
+
+	paddingLen := int(data[len(data)-1])
+	if paddingLen > blockSize || paddingLen == 0 {
+		return nil, errors.New("invalid padding length")
+	}
+
+	for _, v := range data[len(data)-paddingLen:] {
+		if int(v) != paddingLen {
+			return nil, errors.New("invalid padding")
+		}
+	}
+
+	return data[:len(data)-paddingLen], nil
+}
+
 func ClientSideEncrypt(data []byte, password string) ([]byte, error) {
 	// Create a password-protected keyring
 	passphrase := []byte(password)
