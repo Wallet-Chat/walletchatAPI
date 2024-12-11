@@ -4692,8 +4692,8 @@ func WalletGuardCheck(w http.ResponseWriter, r *http.Request) {
 
 func RegisterOuraUser(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
-	var newUser entity.Ourauser
-	json.Unmarshal(requestBody, &newUser)
+	var newUserTemp entity.Ourausertemp
+	json.Unmarshal(requestBody, &newUserTemp)
 
 	//verify its a real and valid API key
 	url := "https://api.ouraring.com/v2/usercollection/daily_activity"
@@ -4706,7 +4706,7 @@ func RegisterOuraUser(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
-	req.Header.Add("Authorization", "Bearer "+newUser.Pac)
+	req.Header.Add("Authorization", "Bearer "+newUserTemp.Pac)
 
 	res, err := client.Do(req)
 	if err != nil {
@@ -4733,12 +4733,18 @@ func RegisterOuraUser(w http.ResponseWriter, r *http.Request) {
 	// if strings.EqualFold(Authuser.Address, newUser.Wallet) {
 
 	var existinguser entity.Ourauser
-	var pacAlreadyExists = database.Connector.Where("pac = ?", newUser.Pac).Find(&existinguser)
+	var pacAlreadyExists = database.Connector.Where("pac = ?", newUserTemp.Pac).Find(&existinguser)
 	if pacAlreadyExists.RowsAffected > 0 {
-		fmt.Println("PAC already registered: ", newUser.Wallet, newUser.Pac)
+		fmt.Println("PAC already registered: ", newUserTemp.Wallet, newUserTemp.Pac)
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
+
+	//Now actually register the user, redeem referral code and set nickname
+	var newUser entity.Ourauser
+	newUser.Pac = newUserTemp.Pac
+	newUser.Wallet = newUserTemp.Wallet
+	newUser.Signature = newUserTemp.Signature
 
 	// Public key as PEM string
 	publicKeyPEM := `-----BEGIN PUBLIC KEY-----
@@ -4769,6 +4775,32 @@ rnvdxUhpAAEtJZme5+pnS6Fr4Zi8mUBPt9kC/mHTtbPQoLsX+FeBs/u+rpXe4xBr
 
 	//give new users 3 new referral codes
 	referrals.CreateReferralCodeInternal(newUser.Wallet)
+
+	if newUserTemp.Referralcode != "" {
+		database.Connector.Model(&entity.Referralcode{}).
+			Where("code = ?", newUserTemp.Referralcode).
+			Update("redeemed", true)
+
+		//set user as validated in the referral code table (used separate table in the case we drop this in future)
+		var uservalid entity.Referraluser
+		uservalid.Referralcode = newUserTemp.Referralcode
+		uservalid.Walletaddr = newUserTemp.Wallet
+		database.Connector.Create(&uservalid)
+	}
+
+	if newUserTemp.Nickname != "" {
+		var addrnameDB entity.Addrnameitem
+		var addrNameItem entity.Addrnameitem
+		addrNameItem.Address = newUserTemp.Wallet
+		addrNameItem.Name = newUserTemp.Nickname
+		var dbQuery = database.Connector.Where("address = ?", newUserTemp.Wallet).Find(&addrnameDB)
+		if dbQuery.RowsAffected == 0 {
+			database.Connector.Create(&addrNameItem)
+		}
+
+		//this isn't great long-term, but for smaller table it allows new usernames to show up in table instead of waiting for once daily update
+		referrals.GetOuraLeaderboardDataCronJob()
+	}
 
 	database.Connector.Create(&newUser)
 	fmt.Println("New PAC User: ", newUser.Wallet)

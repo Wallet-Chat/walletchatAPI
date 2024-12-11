@@ -1,5 +1,14 @@
 package entity
 
+type Ourausertemp struct {
+	Id           int    `gorm:"primaryKey;autoIncrement"`
+	Wallet       string `json:"wallet"`
+	Pac          string `json:"pac"`
+	Signature    string `json:"signature"`
+	Referralcode string `json:"referralcode"`
+	Nickname     string `json:"nickname"`
+}
+
 type Ourauser struct {
 	Id           int    `gorm:"primaryKey;autoIncrement"`
 	Wallet       string `json:"wallet"`

@@ -69,7 +69,6 @@ func main() {
 	router.HandleFunc("/name", controllers.OuraCreateAddrNameItem).Methods("POST")
 	router.HandleFunc("/name/{address}", controllers.GetAddrNameItem).Methods("GET")
 	router.HandleFunc("/get_referral_code/{address}", referrals.GetReferralCodeAddr).Methods("GET")
-	router.HandleFunc("/redeem_referral_code/{code}", referrals.RedeemReferralCode).Methods("GET")
 	//debugging
 	router.HandleFunc("/debug_print", controllers.DebugPrint).Methods("POST")
 
@@ -84,12 +83,12 @@ func main() {
 	initaliseHandlers(wsRouter)
 
 	//schedule daily notifications
-	//s := gocron.NewScheduler(time.UTC)
+	s := gocron.NewScheduler(time.UTC)
 	// set time
 	//s.Every(1).Day().At("10:30").Do(func() { sendPeriodicNotifications() })
-	//s.Every(1).Day().At("01:00").Do(func() { referrals.CreateDailyReferralCodes() })
+	s.Every(1).Day().At("01:00").Do(func() { referrals.CreateDailyReferralCodes() })
 	// starts the scheduler asynchronously
-	//s.StartAsync()
+	s.StartAsync()
 
 	//schedule telegram polling for new verified users (should be webhook someday)
 	t := gocron.NewScheduler(time.UTC)
@@ -117,14 +116,16 @@ func main() {
 	// w.Every(100000).Seconds().Do(func() { referrals.GetLeaderboardDataCronJob() })
 	// // starts the scheduler asynchronously
 	// w.StartAsync()
-	w.Every(1).Days().Do(func() { referrals.GetOuraLeaderboardDataCronJob() })
+	w.Every(1).Day().At("05:00").Do(func() { referrals.GetOuraLeaderboardDataCronJob() })
+	//w.Every(1).Days().Do(func() { referrals.GetOuraLeaderboardDataCronJob() })
 	// starts the scheduler asynchronously
 	w.StartAsync()
 
 	//schedule twitter username polling for new verified users
 	oura := gocron.NewScheduler(time.UTC)
 	// set time
-	oura.Every(1).Days().Do(func() { controllers.FetchOuraData() })
+	oura.Every(1).Day().At("11:00").Do(func() { controllers.FetchOuraData() })
+	//oura.Every(1).Days().Do(func() { controllers.FetchOuraData() })
 	// starts the scheduler asynchronously
 	oura.StartAsync()
 
