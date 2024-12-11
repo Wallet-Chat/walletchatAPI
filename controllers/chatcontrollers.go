@@ -4767,7 +4767,11 @@ rnvdxUhpAAEtJZme5+pnS6Fr4Zi8mUBPt9kC/mHTtbPQoLsX+FeBs/u+rpXe4xBr
 		return
 	}
 
+	//give new users 3 new referral codes
+	referrals.CreateReferralCodeInternal(newUser.Wallet)
+
 	database.Connector.Create(&newUser)
+	fmt.Println("New PAC User: ", newUser.Wallet)
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(http.StatusCreated)

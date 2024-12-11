@@ -69,6 +69,7 @@ func main() {
 	router.HandleFunc("/name", controllers.OuraCreateAddrNameItem).Methods("POST")
 	router.HandleFunc("/name/{address}", controllers.GetAddrNameItem).Methods("GET")
 	router.HandleFunc("/get_referral_code/{address}", referrals.GetReferralCodeAddr).Methods("GET")
+	router.HandleFunc("/redeem_referral_code/{code}", referrals.RedeemReferralCode).Methods("GET")
 	//debugging
 	router.HandleFunc("/debug_print", controllers.DebugPrint).Methods("POST")
 
