@@ -121,19 +121,19 @@ func CreateReferralCodeInternal(walletaddr string) {
 	fmt.Printf("Create 3 New Referral Codes for Wallet: %#v\n", walletaddr)
 
 	var code entity.Referralcode
-	code.Code = "wc-" + randSeq(10)
+	code.Code = "va-" + randSeq(10)
 	code.Walletaddr = walletaddr
 	code.Date = time.Now()
 	database.Connector.Create(&code)
 
 	var code1 entity.Referralcode
-	code1.Code = "wc-" + randSeq(10)
+	code1.Code = "va-" + randSeq(10)
 	code1.Walletaddr = walletaddr
 	code1.Date = time.Now()
 	database.Connector.Create(&code1)
 
 	var code2 entity.Referralcode
-	code2.Code = "wc-" + randSeq(10)
+	code2.Code = "va-" + randSeq(10)
 	code2.Walletaddr = walletaddr
 	code2.Date = time.Now()
 	database.Connector.Create(&code2)
@@ -144,7 +144,7 @@ func CreateDailyReferralCodes() {
 
 	//only create new daily codes for those users who have no unused codes remaining
 	var result []entity.Referralcode
-	database.Connector.Raw("CALL InsertReferralCodes()").Scan(&result)
+	database.Connector.Raw("CALL InsertVanaReferralCodes()").Scan(&result)
 
 	//gorm results were not showing correct number of rows returned, so I had to manually do this in the SP (UGLY AF)
 	fmt.Println("Number of New Daily Referral Codes Created: ", len(result))

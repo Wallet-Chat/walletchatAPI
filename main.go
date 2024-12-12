@@ -98,11 +98,11 @@ func main() {
 	t.StartAsync()
 
 	//schedule twitter username polling for new verified users
-	u := gocron.NewScheduler(time.UTC)
-	// set time
-	u.Every(61).Seconds().Do(func() { twitter.SearchVerifyUsernames() })
-	// starts the scheduler asynchronously
-	u.StartAsync()
+	// u := gocron.NewScheduler(time.UTC)
+	// // set time
+	// u.Every(61).Seconds().Do(func() { twitter.SearchVerifyUsernames() })
+	// // starts the scheduler asynchronously
+	// u.StartAsync()
 
 	//schedule twitter polling for users requesting referral codes
 	//v := gocron.NewScheduler(time.UTC)
