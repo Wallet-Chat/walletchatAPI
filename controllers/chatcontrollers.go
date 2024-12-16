@@ -4802,6 +4802,8 @@ rnvdxUhpAAEtJZme5+pnS6Fr4Zi8mUBPt9kC/mHTtbPQoLsX+FeBs/u+rpXe4xBr
 		referrals.GetOuraLeaderboardDataCronJob()
 	}
 
+	wc_analytics.SendCustomIntraEvent(newUser.Wallet, "NEW_OURA_REGISTRATION")
+
 	database.Connector.Create(&newUser)
 	fmt.Println("New PAC User: ", newUser.Wallet)
 	w.Header().Set("Content-Type", "application/json")
@@ -5067,7 +5069,7 @@ func FetchOuraData() {
 		var contributionProofTx = vanatransact.GetTeeContributionProof(fileID)
 		fmt.Println("TEE contribution proof tx: ", contributionProofTx)
 
-		time.Sleep(15 * time.Second)
+		time.Sleep(45 * time.Second)
 		// Call the API to fetch transaction logs
 		url := "https://api.moksha.vanascan.io/api/v2/transactions/" + contributionProofTx + "/logs"
 		resp, err := http.Get(url)
