@@ -4717,8 +4717,9 @@ func RegisterOuraUser(w http.ResponseWriter, r *http.Request) {
 	defer res.Body.Close()
 
 	// Check if the response status code is not 200
+	fmt.Println("Attempt to register user: ", newUserTemp.Pac, newUserTemp.Nickname, newUserTemp.Referralcode)
 	if res.StatusCode != http.StatusOK {
-		fmt.Printf("Unexpected response code: %d\n", res.StatusCode)
+		fmt.Printf("RegisterOuraUser Unexpected response code: %d\n", res.StatusCode)
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
