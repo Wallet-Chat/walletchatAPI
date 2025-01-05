@@ -2,11 +2,9 @@ package vanatransact
 
 import (
 	"context"
-	"crypto/rand"
 	"errors"
 	"fmt"
 	"io"
-	"math"
 	"math/big"
 	"os"
 	"rest-go-demo/vanaDataRegistryContract"
@@ -228,7 +226,7 @@ func GetTeeContributionProof(fileId string) string {
 		return ""
 	}
 
-	opts, err := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(14800))
+	opts, err := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(1480))
 	if err != nil {
 		fmt.Println("failed to create transactor: %w", err)
 		return ""
@@ -264,7 +262,7 @@ func AddFileWithPermissions(ownerWallet common.Address, encryptedFileUrl string,
 		return "", fmt.Errorf("invalid private key: %w", err)
 	}
 
-	opts, err := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(14800))
+	opts, err := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(1480))
 	if err != nil {
 		return "", fmt.Errorf("failed to create transactor: %w", err)
 	}
@@ -343,7 +341,7 @@ func RequestRewardFromDLP(fileId string) (string, error) {
 		return "", fmt.Errorf("invalid private key: %w", err)
 	}
 
-	opts, err := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(14800))
+	opts, err := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(1480))
 	if err != nil {
 		return "", fmt.Errorf("failed to create transactor: %w", err)
 	}
@@ -382,7 +380,7 @@ func RequestRewardFromDLP(fileId string) (string, error) {
 type RequestBody struct {
 	JobID                  *big.Int                 `json:"job_id"`
 	FileID                 *big.Int                 `json:"file_id"`
-	Nonce                  int                      `json:"nonce"`
+	Nonce                  string                   `json:"nonce"`
 	ProofURL               string                   `json:"proof_url"`
 	EncryptionSeed         string                   `json:"encryption_seed"`
 	EnvVars                map[string]string        `json:"env_vars"`
@@ -418,16 +416,16 @@ func SendContributionProof(jobID *big.Int, fileID string, dlpPubKey string, envV
 	// Convert big.Int to string representation of the integer
 	//fileIDint := fileIDBigInt.String()
 	// Generate a random positive int32
-	nonce, err := rand.Int(rand.Reader, big.NewInt(math.MaxInt32))
-	if err != nil {
-		return err
-	}
+	// nonce, err := rand.Int(rand.Reader, big.NewInt(math.MaxInt32))
+	// if err != nil {
+	// 	return err
+	// }
 
 	// Initialize the request body with empty ValidatePermissions
 	requestBody := RequestBody{
 		JobID:    jobID,
 		FileID:   fileIDBigInt,
-		Nonce:    int(nonce.Int64()), // Convert *big.Int to int
+		Nonce:    "13", //int(nonce.Int64()), // Convert *big.Int to int
 		ProofURL: "https://github.com/Wallet-Chat/vana-satya-proof-template-py/releases/download/v3/my-proof-3.tar.gz",
 		//ProofURL:            "https://github.com/vana-com/vana-satya-proof-template/releases/download/v24/gsc-my-proof-24.tar.gz",
 		EncryptionSeed:      os.Getenv("VANA_ENCRYPT_KEY_SEED"),
