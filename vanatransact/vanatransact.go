@@ -17,6 +17,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"time"
 
 	_ "rest-go-demo/docs"
@@ -226,7 +227,12 @@ func GetTeeContributionProof(fileId string) string {
 		return ""
 	}
 
-	opts, err := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(1480))
+	chainID, err := strconv.ParseInt(os.Getenv("VANA_CHAIN_ID"), 10, 64)
+	if err != nil {
+		fmt.Println("failed to parse chain ID")
+		return ""
+	}
+	opts, err := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(chainID))
 	if err != nil {
 		fmt.Println("failed to create transactor: %w", err)
 		return ""
@@ -262,7 +268,11 @@ func AddFileWithPermissions(ownerWallet common.Address, encryptedFileUrl string,
 		return "", fmt.Errorf("invalid private key: %w", err)
 	}
 
-	opts, err := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(1480))
+	chainID, err := strconv.ParseInt(os.Getenv("VANA_CHAIN_ID"), 10, 64)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse chain ID: %w", err)
+	}
+	opts, err := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(chainID))
 	if err != nil {
 		return "", fmt.Errorf("failed to create transactor: %w", err)
 	}
@@ -341,7 +351,11 @@ func RequestRewardFromDLP(fileId string) (string, error) {
 		return "", fmt.Errorf("invalid private key: %w", err)
 	}
 
-	opts, err := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(1480))
+	chainID, err := strconv.ParseInt(os.Getenv("VANA_CHAIN_ID"), 10, 64)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse chain ID: %w", err)
+	}
+	opts, err := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(chainID))
 	if err != nil {
 		return "", fmt.Errorf("failed to create transactor: %w", err)
 	}
