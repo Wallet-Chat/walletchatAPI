@@ -439,8 +439,8 @@ func SendContributionProof(jobID *big.Int, fileID string, dlpPubKey string, envV
 	requestBody := RequestBody{
 		JobID:    jobID,
 		FileID:   fileIDBigInt,
-		Nonce:    "13", //int(nonce.Int64()), // Convert *big.Int to int
-		ProofURL: "https://github.com/Wallet-Chat/vana-satya-proof-template-py/releases/download/v3/my-proof-3.tar.gz",
+		Nonce:    "18", //int(nonce.Int64()), // Convert *big.Int to int
+		ProofURL: "https://github.com/Wallet-Chat/vana-satya-proof-template-py/releases/download/v4/my-proof-4.tar.gz",
 		//ProofURL:            "https://github.com/vana-com/vana-satya-proof-template/releases/download/v24/gsc-my-proof-24.tar.gz",
 		EncryptionSeed:      os.Getenv("VANA_ENCRYPT_KEY_SEED"),
 		EnvVars:             envVars,
