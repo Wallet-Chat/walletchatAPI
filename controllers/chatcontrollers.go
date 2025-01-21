@@ -38,6 +38,12 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	ens "github.com/wealdtech/go-ens/v3"
 
+	//test code
+	"crypto/ecdsa"
+
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/crypto"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -4893,7 +4899,62 @@ func FetchOuraData() {
 		if len(ourauser.Signature) < 1 {
 			continue
 		}
-		fmt.Println("Fetching Daily Data for: ", ourauser.Wallet)
+		// if ourauser.Oauth != "real" {
+		// 	continue
+		// }
+
+		// 1. Generate a new private key (wallet)
+		privateKey, err := crypto.GenerateKey()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// Convert the private key to bytes, then to a hex string (for display/logging)
+		privateKeyBytes := crypto.FromECDSA(privateKey)
+		fmt.Println("Private Key (hex):", hexutil.Encode(privateKeyBytes))
+
+		// 2. Derive the public key and the Ethereum address
+		publicKey := privateKey.Public()
+		publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
+		if !ok {
+			log.Fatal("Failed to cast public key to ECDSA.")
+		}
+
+		address := crypto.PubkeyToAddress(*publicKeyECDSA).Hex()
+		fmt.Println("Ethereum Address:", address)
+
+		// 3. Sign a simple text message
+		message := []byte("You are signing this message to prove ownership of your wallet. No transaction or gas fees will occur.")
+		// The message must be hashed before signing
+		messageHash := crypto.Keccak256Hash(message)
+
+		signature, err := crypto.Sign(messageHash.Bytes(), privateKey)
+		if err != nil {
+			log.Fatal("Failed to sign message:", err)
+		}
+
+		// Print the signature
+		signatureHex := hexutil.Encode(signature)
+		fmt.Println("Signature (hex):", signatureHex)
+
+		//end of test code
+
+		// Public key as PEM string
+		publicKeyPEM := `-----BEGIN PUBLIC KEY-----
+MIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEA4129oK+dUEalpqP5aT/M
+A6yhFbAjNppOidQuVgeSgEPquXLlJrdLoomHGhzugbBYeKS6lceEDM3oygFdCGhT
+sly26Ws8qyUIGlk0/JGf4mRHd9RMs0uOF50/mB4abNM/mA/k8cO46+UmXOK2rwEL
+U2rPb5tWVzxjPqs8Aw9eT1n7UlvOXxFc4ChyIHX/plfbkKK1R1+PYhtBHeQT8aW1
+o7wLsbbnkCGh2iahJaNacMWmUZ9YygdPg2DICQLK2KbZfZHhhylBjDzuBgjUzNai
+ikVHzrR6f9eTihYjmpx8Br5Ubhj3lVt45nAXFidxMBe1e7IILNVl9C57sqV+nPFM
+2s5ad/r3TDjOZ23e0FGBVsyG+lJwn9q/kx4kjSFsO8fNzJ7wUczVnfW+akox2rMX
+rnvdxUhpAAEtJZme5+pnS6Fr4Zi8mUBPt9kC/mHTtbPQoLsX+FeBs/u+rpXe4xBr
++QhqShKWQ+4HzwQHCc5h9d4pqZEKK8UnpdeJ0c/QTqcVAgMBAAE=
+-----END PUBLIC KEY-----`
+
+		encryptedSecret, _ := vanaencrypt.EncryptSecretForProof(publicKeyPEM, []byte(ourauser.Pac))
+
+		fmt.Println("Fetching Daily Data for: ", address)
 		// Create a buffer to hold the zip data
 		var zipFileBuf bytes.Buffer
 		// Create a new zip writer
@@ -4938,8 +4999,17 @@ func FetchOuraData() {
 				break
 			}
 
-			// Marshal the JSON data with indentation
-			formattedJSON, err := json.MarshalIndent(jsonData, "", "  ")
+			// Generate a random value
+			randomValue := rand.Intn(100) // Example: random integer between 0 and 99
+
+			// Convert jsonData to a map for easy manipulation
+			dataMap := jsonData.(map[string]interface{})
+
+			// Add the random value to the map
+			dataMap["random_value"] = randomValue
+
+			// Marshal the updated map back to JSON
+			formattedJSON, err := json.MarshalIndent(dataMap, "", "  ")
 			if err != nil {
 				fmt.Println("Failed to marshal JSON with indentation:", err)
 				break
@@ -4973,13 +5043,13 @@ func FetchOuraData() {
 		// }
 
 		//encrypt the file encryption key with the users signature (TODO fill this based on user signature)
-		encryptedBytes, err := vanaencrypt.ClientSideEncrypt(zipFileBuf.Bytes(), ourauser.Signature)
+		encryptedBytes, err := vanaencrypt.ClientSideEncrypt(zipFileBuf.Bytes(), signatureHex)
 		if err != nil {
 			fmt.Println("error in ClientSideEncrypt", err)
 		}
 
 		// Upload the zip file to DigitalOcean Spaces
-		fileUrl, err := SaveFileToSpaces(encryptedBytes, ourauser.Wallet+time.Now().Format("2006-01-02_15-04-05")+"_archive.zip")
+		fileUrl, err := SaveFileToSpaces(encryptedBytes, address+time.Now().Format("2006-01-02_15-04-05")+"_archive.zip")
 		if err != nil {
 			log.Fatalf("Failed to upload to DigitalOcean Spaces: %v", err)
 		}
@@ -5012,7 +5082,7 @@ func FetchOuraData() {
 		}
 
 		//get EEK with EK
-		vanaDlpEEK, _, _ := vanaencrypt.EncryptWithWalletPublicKey(ourauser.Signature, publicKeyDLP, iv, ephemPrivateKeyBytes)
+		vanaDlpEEK, _, _ := vanaencrypt.EncryptWithWalletPublicKey(signatureHex, publicKeyDLP, iv, ephemPrivateKeyBytes)
 		finalDlpEEK := append(vanaDlpEEK["iv"],
 			append(vanaDlpEEK["ephemPublicKey"],
 				append(vanaDlpEEK["ciphertext"], vanaDlpEEK["mac"]...)...)...)
@@ -5024,7 +5094,7 @@ func FetchOuraData() {
 		//function - addFileWithPermissions - blockchain RPC call
 		//parameters - (publicly accessible link to encrypted data, "permissions" is the encrypted encryption key)
 		// returns fileID (ex: file id is '601971')
-		walletAddress := common.HexToAddress(ourauser.Wallet) //ourauser.Wallet)
+		walletAddress := common.HexToAddress(address) //ourauser.Wallet)
 		txHash, err := vanatransact.AddFileWithPermissions(walletAddress, fileUrl, hexDataDlpEEK)
 		if err != nil {
 			fmt.Println("Uploaded File  err: ", txHash, err)
@@ -5070,7 +5140,7 @@ func FetchOuraData() {
 		var contributionProofTx = vanatransact.GetTeeContributionProof(fileID)
 		fmt.Println("TEE contribution proof tx: ", contributionProofTx)
 
-		time.Sleep(45 * time.Second)
+		time.Sleep(10 * time.Second)
 		// Call the API to fetch transaction logs
 		url := "https://api.moksha.vanascan.io/api/v2/transactions/" + contributionProofTx + "/logs"
 		resp, err := http.Get(url)
@@ -5142,12 +5212,12 @@ func FetchOuraData() {
 			//secrets := map[string]string{}
 			//encryptedSecret, _ := vanaencrypt.EncryptSecretForProof(publicKeyPEM, []byte("user123@gmail.com"))
 			secrets := map[string]string{
-				"USER_API_KEY": ourauser.Encryptedpac, // Add USER_EMAIL to EnvVars
+				"USER_API_KEY": encryptedSecret, // Add USER_EMAIL to EnvVars
 			} //this would be API keys, etc needed in proof code
 
 			//ask a specific TEE to run the proof of contribution
 			//${jobDetails.teeUrl}/RunProof
-			err := vanatransact.SendContributionProof(latestJobId, fileID, publicKeyDLP, envVars, secrets, teePublicKey, teeUrl, iv, ephemPrivateKeyBytes, ourauser.Signature)
+			err := vanatransact.SendContributionProof(latestJobId, fileID, publicKeyDLP, envVars, secrets, teePublicKey, teeUrl, iv, ephemPrivateKeyBytes, signatureHex)
 			if err != nil {
 				fmt.Println("Error in SendContributionProof", err)
 				continue
