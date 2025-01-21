@@ -2505,6 +2505,21 @@ func OuraCreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func OuraTestFile(w http.ResponseWriter, r *http.Request) {
+	requestBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Unable to read request body", http.StatusBadRequest)
+		return
+	}
+
+	// Print the raw JSON or POST body
+	fmt.Printf("Received POST body: %s\n", string(requestBody))
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.WriteHeader(http.StatusOK)
+}
+
 // func UpdateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 // 	requestBody, _ := ioutil.ReadAll(r.Body)
 // 	var addrname entity.Addrnameitem
