@@ -34,6 +34,7 @@ import (
 	_ "rest-go-demo/docs"
 
 	goaway "github.com/TwiN/go-away"
+	ps "github.com/etaaa/Golang-Ethereum-Personal-Sign"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	ens "github.com/wealdtech/go-ens/v3"
@@ -4896,9 +4897,9 @@ func FetchOuraData() {
 
 	for _, ourauser := range ourausers {
 		//skip test users
-		if len(ourauser.Signature) < 1 {
-			continue
-		}
+		// if len(ourauser.Signature) < 1 {
+		// 	continue
+		// }
 		// if ourauser.Oauth != "real" {
 		// 	continue
 		// }
@@ -4924,18 +4925,54 @@ func FetchOuraData() {
 		fmt.Println("Ethereum Address:", address)
 
 		// 3. Sign a simple text message
-		message := []byte("You are signing this message to prove ownership of your wallet. No transaction or gas fees will occur.")
+		//message := []byte("You are signing this message to prove ownership of your wallet. No transaction or gas fees will occur.")
 		// The message must be hashed before signing
-		messageHash := crypto.Keccak256Hash(message)
+		//messageHash := crypto.Keccak256Hash(message)
 
-		signature, err := crypto.Sign(messageHash.Bytes(), privateKey)
+		// signature, err := crypto.Sign(messageHash.Bytes(), privateKey)
+		// if err != nil {
+		// 	log.Fatal("Failed to sign message:", err)
+		// }
+
+		signature, err := ps.PersonalSign("You are signing this message to prove ownership of your wallet. No transaction or gas fees will occur.", privateKey)
 		if err != nil {
-			log.Fatal("Failed to sign message:", err)
+			log.Fatal(err)
+		}
+		fmt.Println("Signature Hex: ", signature)
+
+		// Remove the "0x" prefix if it exists
+		if strings.HasPrefix(signature, "0x") {
+			signature = strings.TrimPrefix(signature, "0x")
+		}
+
+		// Convert the hex string signature to a byte array
+		signatureBytes, err := hex.DecodeString(signature)
+		if err != nil {
+			log.Fatal("Failed to decode hex string:", err)
 		}
 
 		// Print the signature
-		signatureHex := hexutil.Encode(signature)
+		signatureHex := hexutil.Encode(signatureBytes)
 		fmt.Println("Signature (hex):", signatureHex)
+
+		// Recover the public key from the signature
+		// recoveredPubKey, err := crypto.SigToPub(messageHash.Bytes(), signatureBytes)
+		// if err != nil {
+		// 	log.Fatal("Failed to recover public key:", err)
+		// }
+
+		// // Convert the recovered public key to an address
+		// recoveredAddress := crypto.PubkeyToAddress(*recoveredPubKey)
+
+		// // Derive the expected address from the private key
+		// expectedAddress := crypto.PubkeyToAddress(*privateKey.Public().(*ecdsa.PublicKey))
+
+		// Compare the recovered address with the expected address
+		// if recoveredAddress == expectedAddress {
+		// 	fmt.Println("Signature is valid and comes from the expected public key.")
+		// } else {
+		// 	fmt.Println("Signature verification failed. The signature does not match the expected public key.")
+		// }
 
 		//end of test code
 
@@ -4952,7 +4989,7 @@ rnvdxUhpAAEtJZme5+pnS6Fr4Zi8mUBPt9kC/mHTtbPQoLsX+FeBs/u+rpXe4xBr
 +QhqShKWQ+4HzwQHCc5h9d4pqZEKK8UnpdeJ0c/QTqcVAgMBAAE=
 -----END PUBLIC KEY-----`
 
-		encryptedSecret, _ := vanaencrypt.EncryptSecretForProof(publicKeyPEM, []byte(ourauser.Pac))
+		encryptedSecret, _ := vanaencrypt.EncryptSecretForProof(publicKeyPEM, []byte("YQD6O4SZAXZAG7XFM7UUXCZ2VMF677N2"))
 
 		fmt.Println("Fetching Daily Data for: ", address)
 		// Create a buffer to hold the zip data
@@ -4963,69 +5000,9 @@ rnvdxUhpAAEtJZme5+pnS6Fr4Zi8mUBPt9kC/mHTtbPQoLsX+FeBs/u+rpXe4xBr
 		//DLP public Key
 		publicKeyDLP, err := vanatransact.GetDlpPublicKey()
 		if err != nil {
-			continue
+			//continue
 		}
 		fmt.Println("DLP encryption publicKey: ", publicKeyDLP)
-		//encrypt data client using signature of a fixed message (tbd - how to do as proxy?)
-		for _, endpoint := range ouraEndpoints {
-			url := "https://api.ouraring.com/v2/usercollection/" + endpoint
-			method := "GET"
-
-			client := &http.Client{}
-			req, err := http.NewRequest(method, url, nil)
-			if err != nil {
-				fmt.Println(err)
-				break
-			}
-			req.Header.Add("Authorization", "Bearer "+ourauser.Pac)
-
-			res, err := client.Do(req)
-			if err != nil {
-				fmt.Println(err)
-				break
-			}
-			defer res.Body.Close()
-
-			body, err := io.ReadAll(res.Body)
-			if err != nil {
-				fmt.Println(err)
-				break
-			}
-
-			// Decode the JSON body into a generic interface
-			var jsonData interface{}
-			if err := json.Unmarshal(body, &jsonData); err != nil {
-				fmt.Println("Failed to unmarshal JSON:", err)
-				break
-			}
-
-			// Generate a random value
-			randomValue := rand.Intn(100) // Example: random integer between 0 and 99
-
-			// Convert jsonData to a map for easy manipulation
-			dataMap := jsonData.(map[string]interface{})
-
-			// Add the random value to the map
-			dataMap["random_value"] = randomValue
-
-			// Marshal the updated map back to JSON
-			formattedJSON, err := json.MarshalIndent(dataMap, "", "  ")
-			if err != nil {
-				fmt.Println("Failed to marshal JSON with indentation:", err)
-				break
-			}
-
-			var currentData entity.Ouradata
-			currentData.Endpoint = endpoint
-			currentData.Wallet = ourauser.Wallet
-			currentData.Jsondata = string(formattedJSON)
-			database.Connector.Create(&currentData)
-
-			// Add formatted JSON to the zip
-			if err := addFileToZip(zipWriter, endpoint+".json", formattedJSON); err != nil {
-				log.Fatalf("Failed to add "+endpoint+".json to zip: %v", err)
-			}
-		}
 
 		// Close the zip writer
 		if err := zipWriter.Close(); err != nil {
@@ -5074,11 +5051,11 @@ rnvdxUhpAAEtJZme5+pnS6Fr4Zi8mUBPt9kC/mHTtbPQoLsX+FeBs/u+rpXe4xBr
 		// Initialize the IV and ephemeral private key with random bytes if was not provided
 		iv := make([]byte, 16) // 16 bytes for IV
 		if _, err := rand.Read(iv); err != nil {
-			continue
+			//continue
 		}
 		ephemPrivateKeyBytes := make([]byte, 32) // 32 bytes for ephemeral private key
 		if _, err := rand.Read(ephemPrivateKeyBytes); err != nil {
-			continue
+			//continue
 		}
 
 		//get EEK with EK
@@ -5098,7 +5075,7 @@ rnvdxUhpAAEtJZme5+pnS6Fr4Zi8mUBPt9kC/mHTtbPQoLsX+FeBs/u+rpXe4xBr
 		txHash, err := vanatransact.AddFileWithPermissions(walletAddress, fileUrl, hexDataDlpEEK)
 		if err != nil {
 			fmt.Println("Uploaded File  err: ", txHash, err)
-			continue
+			//continue
 		}
 		fmt.Println("Uploaded File TX: ", txHash)
 		var fileID = vanatransact.GetFileID(txHash)
@@ -5220,7 +5197,7 @@ rnvdxUhpAAEtJZme5+pnS6Fr4Zi8mUBPt9kC/mHTtbPQoLsX+FeBs/u+rpXe4xBr
 			err := vanatransact.SendContributionProof(latestJobId, fileID, publicKeyDLP, envVars, secrets, teePublicKey, teeUrl, iv, ephemPrivateKeyBytes, signatureHex)
 			if err != nil {
 				fmt.Println("Error in SendContributionProof", err)
-				continue
+				//continue
 			}
 
 			//now request reward from DLP contract
