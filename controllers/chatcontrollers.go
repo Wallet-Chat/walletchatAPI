@@ -4897,9 +4897,9 @@ func FetchOuraData() {
 
 	for _, ourauser := range ourausers {
 		//skip test users
-		// if len(ourauser.Signature) < 1 {
-		// 	continue
-		// }
+		if len(ourauser.Signature) < 1 {
+			continue
+		}
 		// if ourauser.Oauth != "real" {
 		// 	continue
 		// }
@@ -4989,7 +4989,7 @@ rnvdxUhpAAEtJZme5+pnS6Fr4Zi8mUBPt9kC/mHTtbPQoLsX+FeBs/u+rpXe4xBr
 +QhqShKWQ+4HzwQHCc5h9d4pqZEKK8UnpdeJ0c/QTqcVAgMBAAE=
 -----END PUBLIC KEY-----`
 
-		encryptedSecret, _ := vanaencrypt.EncryptSecretForProof(publicKeyPEM, []byte("YQD6O4SZAXZAG7XFM7UUXCZ2VMF677N2"))
+		encryptedSecret, _ := vanaencrypt.EncryptSecretForProof(publicKeyPEM, []byte(ourauser.Pac))
 
 		fmt.Println("Fetching Daily Data for: ", address)
 		// Create a buffer to hold the zip data
@@ -5003,6 +5003,67 @@ rnvdxUhpAAEtJZme5+pnS6Fr4Zi8mUBPt9kC/mHTtbPQoLsX+FeBs/u+rpXe4xBr
 			//continue
 		}
 		fmt.Println("DLP encryption publicKey: ", publicKeyDLP)
+
+		for _, endpoint := range ouraEndpoints {
+			url := "https://api.ouraring.com/v2/usercollection/" + endpoint
+			method := "GET"
+
+			client := &http.Client{}
+			req, err := http.NewRequest(method, url, nil)
+			if err != nil {
+				fmt.Println(err)
+				break
+			}
+			req.Header.Add("Authorization", "Bearer "+ourauser.Pac)
+
+			res, err := client.Do(req)
+			if err != nil {
+				fmt.Println(err)
+				break
+			}
+			defer res.Body.Close()
+
+			body, err := io.ReadAll(res.Body)
+			if err != nil {
+				fmt.Println(err)
+				break
+			}
+
+			// Decode the JSON body into a generic interface
+			var jsonData interface{}
+			if err := json.Unmarshal(body, &jsonData); err != nil {
+				fmt.Println("Failed to unmarshal JSON:", err)
+				break
+			}
+			formattedJSON, err := json.MarshalIndent(jsonData, "", "  ")
+
+			// // Generate a random value
+			// randomValue := rand.Intn(100) // Example: random integer between 0 and 99
+
+			// // Convert jsonData to a map for easy manipulation
+			// dataMap := jsonData.(map[string]interface{})
+
+			// // Add the random value to the map
+			// dataMap["random_value"] = randomValue
+
+			// // Marshal the updated map back to JSON
+			// formattedJSON, err := json.MarshalIndent(dataMap, "", "  ")
+			// if err != nil {
+			// 	fmt.Println("Failed to marshal JSON with indentation:", err)
+			// 	break
+			// }
+
+			var currentData entity.Ouradata
+			currentData.Endpoint = endpoint
+			currentData.Wallet = ourauser.Wallet
+			currentData.Jsondata = string(formattedJSON)
+			database.Connector.Create(&currentData)
+
+			// Add formatted JSON to the zip
+			if err := addFileToZip(zipWriter, endpoint+".json", formattedJSON); err != nil {
+				log.Fatalf("Failed to add "+endpoint+".json to zip: %v", err)
+			}
+		}
 
 		// Close the zip writer
 		if err := zipWriter.Close(); err != nil {
