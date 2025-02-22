@@ -4,6 +4,7 @@ type Ourausertemp struct {
 	Id           int    `gorm:"primaryKey;autoIncrement"`
 	Wallet       string `json:"wallet"`
 	Pac          string `json:"pac"`
+	Email        string `json:"email"`
 	Signature    string `json:"signature"`
 	Referralcode string `json:"referralcode"`
 	Nickname     string `json:"nickname"`

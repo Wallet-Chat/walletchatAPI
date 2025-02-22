@@ -4697,6 +4697,60 @@ func WalletGuardCheck(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(recommendedActions)
 }
 
+func RegisterOpenCuresUser(w http.ResponseWriter, r *http.Request) {
+	requestBody, _ := ioutil.ReadAll(r.Body)
+	var newUserTemp entity.Ourausertemp
+	json.Unmarshal(requestBody, &newUserTemp)
+
+	// Define the API URL and API key
+	apiUrl := "https://api.opencures.dev/api/v1/connections/connect"
+	apiKey := os.Getenv("OPENCURES_API_KEY")
+
+	// Create the data to be sent in the request body
+	data := map[string]string{
+		"email":       newUserTemp.Email,
+		"redirectUrl": "https://leaderboard.intra.so",
+	}
+
+	// Convert the data map to a JSON string
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		log.Fatalf("Error marshaling JSON: %v", err)
+	}
+
+	// Create a new HTTP request
+	req, err := http.NewRequest("POST", apiUrl, bytes.NewBuffer(jsonData))
+	if err != nil {
+		log.Fatalf("Error creating request: %v", err)
+	}
+
+	// Set the request headers
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiKey)) // Use fmt.Sprintf to insert the API key
+
+	// Perform the HTTP request
+	client := &http.Client{}
+	response, err := client.Do(req)
+	if err != nil {
+		log.Fatalf("Error making request: %v", err)
+	}
+	defer response.Body.Close() // Ensure the response body is closed
+
+	// Check if the response is OK
+	if response.StatusCode != http.StatusOK {
+		log.Fatalf("HTTP error! status: %d", response.StatusCode)
+	}
+
+	// Parse the JSON response
+	var responseData map[string]interface{}
+	if err := json.NewDecoder(response.Body).Decode(&responseData); err != nil {
+		log.Fatalf("Error decoding JSON response: %v", err)
+	}
+
+	// Print the success message
+	fmt.Println("Success:", responseData)
+}
+
 func RegisterOuraUser(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var newUserTemp entity.Ourausertemp
