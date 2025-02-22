@@ -4745,7 +4745,7 @@ func RegisterOpenCuresUser(w http.ResponseWriter, r *http.Request) {
 	defer response.Body.Close() // Ensure the response body is closed
 
 	// Check if the response is OK
-	if response.StatusCode != http.StatusOK {
+	if response.StatusCode != http.StatusOK && response.StatusCode != http.StatusCreated {
 		log.Fatalf("HTTP error! status: %d", response.StatusCode)
 	}
 
@@ -4757,6 +4757,10 @@ func RegisterOpenCuresUser(w http.ResponseWriter, r *http.Request) {
 
 	// Print the success message
 	fmt.Println("Success:", responseData)
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(responseData)
 }
 
 func RegisterOuraUser(w http.ResponseWriter, r *http.Request) {
