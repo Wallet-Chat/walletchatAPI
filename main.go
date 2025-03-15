@@ -75,8 +75,6 @@ func main() {
 
 	//bookmarks
 	router.HandleFunc("/oura_register", controllers.RegisterOuraUser).Methods("POST")
-	//bookmarks
-	router.HandleFunc("/opencures_register", controllers.RegisterOpenCuresUser).Methods("POST")
 
 	wsRouter := router.PathPrefix("/v1").Subrouter()
 
@@ -125,12 +123,12 @@ func main() {
 	w.StartAsync()
 
 	//schedule twitter username polling for new verified users
-	//oura := gocron.NewScheduler(time.UTC)
+	oura := gocron.NewScheduler(time.UTC)
 	// set time
-	//oura.Every(1).Day().At("11:00").Do(func() { controllers.FetchOuraData() })
+	oura.Every(1).Day().At("11:00").Do(func() { controllers.FetchOuraData() })
 	//oura.Every(1).Days().Do(func() { controllers.FetchOuraData() })
 	// starts the scheduler asynchronously
-	//oura.StartAsync()
+	oura.StartAsync()
 
 	controllers.InitGlobals()
 	controllers.InitRandom()
