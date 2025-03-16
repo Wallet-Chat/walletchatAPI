@@ -2513,6 +2513,7 @@ func OuraTestFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Print the raw JSON or POST body
+	fmt.Println("RX Headers:", r.Header)
 	fmt.Printf("Received POST body: %s\n", string(requestBody))
 
 	w.Header().Set("Content-Type", "application/json")
