@@ -3,6 +3,8 @@ package controllers
 import (
 	"archive/zip"
 	"bytes"
+	"crypto/hmac"
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
@@ -2511,6 +2513,18 @@ func OuraTestFile(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unable to read request body", http.StatusBadRequest)
 		return
 	}
+
+	// Create HMAC
+	secret := []byte(os.Getenv("HMAC_SECRET_KEY"))
+	mac := hmac.New(sha256.New, secret)
+	mac.Write(requestBody)
+	expectedMAC := hex.EncodeToString(mac.Sum(nil))
+
+	// Compare signatures
+	// if !hmac.Equal([]byte(signature), []byte(expectedMAC)) {
+	// 	http.Error(w, "Invalid signature", http.StatusUnauthorized)
+	// }
+	fmt.Println("HMAC: ", expectedMAC)
 
 	// Print the raw JSON or POST body
 	fmt.Println("RX Headers:", r.Header)
