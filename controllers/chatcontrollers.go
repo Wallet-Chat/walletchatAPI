@@ -44,6 +44,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
@@ -5206,8 +5207,8 @@ func HandleWebhookData(w http.ResponseWriter, r *http.Request) {
 
 	//Save file to DB
 	var currentData entity.Ouradata
-	currentData.Endpoint = "HealthData"
-	currentData.Wallet = "wallet_addr" //TODO get from data UL
+	currentData.Endpoint = uuid.New().String() //TODO we should make a new DB table but for now we re-use this
+	currentData.Wallet = "wallet_addr"         //TODO get from data UL
 	currentData.Jsondata = string(requestBody)
 	database.Connector.Create(&currentData)
 
