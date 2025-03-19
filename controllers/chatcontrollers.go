@@ -2508,6 +2508,42 @@ func OuraCreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func VerifyDataHMAC(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	uuidInput := vars["uuid"]
+	hmacInput := vars["hmac"]
+
+	fmt.Println("Verify HMAC inputs: ", uuidInput, hmacInput)
+	validHMAC := false
+
+	//TODO: find data associated with UUID, computed HMAC and compare to passed HMAC
+	// Create HMAC
+	secret := []byte(uuidInput)
+	mac := hmac.New(sha256.New, secret)
+	//Get raw json matching uuid (we are re-using a field for now - endpoint FIX!)
+	var userData entity.Ouradata
+	var existingData = database.Connector.Where("endpoint = ?", uuidInput).Find(&userData)
+	if existingData.RowsAffected > 0 {
+		mac.Write([]byte(userData.Jsondata))
+		expectedMAC := hex.EncodeToString(mac.Sum(nil))
+
+		// Compare signatures
+		if hmac.Equal([]byte(hmacInput), []byte(expectedMAC)) {
+			validHMAC = true
+		}
+		fmt.Println("HMAC compare: ", expectedMAC, hmacInput)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+
+	if validHMAC {
+		w.WriteHeader(http.StatusOK)
+	} else {
+		w.WriteHeader(http.StatusConflict)
+	}
+}
+
 func OuraTestFile(w http.ResponseWriter, r *http.Request) {
 	requestBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -5212,8 +5248,8 @@ func HandleWebhookData(w http.ResponseWriter, r *http.Request) {
 	currentData.Jsondata = string(requestBody)
 	database.Connector.Create(&currentData)
 
-	var userData entity.Ourauser
-	var existingUserData = database.Connector.Where("wallet = ?", currentData.Wallet).Find(&userData)
+	var userInfo entity.Ourauser
+	var existingUserData = database.Connector.Where("wallet = ?", currentData.Wallet).Find(&userInfo)
 	if existingUserData.RowsAffected == 0 {
 		//create user + wallet connection
 
@@ -5238,7 +5274,7 @@ func HandleWebhookData(w http.ResponseWriter, r *http.Request) {
 	//TODO get user, so we can pull signature, or have it sent with data
 
 	//encrypt the file encryption key with the users signature (TODO fill this based on user signature)
-	encryptedBytes, err := vanaencrypt.ClientSideEncrypt(zipFileBuf.Bytes(), userData.Signature)
+	encryptedBytes, err := vanaencrypt.ClientSideEncrypt(zipFileBuf.Bytes(), userInfo.Signature)
 	if err != nil {
 		fmt.Println("error in ClientSideEncrypt", err)
 	}
@@ -5277,7 +5313,7 @@ func HandleWebhookData(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//get EEK with EK
-	vanaDlpEEK, _, _ := vanaencrypt.EncryptWithWalletPublicKey(userData.Signature, publicKeyDLP, iv, ephemPrivateKeyBytes)
+	vanaDlpEEK, _, _ := vanaencrypt.EncryptWithWalletPublicKey(userInfo.Signature, publicKeyDLP, iv, ephemPrivateKeyBytes)
 	finalDlpEEK := append(vanaDlpEEK["iv"],
 		append(vanaDlpEEK["ephemPublicKey"],
 			append(vanaDlpEEK["ciphertext"], vanaDlpEEK["mac"]...)...)...)
@@ -5289,7 +5325,7 @@ func HandleWebhookData(w http.ResponseWriter, r *http.Request) {
 	//function - addFileWithPermissions - blockchain RPC call
 	//parameters - (publicly accessible link to encrypted data, "permissions" is the encrypted encryption key)
 	// returns fileID (ex: file id is '601971')
-	walletAddress := common.HexToAddress(userData.Wallet) //ourauser.Wallet)
+	walletAddress := common.HexToAddress(userInfo.Wallet) //ourauser.Wallet)
 	txHash, err := vanatransact.AddFileWithPermissions(walletAddress, fileUrl, hexDataDlpEEK)
 	if err != nil {
 		fmt.Println("Uploaded File  err: ", txHash, err)
@@ -5406,7 +5442,7 @@ func HandleWebhookData(w http.ResponseWriter, r *http.Request) {
 		//secrets := map[string]string{}
 		//encryptedSecret, _ := vanaencrypt.EncryptSecretForProof(publicKeyPEM, []byte("user123@gmail.com"))
 		secrets := map[string]string{
-			//"USER_API_KEY":
+			"USER_API_KEY": currentData.Endpoint, //TODO we are re-using this field for UUID (fix when new DB table is added)
 		} //this would be API keys, etc needed in proof code
 
 		//ask a specific TEE to run the proof of contribution
