@@ -27,6 +27,7 @@ import (
 	"rest-go-demo/vanaencrypt"
 	"rest-go-demo/vanatransact"
 	"rest-go-demo/wc_analytics"
+	"sort"
 	"sync"
 
 	"strconv"
@@ -2516,24 +2517,44 @@ func VerifyDataHMAC(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Verify HMAC inputs: ", uuidInput, hmacInput)
 	validHMAC := false
 
-	//TODO: find data associated with UUID, computed HMAC and compare to passed HMAC
-	// Create HMAC
-	secret := []byte(uuidInput)
-	mac := hmac.New(sha256.New, secret)
-	//Get raw json matching uuid (we are re-using a field for now - endpoint FIX!)
+	// Get raw JSON matching UUID from the database (assuming `userData.Jsondata` holds JSON string)
 	var userData entity.Ouradata
 	var existingData = database.Connector.Where("endpoint = ?", uuidInput).Find(&userData)
-	if existingData.RowsAffected > 0 {
-		mac.Write([]byte(userData.Jsondata))
-		expectedMAC := hex.EncodeToString(mac.Sum(nil))
 
-		// Compare signatures
-		if hmac.Equal([]byte(hmacInput), []byte(expectedMAC)) {
-			validHMAC = true
-		}
-		fmt.Println("HMAC compare: ", expectedMAC, hmacInput)
+	if existingData.RowsAffected == 0 {
+		http.Error(w, "Data not found", http.StatusNotFound)
+		return
 	}
 
+	// Parse JSON into a map to allow sorting
+	var jsonData map[string]interface{}
+	if err := json.Unmarshal([]byte(userData.Jsondata), &jsonData); err != nil {
+		http.Error(w, "Invalid JSON format", http.StatusBadRequest)
+		return
+	}
+
+	// Convert back to JSON with sorted keys
+	normalizedData, err := sortedCompactJSON(jsonData)
+	if err != nil {
+		http.Error(w, "Failed to normalize JSON", http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Println("Normalized JSON: ", normalizedData)
+
+	// Compute HMAC
+	secret := []byte(uuidInput)
+	mac := hmac.New(sha256.New, secret)
+	mac.Write([]byte(normalizedData))
+	expectedMAC := hex.EncodeToString(mac.Sum(nil))
+
+	// Compare signatures
+	if hmac.Equal([]byte(hmacInput), []byte(expectedMAC)) {
+		validHMAC = true
+	}
+	fmt.Println("HMAC compare: ", expectedMAC, hmacInput)
+
+	// Response
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 
@@ -2544,6 +2565,37 @@ func VerifyDataHMAC(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// ✅ **Function to Sort JSON Keys & Compact the Output**
+func sortedCompactJSON(data map[string]interface{}) (string, error) {
+	// Extract keys and sort them
+	keys := make([]string, 0, len(data))
+	for k := range data {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	// Manually reconstruct JSON in a sorted, compact format
+	var buffer bytes.Buffer
+	buffer.WriteString("{")
+	for i, k := range keys {
+		if i > 0 {
+			buffer.WriteString(",") // Ensure compact formatting (no extra spaces)
+		}
+		// Append key
+		buffer.WriteString(`"` + k + `":`)
+
+		// Append value
+		value, err := json.Marshal(data[k]) // Ensure correct value formatting
+		if err != nil {
+			return "", err
+		}
+		buffer.Write(value)
+	}
+	buffer.WriteString("}")
+
+	return buffer.String(), nil
+}
+
 func OuraTestFile(w http.ResponseWriter, r *http.Request) {
 	requestBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -2551,21 +2603,25 @@ func OuraTestFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Create HMAC
+	// Normalize JSON by removing all whitespace
+	var normalizedData bytes.Buffer
+	if err := json.Compact(&normalizedData, requestBody); err != nil {
+		http.Error(w, "Invalid JSON format", http.StatusBadRequest)
+		return
+	}
+
+	// Create HMAC with normalized data
 	secret := []byte(os.Getenv("HMAC_SECRET_KEY"))
 	mac := hmac.New(sha256.New, secret)
-	mac.Write(requestBody)
+	mac.Write(normalizedData.Bytes())
 	expectedMAC := hex.EncodeToString(mac.Sum(nil))
 
-	// Compare signatures
-	// if !hmac.Equal([]byte(signature), []byte(expectedMAC)) {
-	// 	http.Error(w, "Invalid signature", http.StatusUnauthorized)
-	// }
 	fmt.Println("HMAC: ", expectedMAC)
 
 	// Print the raw JSON or POST body
 	fmt.Println("RX Headers:", r.Header)
-	fmt.Printf("Received POST body: %s\n", string(requestBody))
+	fmt.Printf("Original POST body: %s\n", string(requestBody))
+	fmt.Printf("Normalized body: %s\n", normalizedData.String())
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
@@ -5280,7 +5336,7 @@ func HandleWebhookData(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Upload the zip file to DigitalOcean Spaces
-	fileUrl, err := SaveFileToSpaces(encryptedBytes, userData.Wallet+time.Now().Format("2006-01-02_15-04-05")+"_archive.zip")
+	fileUrl, err := SaveFileToSpaces(encryptedBytes, currentData.Wallet+time.Now().Format("2006-01-02_15-04-05")+"_archive.zip")
 	if err != nil {
 		log.Fatalf("Failed to upload to DigitalOcean Spaces: %v", err)
 	}
@@ -5447,7 +5503,7 @@ func HandleWebhookData(w http.ResponseWriter, r *http.Request) {
 
 		//ask a specific TEE to run the proof of contribution
 		//${jobDetails.teeUrl}/RunProof
-		err := vanatransact.SendContributionProof(latestJobId, fileID, publicKeyDLP, envVars, secrets, teePublicKey, teeUrl, iv, ephemPrivateKeyBytes, ourauser.Signature)
+		err := vanatransact.SendContributionProof(latestJobId, fileID, publicKeyDLP, envVars, secrets, teePublicKey, teeUrl, iv, ephemPrivateKeyBytes, userInfo.Signature)
 		if err != nil {
 			fmt.Println("Error in SendContributionProof", err)
 		}
