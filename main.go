@@ -56,6 +56,7 @@ func main() {
 	router.HandleFunc("/get_unread_cnt/{address}", controllers.GetUnreadMsgCntTotalExternal).Methods("GET") //For Android app
 	router.HandleFunc("/verify_email/{email}/{code}", controllers.VerifyEmail).Methods("GET")
 	router.HandleFunc("/signin", auth.SigninHandler(jwtProvider)).Methods("POST")
+	router.HandleFunc("/signinmobile", auth.SigninHandlerMobile(jwtProvider)).Methods("POST")
 	router.HandleFunc("/resolve_name/{name}", controllers.ResolveName).Methods("GET")
 	router.HandleFunc("/ethereum_token_overlap/{contract_address}", controllers.Erc20TokenOverlap).Methods("GET") //for custom GPT - not WC directly
 	router.HandleFunc("/solana_token_overlap/{contract_address}", controllers.SolTokenOverlap).Methods("GET")     //for custom GPT - not WC directly
@@ -177,6 +178,8 @@ func updateTelegramVerifiedUsers() {
 
 // these endpoints are protected by JWTs
 func initaliseHandlers(router *mux.Router) {
+	router.HandleFunc("/getmobileappinfo", controllers.GetMobileAppInfo).Methods("GET")
+
 	router.HandleFunc("/apicount", auth.GetCountsAPI()).Methods("GET")
 	router.HandleFunc("/resolve_name/{name}", controllers.ResolveName).Methods("GET")
 

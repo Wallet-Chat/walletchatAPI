@@ -2509,6 +2509,32 @@ func OuraCreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func GetMobileAppInfo(w http.ResponseWriter, r *http.Request) {
+	Authuser := auth.GetUserFromReqContext(r)
+
+	var existinguser entity.Ourauser
+	var userSearch = database.Connector.Where("wallet = ?", Authuser.Address).Find(&existinguser)
+
+	if userSearch.RowsAffected > 0 {
+		response := struct {
+			Oauth           string `json:"external_id"`
+			MobileAppID     string `json:"mobile_app_id"`
+			MobileAppSecret string `json:"mobile_app_secret"`
+		}{
+			Oauth:           existinguser.Oauth,
+			MobileAppID:     os.Getenv("SAHHA_MOBILE_APP_ID"),
+			MobileAppSecret: os.Getenv("SAHHA_MOBILE_APP_SECRET"),
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(response)
+	} else {
+		http.Error(w, "User not found", http.StatusNotFound)
+	}
+}
+
 func VerifyDataHMAC(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	uuidInput := vars["uuid"]

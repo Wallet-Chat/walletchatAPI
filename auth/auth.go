@@ -157,7 +157,7 @@ func (p RegisterPayload) Validate() error {
 	return nil
 }
 
-//Legacy - not needed anymore
+// Legacy - not needed anymore
 func RegisterHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		requestBody, _ := ioutil.ReadAll(r.Body)
@@ -288,6 +288,61 @@ func (s SigninPayload) Validate() error {
 		return ErrMissingSig
 	}
 	return nil
+}
+
+func SigninHandlerMobile(jwtProvider *JwtHmacProvider) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var p SigninPayload
+		requestBody, _ := ioutil.ReadAll(r.Body)
+		if err := json.Unmarshal(requestBody, &p); err != nil { // Parse []byte to the go struct pointer
+			fmt.Println("Can not unmarshal JSON in SigninHandler")
+			fmt.Println(r.Body)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		//check msg recovery address
+		sig := hexutil.MustDecode(p.Sig)
+		// https://github.com/ethereum/go-ethereum/blob/master/internal/ethapi/api.go#L516
+		// check here why I am subtracting 27 from the last byte
+		sig[crypto.RecoveryIDOffset] -= 27
+		msg := accounts.TextHash([]byte(p.Msg))
+		recovered, err := crypto.SigToPub(msg, sig)
+		//fmt.Println("EVM signature ", sig)
+		if err != nil {
+			fmt.Println("EVM signature initial error: ", err)
+			err = nil //reset error
+			//this is a workaround for Ledger+Metamask - which has a known implementation difference to Ledger Live alone.
+			//Valora wallet has this issue too
+			sig[crypto.RecoveryIDOffset] += 27
+			recovered, err = crypto.SigToPub(msg, sig)
+			if err != nil {
+				fmt.Println("failed to recover EVM signature ", err)
+				return
+			}
+			fmt.Println("EVM signature recovered OK")
+		}
+
+		recoveredAddr := strings.ToLower(crypto.PubkeyToAddress(*recovered).Hex())
+
+		if recoveredAddr == strings.ToLower(p.Address) {
+			signedToken, err := jwtProvider.CreateStandard(p.Address)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+
+			resp := struct {
+				AccessToken string `json:"access"`
+			}{
+				AccessToken: signedToken,
+			}
+			renderJson(r, w, http.StatusOK, resp)
+		} else {
+			fmt.Println("failed to recover EVM addr ", recoveredAddr, p.Address)
+			return
+		}
+	}
 }
 
 // SigninHandler godoc
@@ -778,7 +833,7 @@ func renderJson(r *http.Request, w http.ResponseWriter, statusCode int, res inte
 	}
 }
 
-//call DelegateCash function
+// call DelegateCash function
 func GetDelegationsByDelegate(addressDelegateWallet string) []delegatecash.IDelegationRegistryDelegationInfo {
 	// Connect to an ethereum node
 	client, err := ethclient.Dial("https://mainnet.infura.io/v3/" + os.Getenv("INFURA_V3"))
