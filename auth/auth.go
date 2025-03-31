@@ -24,6 +24,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/google/uuid"
 	"github.com/spruceid/siwe-go"
 
 	//"github.com/ethereum/go-ethereum/crypto/secp256k1"
@@ -338,6 +339,60 @@ func SigninHandlerMobile(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 				AccessToken: signedToken,
 			}
 			renderJson(r, w, http.StatusOK, resp)
+
+			var existinguser entity.Ourauser
+			var userAlreadyExists = database.Connector.Where("wallet = ?", p.Address).Find(&existinguser)
+			if userAlreadyExists.RowsAffected > 0 {
+				//just to allow users to update nickname if desired
+				if p.Name != "" {
+					var addrnameDB entity.Addrnameitem
+					var addrNameItem entity.Addrnameitem
+					addrNameItem.Address = p.Address
+					addrNameItem.Name = p.Name
+					var dbQuery = database.Connector.Where("address = ?", p.Address).Find(&addrnameDB)
+					if dbQuery.RowsAffected == 0 {
+						database.Connector.Create(&addrNameItem)
+					}
+				}
+			} else {
+				//actually register the user, assign UUID and redeem referral code(redacted for now) and set nickname
+				var newUser entity.Ourauser
+				newUser.Oauth = uuid.New().String() //TODO re-using this field for test until we are sure we do this
+				newUser.Wallet = p.Address
+				newUser.Signature = p.Sig
+
+				wc_analytics.SendCustomIntraEvent(newUser.Wallet, "NEW_HEALTHKIT_REGISTRATION")
+
+				// if newUserTemp.Referralcode != "" {
+				// 	database.Connector.Model(&entity.Referralcode{}).
+				// 		Where("code = ?", newUserTemp.Referralcode).
+				// 		Update("redeemed", true)
+
+				// 	//set user as validated in the referral code table (used separate table in the case we drop this in future)
+				// 	var uservalid entity.Referraluser
+				// 	uservalid.Referralcode = newUserTemp.Referralcode
+				// 	uservalid.Walletaddr = newUserTemp.Wallet
+				// 	database.Connector.Create(&uservalid)
+				// }
+
+				if p.Name != "" {
+					var addrnameDB entity.Addrnameitem
+					var addrNameItem entity.Addrnameitem
+					addrNameItem.Address = p.Address
+					addrNameItem.Name = p.Name
+					var dbQuery = database.Connector.Where("address = ?", p.Address).Find(&addrnameDB)
+					if dbQuery.RowsAffected == 0 {
+						database.Connector.Create(&addrNameItem)
+					}
+				}
+
+				database.Connector.Create(&newUser)
+				fmt.Println("New HealthKit User: ", newUser.Wallet)
+				w.Header().Set("Content-Type", "application/json")
+				w.Header().Set("X-Content-Type-Options", "nosniff")
+				w.WriteHeader(http.StatusCreated)
+				json.NewEncoder(w).Encode(newUser)
+			}
 		} else {
 			fmt.Println("failed to recover EVM addr ", recoveredAddr, p.Address)
 			return
