@@ -2568,7 +2568,7 @@ func VerifyDataHMAC(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("Normalized JSON: ", normalizedData)
 
-	// Compute HMAC
+	// Compute HMAC - we could just save this as wel if its being computed over stored data...
 	secret := []byte(uuidInput)
 	mac := hmac.New(sha256.New, secret)
 	mac.Write([]byte(normalizedData))
@@ -2636,8 +2636,8 @@ func OuraTestFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Create HMAC with normalized data
-	secret := []byte(os.Getenv("HMAC_SECRET_KEY"))
+	// Create HMAC with normalized data (unless we store it, we just need to create UUID and store it with the new data - we don't do that here since its just a test function)
+	secret := []byte(uuid.New().String()) //TODO we should make a new DB table but for now we re-use this//[]byte(os.Getenv("HMAC_SECRET_KEY"))  #os env is just for test so we have consistent results when developing proof
 	mac := hmac.New(sha256.New, secret)
 	mac.Write(normalizedData.Bytes())
 	expectedMAC := hex.EncodeToString(mac.Sum(nil))
@@ -2647,7 +2647,7 @@ func OuraTestFile(w http.ResponseWriter, r *http.Request) {
 	// Print the raw JSON or POST body
 	fmt.Println("RX Headers:", r.Header)
 	fmt.Printf("Original POST body: %s\n", string(requestBody))
-	fmt.Printf("Normalized body: %s\n", normalizedData.String())
+	// fmt.Printf("Normalized body: %s\n", normalizedData.String())
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
@@ -5310,6 +5310,7 @@ func FetchOuraData() {
 }
 
 // we need wallet address/email as part of RX data or a way to link it to mobile device
+// sahha ai will be different using external ID, so maybe we handle that here or have a different function...
 func HandleWebhookData(w http.ResponseWriter, r *http.Request) {
 	requestBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -5317,24 +5318,28 @@ func HandleWebhookData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println("*** HandleWebhookData: ", requestBody)
+
 	//DLP public Key
 	publicKeyDLP, err := vanatransact.GetDlpPublicKey()
 	if err != nil {
-
+		http.Error(w, "didn't get public key DLP", http.StatusBadRequest)
+		return
 	}
 
 	//Save file to DB
 	var currentData entity.Ouradata
 	currentData.Endpoint = uuid.New().String() //TODO we should make a new DB table but for now we re-use this
-	currentData.Wallet = "wallet_addr"         //TODO get from data UL
+	//TODO, if using sahha we'd have to get the wallet address
+	currentData.Wallet = "wallet_addr" //TODO get from data UL (external ID or wallet addr)
 	currentData.Jsondata = string(requestBody)
 	database.Connector.Create(&currentData)
 
 	var userInfo entity.Ourauser
 	var existingUserData = database.Connector.Where("wallet = ?", currentData.Wallet).Find(&userInfo)
 	if existingUserData.RowsAffected == 0 {
-		//create user + wallet connection
-
+		http.Error(w, "Wallet not a registered user", http.StatusBadRequest)
+		return
 	}
 
 	// Create a buffer to hold the zip data
@@ -5524,6 +5529,7 @@ func HandleWebhookData(w http.ResponseWriter, r *http.Request) {
 		//secrets := map[string]string{}
 		//encryptedSecret, _ := vanaencrypt.EncryptSecretForProof(publicKeyPEM, []byte("user123@gmail.com"))
 		secrets := map[string]string{
+			//TODO, when we change proof can we name this as HMAC_UUID_KEY or something like that
 			"USER_API_KEY": currentData.Endpoint, //TODO we are re-using this field for UUID (fix when new DB table is added)
 		} //this would be API keys, etc needed in proof code
 
