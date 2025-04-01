@@ -4839,131 +4839,131 @@ func WalletGuardCheck(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(recommendedActions)
 }
 
-// func RegisterOuraUser(w http.ResponseWriter, r *http.Request) {
-// 	requestBody, _ := ioutil.ReadAll(r.Body)
-// 	var newUserTemp entity.Ourausertemp
-// 	json.Unmarshal(requestBody, &newUserTemp)
+func RegisterOuraUser(w http.ResponseWriter, r *http.Request) {
+	requestBody, _ := ioutil.ReadAll(r.Body)
+	var newUserTemp entity.Ourausertemp
+	json.Unmarshal(requestBody, &newUserTemp)
 
-// 	//verify its a real and valid API key
-// 	url := "https://api.ouraring.com/v2/usercollection/daily_activity"
-// 	method := "GET"
+	//verify its a real and valid API key
+	url := "https://api.ouraring.com/v2/usercollection/daily_activity"
+	method := "GET"
 
-// 	client := &http.Client{}
-// 	req, err := http.NewRequest(method, url, nil)
+	client := &http.Client{}
+	req, err := http.NewRequest(method, url, nil)
 
-// 	if err != nil {
-// 		w.WriteHeader(http.StatusForbidden)
-// 		return
-// 	}
-// 	req.Header.Add("Authorization", "Bearer "+newUserTemp.Pac)
+	if err != nil {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+	req.Header.Add("Authorization", "Bearer "+newUserTemp.Pac)
 
-// 	res, err := client.Do(req)
-// 	if err != nil {
-// 		w.WriteHeader(http.StatusForbidden)
-// 		fmt.Println("Error making request:", err)
-// 		return
-// 	}
-// 	defer res.Body.Close()
+	res, err := client.Do(req)
+	if err != nil {
+		w.WriteHeader(http.StatusForbidden)
+		fmt.Println("Error making request:", err)
+		return
+	}
+	defer res.Body.Close()
 
-// 	// Check if the response status code is not 200
-// 	fmt.Println("Attempt to register user: ", newUserTemp.Pac, newUserTemp.Nickname, newUserTemp.Referralcode)
-// 	if res.StatusCode != http.StatusOK {
-// 		fmt.Printf("RegisterOuraUser Unexpected response code: %d\n", res.StatusCode)
-// 		w.WriteHeader(http.StatusForbidden)
-// 		return
-// 	}
-// 	body, err := io.ReadAll(res.Body)
-// 	if err != nil {
-// 		fmt.Println(err, string(body))
-// 		return
-// 	}
-// 	//fmt.Println("Test Register User Check: ", string(body))
+	// Check if the response status code is not 200
+	fmt.Println("Attempt to register user: ", newUserTemp.Pac, newUserTemp.Nickname, newUserTemp.Referralcode)
+	if res.StatusCode != http.StatusOK {
+		fmt.Printf("RegisterOuraUser Unexpected response code: %d\n", res.StatusCode)
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println(err, string(body))
+		return
+	}
+	//fmt.Println("Test Register User Check: ", string(body))
 
-// 	// Authuser := auth.GetUserFromReqContext(r)
-// 	// if strings.EqualFold(Authuser.Address, newUser.Wallet) {
+	// Authuser := auth.GetUserFromReqContext(r)
+	// if strings.EqualFold(Authuser.Address, newUser.Wallet) {
 
-// 	var existinguser entity.Ourauser
-// 	var pacAlreadyExists = database.Connector.Where("pac = ?", newUserTemp.Pac).Find(&existinguser)
-// 	if pacAlreadyExists.RowsAffected > 0 {
-// 		fmt.Println("PAC already registered: ", newUserTemp.Wallet, newUserTemp.Pac)
-// 		w.WriteHeader(http.StatusForbidden)
-// 		return
-// 	}
+	var existinguser entity.Ourauser
+	var pacAlreadyExists = database.Connector.Where("pac = ?", newUserTemp.Pac).Find(&existinguser)
+	if pacAlreadyExists.RowsAffected > 0 {
+		fmt.Println("PAC already registered: ", newUserTemp.Wallet, newUserTemp.Pac)
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
 
-// 	//Now actually register the user, redeem referral code and set nickname
-// 	var newUser entity.Ourauser
-// 	newUser.Pac = newUserTemp.Pac
-// 	newUser.Wallet = newUserTemp.Wallet
-// 	newUser.Signature = newUserTemp.Signature
+	//Now actually register the user, redeem referral code and set nickname
+	var newUser entity.Ourauser
+	newUser.Pac = newUserTemp.Pac
+	newUser.Wallet = newUserTemp.Wallet
+	newUser.Signature = newUserTemp.Signature
 
-// 	// Public key as PEM string
-// 	publicKeyPEM := `-----BEGIN PUBLIC KEY-----
-// MIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEA4129oK+dUEalpqP5aT/M
-// A6yhFbAjNppOidQuVgeSgEPquXLlJrdLoomHGhzugbBYeKS6lceEDM3oygFdCGhT
-// sly26Ws8qyUIGlk0/JGf4mRHd9RMs0uOF50/mB4abNM/mA/k8cO46+UmXOK2rwEL
-// U2rPb5tWVzxjPqs8Aw9eT1n7UlvOXxFc4ChyIHX/plfbkKK1R1+PYhtBHeQT8aW1
-// o7wLsbbnkCGh2iahJaNacMWmUZ9YygdPg2DICQLK2KbZfZHhhylBjDzuBgjUzNai
-// ikVHzrR6f9eTihYjmpx8Br5Ubhj3lVt45nAXFidxMBe1e7IILNVl9C57sqV+nPFM
-// 2s5ad/r3TDjOZ23e0FGBVsyG+lJwn9q/kx4kjSFsO8fNzJ7wUczVnfW+akox2rMX
-// rnvdxUhpAAEtJZme5+pnS6Fr4Zi8mUBPt9kC/mHTtbPQoLsX+FeBs/u+rpXe4xBr
-// +QhqShKWQ+4HzwQHCc5h9d4pqZEKK8UnpdeJ0c/QTqcVAgMBAAE=
-// -----END PUBLIC KEY-----`
+	// Public key as PEM string
+	publicKeyPEM := `-----BEGIN PUBLIC KEY-----
+MIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEA4129oK+dUEalpqP5aT/M
+A6yhFbAjNppOidQuVgeSgEPquXLlJrdLoomHGhzugbBYeKS6lceEDM3oygFdCGhT
+sly26Ws8qyUIGlk0/JGf4mRHd9RMs0uOF50/mB4abNM/mA/k8cO46+UmXOK2rwEL
+U2rPb5tWVzxjPqs8Aw9eT1n7UlvOXxFc4ChyIHX/plfbkKK1R1+PYhtBHeQT8aW1
+o7wLsbbnkCGh2iahJaNacMWmUZ9YygdPg2DICQLK2KbZfZHhhylBjDzuBgjUzNai
+ikVHzrR6f9eTihYjmpx8Br5Ubhj3lVt45nAXFidxMBe1e7IILNVl9C57sqV+nPFM
+2s5ad/r3TDjOZ23e0FGBVsyG+lJwn9q/kx4kjSFsO8fNzJ7wUczVnfW+akox2rMX
+rnvdxUhpAAEtJZme5+pnS6Fr4Zi8mUBPt9kC/mHTtbPQoLsX+FeBs/u+rpXe4xBr
++QhqShKWQ+4HzwQHCc5h9d4pqZEKK8UnpdeJ0c/QTqcVAgMBAAE=
+-----END PUBLIC KEY-----`
 
-// 	encryptedSecret, _ := vanaencrypt.EncryptSecretForProof(publicKeyPEM, []byte(newUser.Pac))
-// 	newUser.Encryptedpac = encryptedSecret
+	encryptedSecret, _ := vanaencrypt.EncryptSecretForProof(publicKeyPEM, []byte(newUser.Pac))
+	newUser.Encryptedpac = encryptedSecret
 
-// 	var existinguser2 entity.Ourauser
-// 	var walletAlreadyExists = database.Connector.Where("wallet = ?", newUser.Wallet).Find(&existinguser2)
-// 	if walletAlreadyExists.RowsAffected > 0 {
-// 		fmt.Println("wallet updated: ", newUser.Wallet, newUser.Pac)
-// 		database.Connector.Model(&entity.Ourauser{}).Where("wallet = ?", newUser.Wallet).Update("pac", newUser.Pac)
-// 		database.Connector.Model(&entity.Ourauser{}).Where("wallet = ?", newUser.Wallet).Update("encrypted_pac", newUser.Encryptedpac)
-// 		w.WriteHeader(http.StatusCreated)
-// 		json.NewEncoder(w).Encode(newUser)
-// 		return
-// 	}
+	var existinguser2 entity.Ourauser
+	var walletAlreadyExists = database.Connector.Where("wallet = ?", newUser.Wallet).Find(&existinguser2)
+	if walletAlreadyExists.RowsAffected > 0 {
+		fmt.Println("wallet updated: ", newUser.Wallet, newUser.Pac)
+		database.Connector.Model(&entity.Ourauser{}).Where("wallet = ?", newUser.Wallet).Update("pac", newUser.Pac)
+		database.Connector.Model(&entity.Ourauser{}).Where("wallet = ?", newUser.Wallet).Update("encrypted_pac", newUser.Encryptedpac)
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(newUser)
+		return
+	}
 
-// 	//give new users 3 new referral codes
-// 	referrals.CreateReferralCodeInternal(newUser.Wallet)
+	//give new users 3 new referral codes
+	referrals.CreateReferralCodeInternal(newUser.Wallet)
 
-// 	if newUserTemp.Referralcode != "" {
-// 		database.Connector.Model(&entity.Referralcode{}).
-// 			Where("code = ?", newUserTemp.Referralcode).
-// 			Update("redeemed", true)
+	if newUserTemp.Referralcode != "" {
+		database.Connector.Model(&entity.Referralcode{}).
+			Where("code = ?", newUserTemp.Referralcode).
+			Update("redeemed", true)
 
-// 		//set user as validated in the referral code table (used separate table in the case we drop this in future)
-// 		var uservalid entity.Referraluser
-// 		uservalid.Referralcode = newUserTemp.Referralcode
-// 		uservalid.Walletaddr = newUserTemp.Wallet
-// 		database.Connector.Create(&uservalid)
-// 	}
+		//set user as validated in the referral code table (used separate table in the case we drop this in future)
+		var uservalid entity.Referraluser
+		uservalid.Referralcode = newUserTemp.Referralcode
+		uservalid.Walletaddr = newUserTemp.Wallet
+		database.Connector.Create(&uservalid)
+	}
 
-// 	if newUserTemp.Nickname != "" {
-// 		var addrnameDB entity.Addrnameitem
-// 		var addrNameItem entity.Addrnameitem
-// 		addrNameItem.Address = newUserTemp.Wallet
-// 		addrNameItem.Name = newUserTemp.Nickname
-// 		var dbQuery = database.Connector.Where("address = ?", newUserTemp.Wallet).Find(&addrnameDB)
-// 		if dbQuery.RowsAffected == 0 {
-// 			database.Connector.Create(&addrNameItem)
-// 		}
+	if newUserTemp.Nickname != "" {
+		var addrnameDB entity.Addrnameitem
+		var addrNameItem entity.Addrnameitem
+		addrNameItem.Address = newUserTemp.Wallet
+		addrNameItem.Name = newUserTemp.Nickname
+		var dbQuery = database.Connector.Where("address = ?", newUserTemp.Wallet).Find(&addrnameDB)
+		if dbQuery.RowsAffected == 0 {
+			database.Connector.Create(&addrNameItem)
+		}
 
-// 		//this isn't great long-term, but for smaller table it allows new usernames to show up in table instead of waiting for once daily update
-// 		referrals.GetOuraLeaderboardDataCronJob()
-// 	}
+		//this isn't great long-term, but for smaller table it allows new usernames to show up in table instead of waiting for once daily update
+		referrals.GetOuraLeaderboardDataCronJob()
+	}
 
-// 	wc_analytics.SendCustomIntraEvent(newUser.Wallet, "NEW_OURA_REGISTRATION")
+	wc_analytics.SendCustomIntraEvent(newUser.Wallet, "NEW_OURA_REGISTRATION")
 
-// 	database.Connector.Create(&newUser)
-// 	fmt.Println("New PAC User: ", newUser.Wallet)
-// 	w.Header().Set("Content-Type", "application/json")
-// 	w.Header().Set("X-Content-Type-Options", "nosniff")
-// 	w.WriteHeader(http.StatusCreated)
-// 	json.NewEncoder(w).Encode(newUser)
-// 	// } else {
-// 	// 	w.WriteHeader(http.StatusForbidden)
-// 	// }
-// }
+	database.Connector.Create(&newUser)
+	fmt.Println("New PAC User: ", newUser.Wallet)
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(newUser)
+	// } else {
+	// 	w.WriteHeader(http.StatusForbidden)
+	// }
+}
 
 var ouraEndpoints = []string{
 	"daily_activity",

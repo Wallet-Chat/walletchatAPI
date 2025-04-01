@@ -77,7 +77,7 @@ func main() {
 	router.HandleFunc("/debug_print", controllers.DebugPrint).Methods("POST")
 
 	//bookmarks
-	//router.HandleFunc("/oura_register", controllers.RegisterOuraUser).Methods("POST")
+	router.HandleFunc("/oura_register", controllers.RegisterOuraUser).Methods("POST")
 
 	wsRouter := router.PathPrefix("/v1").Subrouter()
 
