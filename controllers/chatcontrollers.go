@@ -2629,25 +2629,33 @@ func OuraTestFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Parse JSON into a map to allow sorting
+	var jsonData map[string]interface{}
+	if err := json.Unmarshal(requestBody, &jsonData); err != nil {
+		http.Error(w, "Invalid JSON format", http.StatusBadRequest)
+		return
+	}
+
 	// Normalize JSON by removing all whitespace
-	var normalizedData bytes.Buffer
-	if err := json.Compact(&normalizedData, requestBody); err != nil {
+	normalizedData, err := sortedCompactJSON(jsonData)
+	if err != nil {
 		http.Error(w, "Invalid JSON format", http.StatusBadRequest)
 		return
 	}
 
 	// Create HMAC with normalized data (unless we store it, we just need to create UUID and store it with the new data - we don't do that here since its just a test function)
-	secret := []byte(uuid.New().String()) //TODO we should make a new DB table but for now we re-use this//[]byte(os.Getenv("HMAC_SECRET_KEY"))  #os env is just for test so we have consistent results when developing proof
+	//secret := []byte(uuid.New().String())
+	secret := []byte(os.Getenv("HMAC_SECRET_KEY")) //os env is just for test so we have consistent results when developing proof
 	mac := hmac.New(sha256.New, secret)
-	mac.Write(normalizedData.Bytes())
+	mac.Write([]byte(normalizedData))
 	expectedMAC := hex.EncodeToString(mac.Sum(nil))
 
 	fmt.Println("HMAC: ", expectedMAC)
 
 	// Print the raw JSON or POST body
-	fmt.Println("RX Headers:", r.Header)
+	//fmt.Println("RX Headers:", r.Header)
 	fmt.Printf("Original POST body: %s\n", string(requestBody))
-	// fmt.Printf("Normalized body: %s\n", normalizedData.String())
+	fmt.Printf("Normalized body: %s\n", normalizedData)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
