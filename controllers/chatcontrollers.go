@@ -2546,14 +2546,14 @@ func VerifyDataHMAC(w http.ResponseWriter, r *http.Request) {
 	// Get raw JSON matching UUID from the database (assuming `userData.Jsondata` holds JSON string)
 	var userData entity.Ouradata
 	var existingData = database.Connector.Where("endpoint = ?", uuidInput).Find(&userData)
-
 	if existingData.RowsAffected == 0 {
 		http.Error(w, "Data not found", http.StatusNotFound)
 		return
 	}
+	fmt.Println("found JSON: ", userData.Jsondata)
 
 	// Parse JSON into a map to allow sorting
-	var jsonData map[string]interface{}
+	var jsonData interface{}
 	if err := json.Unmarshal([]byte(userData.Jsondata), &jsonData); err != nil {
 		http.Error(w, "Invalid JSON format", http.StatusBadRequest)
 		return
@@ -2592,34 +2592,40 @@ func VerifyDataHMAC(w http.ResponseWriter, r *http.Request) {
 }
 
 // ✅ **Function to Sort JSON Keys & Compact the Output**
-func sortedCompactJSON(data map[string]interface{}) (string, error) {
-	// Extract keys and sort them
-	keys := make([]string, 0, len(data))
-	for k := range data {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-
-	// Manually reconstruct JSON in a sorted, compact format
-	var buffer bytes.Buffer
-	buffer.WriteString("{")
-	for i, k := range keys {
-		if i > 0 {
-			buffer.WriteString(",") // Ensure compact formatting (no extra spaces)
+func sortedCompactJSON(data interface{}) (string, error) {
+	switch v := data.(type) {
+	case map[string]interface{}:
+		// Sort and build JSON from object
+		keys := make([]string, 0, len(v))
+		for k := range v {
+			keys = append(keys, k)
 		}
-		// Append key
-		buffer.WriteString(`"` + k + `":`)
+		sort.Strings(keys)
 
-		// Append value
-		value, err := json.Marshal(data[k]) // Ensure correct value formatting
-		if err != nil {
-			return "", err
+		var buffer bytes.Buffer
+		buffer.WriteString("{")
+		for i, k := range keys {
+			if i > 0 {
+				buffer.WriteString(",")
+			}
+			buffer.WriteString(`"` + k + `":`)
+			valJSON, err := json.Marshal(v[k])
+			if err != nil {
+				return "", err
+			}
+			buffer.Write(valJSON)
 		}
-		buffer.Write(value)
-	}
-	buffer.WriteString("}")
+		buffer.WriteString("}")
+		return buffer.String(), nil
 
-	return buffer.String(), nil
+	case []interface{}:
+		// Just marshal compactly
+		result, err := json.Marshal(v)
+		return string(result), err
+
+	default:
+		return "", fmt.Errorf("unsupported JSON root type")
+	}
 }
 
 func OuraTestFile(w http.ResponseWriter, r *http.Request) {
