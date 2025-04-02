@@ -5309,6 +5309,32 @@ func FetchOuraData() {
 	}
 }
 
+// only for sahha.ai
+// Recursive search that returns the first externalId it finds
+func findExternalId(obj interface{}) (string, bool) {
+	switch val := obj.(type) {
+	case map[string]interface{}:
+		for k, v := range val {
+			if k == "externalId" {
+				if s, ok := v.(string); ok {
+					return s, true
+				}
+			} else {
+				if result, found := findExternalId(v); found {
+					return result, true
+				}
+			}
+		}
+	case []interface{}:
+		for _, item := range val {
+			if result, found := findExternalId(item); found {
+				return result, true
+			}
+		}
+	}
+	return "", false
+}
+
 // we need wallet address/email as part of RX data or a way to link it to mobile device
 // sahha ai will be different using external ID, so maybe we handle that here or have a different function...
 func HandleWebhookData(w http.ResponseWriter, r *http.Request) {
@@ -5318,7 +5344,7 @@ func HandleWebhookData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("*** HandleWebhookData: ", requestBody)
+	fmt.Println("*** HandleWebhookData: ", string(requestBody))
 
 	//DLP public Key
 	publicKeyDLP, err := vanatransact.GetDlpPublicKey()
@@ -5331,16 +5357,28 @@ func HandleWebhookData(w http.ResponseWriter, r *http.Request) {
 	var currentData entity.Ouradata
 	currentData.Endpoint = uuid.New().String() //TODO we should make a new DB table but for now we re-use this
 	//TODO, if using sahha we'd have to get the wallet address
-	currentData.Wallet = "wallet_addr" //TODO get from data UL (external ID or wallet addr)
-	currentData.Jsondata = string(requestBody)
-	database.Connector.Create(&currentData)
-
+	//aa658c20-fa43-41a2-8d76-ca287832b2dd
 	var userInfo entity.Ourauser
-	var existingUserData = database.Connector.Where("wallet = ?", currentData.Wallet).Find(&userInfo)
-	if existingUserData.RowsAffected == 0 {
-		http.Error(w, "Wallet not a registered user", http.StatusBadRequest)
+	var jsonData interface{}
+	json.Unmarshal(requestBody, &jsonData)
+	if externalId, found := findExternalId(jsonData); found {
+		fmt.Printf("found external ID %s\n", externalId)
+
+		var existingUserData = database.Connector.Where("oauth = ?", externalId).Find(&userInfo)
+		if existingUserData.RowsAffected == 0 {
+			http.Error(w, "externalId not a registered user", http.StatusBadRequest)
+			return
+		}
+		currentData.Wallet = userInfo.Wallet //TODO get from data UL (external ID or wallet addr)
+	} else {
+		http.Error(w, "externalId not in post data", http.StatusBadRequest)
 		return
 	}
+	//TODO - need to handle mobile app data here -
+	// 	currentData.Wallet = "wallet_addr" //TODO get from data UL (external ID or wallet addr)
+	// }
+	currentData.Jsondata = string(requestBody)
+	database.Connector.Create(&currentData)
 
 	// Create a buffer to hold the zip data
 	var zipFileBuf bytes.Buffer
