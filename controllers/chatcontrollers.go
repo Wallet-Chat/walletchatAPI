@@ -5829,7 +5829,8 @@ func HandleMobileData(w http.ResponseWriter, r *http.Request) {
 
 	time.Sleep(45 * time.Second)
 	// Call the API to fetch transaction logs
-	url := "https://vanascan.io/api/v2/transactions/" + contributionProofTx + "/logs"
+	url := "https://api.moksha.vanascan.io/api/v2/transactions/" + contributionProofTx + "/logs"
+	//url := "https://vanascan.io/api/v2/transactions/" + contributionProofTx + "/logs"
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Println("Error fetching transaction logs:", err)
@@ -5896,11 +5897,24 @@ func HandleMobileData(w http.ResponseWriter, r *http.Request) {
 		// }
 		envVars := map[string]string{}
 
-		//secrets := map[string]string{}
-		//encryptedSecret, _ := vanaencrypt.EncryptSecretForProof(publicKeyPEM, []byte("user123@gmail.com"))
+		// Public key as PEM string
+		publicKeyPEM := `-----BEGIN PUBLIC KEY-----
+MIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEA4129oK+dUEalpqP5aT/M
+A6yhFbAjNppOidQuVgeSgEPquXLlJrdLoomHGhzugbBYeKS6lceEDM3oygFdCGhT
+sly26Ws8qyUIGlk0/JGf4mRHd9RMs0uOF50/mB4abNM/mA/k8cO46+UmXOK2rwEL
+U2rPb5tWVzxjPqs8Aw9eT1n7UlvOXxFc4ChyIHX/plfbkKK1R1+PYhtBHeQT8aW1
+o7wLsbbnkCGh2iahJaNacMWmUZ9YygdPg2DICQLK2KbZfZHhhylBjDzuBgjUzNai
+ikVHzrR6f9eTihYjmpx8Br5Ubhj3lVt45nAXFidxMBe1e7IILNVl9C57sqV+nPFM
+2s5ad/r3TDjOZ23e0FGBVsyG+lJwn9q/kx4kjSFsO8fNzJ7wUczVnfW+akox2rMX
+rnvdxUhpAAEtJZme5+pnS6Fr4Zi8mUBPt9kC/mHTtbPQoLsX+FeBs/u+rpXe4xBr
++QhqShKWQ+4HzwQHCc5h9d4pqZEKK8UnpdeJ0c/QTqcVAgMBAAE=
+-----END PUBLIC KEY-----`
+
+		//--------------------------------------------------------------------------//TODO we are re-using this field for UUID
+		encryptedSecret, _ := vanaencrypt.EncryptSecretForProof(publicKeyPEM, []byte(currentData.Endpoint))
 		secrets := map[string]string{
 			//TODO, when we change proof can we name this as HMAC_UUID_KEY or something like that
-			"USER_API_KEY": currentData.Endpoint, //TODO we are re-using this field for UUID (fix when new DB table is added)
+			"USER_API_KEY": encryptedSecret, //TODO we are re-using this field for UUID (fix when new DB table is added)
 		} //this would be API keys, etc needed in proof code
 
 		//ask a specific TEE to run the proof of contribution
