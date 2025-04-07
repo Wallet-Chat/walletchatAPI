@@ -70,6 +70,7 @@ func main() {
 	router.HandleFunc("/name", controllers.OuraCreateAddrNameItem).Methods("POST")
 	router.HandleFunc("/testfile", controllers.OuraTestFile).Methods("POST")
 	router.HandleFunc("/testwebhook", controllers.HandleWebhookData).Methods("POST")
+	router.HandleFunc("/testmobileupload", controllers.HandleMobileData).Methods("POST")
 	router.HandleFunc("/verifyhmac/{uuid}/{hmac}", controllers.VerifyDataHMAC).Methods("GET")
 	router.HandleFunc("/name/{address}", controllers.GetAddrNameItem).Methods("GET")
 	router.HandleFunc("/get_referral_code/{address}", referrals.GetReferralCodeAddr).Methods("GET")
