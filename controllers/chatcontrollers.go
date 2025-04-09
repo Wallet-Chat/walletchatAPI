@@ -2634,6 +2634,7 @@ func OuraTestFile(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unable to read request body", http.StatusBadRequest)
 		return
 	}
+	fmt.Printf("Original POST body: %s\n", string(requestBody))
 
 	// Parse JSON into a map to allow sorting
 	var jsonData map[string]interface{}
@@ -2660,7 +2661,6 @@ func OuraTestFile(w http.ResponseWriter, r *http.Request) {
 
 	// Print the raw JSON or POST body
 	//fmt.Println("RX Headers:", r.Header)
-	fmt.Printf("Original POST body: %s\n", string(requestBody))
 	fmt.Printf("Normalized body: %s\n", normalizedData)
 
 	w.Header().Set("Content-Type", "application/json")
@@ -5829,7 +5829,7 @@ func HandleMobileData(w http.ResponseWriter, r *http.Request) {
 
 	time.Sleep(45 * time.Second)
 	// Call the API to fetch transaction logs
-	url := "https://api.moksha.vanascan.io/api/v2/transactions/" + contributionProofTx + "/logs"
+	url := os.Getenv("VANA_API_URL") + "/transactions/" + contributionProofTx + "/logs" //"https://api.moksha.vanascan.io/api/v2/transactions/" + contributionProofTx + "/logs"
 	//url := "https://vanascan.io/api/v2/transactions/" + contributionProofTx + "/logs"
 	resp, err := http.Get(url)
 	if err != nil {
