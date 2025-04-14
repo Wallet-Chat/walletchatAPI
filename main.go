@@ -180,6 +180,7 @@ func updateTelegramVerifiedUsers() {
 // these endpoints are protected by JWTs
 func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/getmobileappinfo", controllers.GetMobileAppInfo).Methods("GET")
+	router.HandleFunc("/authtestfile", controllers.AuthTestFile).Methods("POST")
 
 	router.HandleFunc("/apicount", auth.GetCountsAPI()).Methods("GET")
 	router.HandleFunc("/resolve_name/{name}", controllers.ResolveName).Methods("GET")
