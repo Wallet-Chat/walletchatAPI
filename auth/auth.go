@@ -385,8 +385,21 @@ func SigninHandlerMobile(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 						database.Connector.Create(&addrNameItem)
 					}
 				}
-
 				database.Connector.Create(&newUser)
+
+				//save to authusers as well for JWT verification later on
+				lowercaseAddress := strings.ToLower(p.Address)
+				nonce, err := GetNonce()
+				if err != nil {
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+				user := Authuser{
+					Address: lowercaseAddress,
+					Nonce:   nonce,
+				}
+				CreateIfNotExists(user)
+
 				fmt.Println("New HealthKit User: ", newUser.Wallet)
 				w.Header().Set("Content-Type", "application/json")
 				w.Header().Set("X-Content-Type-Options", "nosniff")
