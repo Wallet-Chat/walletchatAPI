@@ -3231,7 +3231,7 @@ func GetConfigInfo(w http.ResponseWriter, r *http.Request) {
 		AppName string `json:"app_name"`
 		Version string `json:"version"`
 		//Features       []string `json:"features"`
-		ExportIntervalInMinutes int    `json:"export_interva_in_minutes"`
+		ExportIntervalInMinutes int    `json:"export_interval_in_minutes"`
 		ExportUrl               string `json:"export_url"`
 		PrivacyPolicyUrl        string `json:"privacy_policy_url"`
 		AboutUsUrl              string `json:"about_us_url"`
