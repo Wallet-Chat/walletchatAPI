@@ -3219,6 +3219,35 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GetConfigInfo godoc
+// @Summary     Get application configuration
+// @Description Returns a JSON file containing application configuration items
+// @Tags        config
+// @Produce     json
+// @Success     200 {object} ConfigResponse
+// @Router      /config [get]
+func GetConfigInfo(w http.ResponseWriter, r *http.Request) {
+	config := struct {
+		AppName string `json:"app_name"`
+		Version string `json:"version"`
+		//Features       []string `json:"features"`
+		ExportIntervalInMinutes int    `json:"export_interva_in_minutes"`
+		ExportUrl               string `json:"export_url"`
+	}{
+		AppName: "Intra by BHDAO",
+		Version: "1.0.0",
+		//Features:       []string{"chat", "nft", "community"},
+		ExportIntervalInMinutes: 24 * 60, // once every 24 hours
+		ExportUrl:               "https://api.v2.walletchat.fun/v1/authtestfile",
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.Header().Set("Access-Control-Allow-Origin", "*") // Allow CORS
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(config)
+}
+
 // UpdateSettings godoc
 // @Summary     Link a user can click in email to verify email address, will have unique code
 // @Description Users will get an email when signing-up to verify email, to ensure we do not send spam

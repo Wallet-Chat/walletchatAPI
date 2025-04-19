@@ -55,6 +55,7 @@ func main() {
 	router.HandleFunc("/users/{address}/nonce", auth.UserNonceHandler()).Methods("GET")
 	router.HandleFunc("/get_unread_cnt/{address}", controllers.GetUnreadMsgCntTotalExternal).Methods("GET") //For Android app
 	router.HandleFunc("/verify_email/{email}/{code}", controllers.VerifyEmail).Methods("GET")
+	router.HandleFunc("/config", controllers.GetConfigInfo).Methods("GET")
 	router.HandleFunc("/signin", auth.SigninHandler(jwtProvider)).Methods("POST")
 	router.HandleFunc("/signinmobile", auth.SigninHandlerMobile(jwtProvider)).Methods("POST")
 	router.HandleFunc("/resolve_name/{name}", controllers.ResolveName).Methods("GET")

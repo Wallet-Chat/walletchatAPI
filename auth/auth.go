@@ -408,6 +408,7 @@ func SigninHandlerMobile(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 			}
 		} else {
 			fmt.Println("failed to recover EVM addr ", recoveredAddr, p.Address)
+			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 	}
