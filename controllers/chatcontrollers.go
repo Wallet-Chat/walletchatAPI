@@ -3233,12 +3233,16 @@ func GetConfigInfo(w http.ResponseWriter, r *http.Request) {
 		//Features       []string `json:"features"`
 		ExportIntervalInMinutes int    `json:"export_interva_in_minutes"`
 		ExportUrl               string `json:"export_url"`
+		PrivacyPolicyUrl        string `json:"privacy_policy_url"`
+		AboutUsUrl              string `json:"about_us_url"`
 	}{
 		AppName: "Intra by BHDAO",
 		Version: "1.0.0",
 		//Features:       []string{"chat", "nft", "community"},
 		ExportIntervalInMinutes: 24 * 60, // once every 24 hours
 		ExportUrl:               "https://api.v2.walletchat.fun/v1/authtestfile",
+		PrivacyPolicyUrl:        "https://intra.so/privacy",
+		AboutUsUrl:              "https://intra.so",
 	}
 
 	w.Header().Set("Content-Type", "application/json")
