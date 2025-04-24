@@ -2591,13 +2591,37 @@ func VerifyDataHMAC(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// ✅ **Function to Sort JSON Keys & Compact the Output**
+// sortedCompactJSON normalizes JSON by sorting object keys and compacting the result.
 func sortedCompactJSON(data interface{}) (string, error) {
-	switch v := data.(type) {
-	case map[string]interface{}:
-		// Sort and build JSON from object
-		keys := make([]string, 0, len(v))
-		for k := range v {
+	// Convert struct slice (e.g., []HealthData) to []map[string]interface{}
+	v := reflect.ValueOf(data)
+	if v.Kind() == reflect.Slice {
+		result := make([]string, v.Len())
+		for i := 0; i < v.Len(); i++ {
+			item := v.Index(i).Interface()
+			// Marshal then unmarshal into a map
+			var mapItem map[string]interface{}
+			tmpJSON, err := json.Marshal(item)
+			if err != nil {
+				return "", err
+			}
+			if err := json.Unmarshal(tmpJSON, &mapItem); err != nil {
+				return "", err
+			}
+			sortedJSON, err := sortedCompactJSON(mapItem)
+			if err != nil {
+				return "", err
+			}
+			result[i] = sortedJSON
+		}
+		// Join compact sorted items into a JSON array
+		return "[" + joinJSON(result) + "]", nil
+	}
+
+	// Case: map[string]interface{} — sort keys and return compact JSON
+	if m, ok := data.(map[string]interface{}); ok {
+		keys := make([]string, 0, len(m))
+		for k := range m {
 			keys = append(keys, k)
 		}
 		sort.Strings(keys)
@@ -2608,8 +2632,8 @@ func sortedCompactJSON(data interface{}) (string, error) {
 			if i > 0 {
 				buffer.WriteString(",")
 			}
-			buffer.WriteString(`"` + k + `":`)
-			valJSON, err := json.Marshal(v[k])
+			buffer.WriteString(fmt.Sprintf(`"%s":`, k))
+			valJSON, err := json.Marshal(m[k])
 			if err != nil {
 				return "", err
 			}
@@ -2617,15 +2641,21 @@ func sortedCompactJSON(data interface{}) (string, error) {
 		}
 		buffer.WriteString("}")
 		return buffer.String(), nil
-
-	case []interface{}:
-		// Just marshal compactly
-		result, err := json.Marshal(v)
-		return string(result), err
-
-	default:
-		return "", fmt.Errorf("unsupported JSON root type")
 	}
+
+	return "", fmt.Errorf("unsupported JSON type: %T", data)
+}
+
+// joinJSON joins pre-sorted JSON objects with commas
+func joinJSON(items []string) string {
+	var buffer bytes.Buffer
+	for i, s := range items {
+		if i > 0 {
+			buffer.WriteString(",")
+		}
+		buffer.WriteString(s)
+	}
+	return buffer.String()
 }
 
 func OuraTestFile(w http.ResponseWriter, r *http.Request) {
@@ -2668,42 +2698,46 @@ func OuraTestFile(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+// HealthData represents the expected JSON structure.
+type HealthData struct {
+	StartDate     string  `json:"startDate"`
+	EndDate       string  `json:"endDate"`
+	Identificator string  `json:"identificator"`
+	Quantity      float64 `json:"quantity"`
+}
+
 func AuthTestFile(w http.ResponseWriter, r *http.Request) {
 	Authuser := auth.GetUserFromReqContext(r)
 	fmt.Println("AuthTestFile User Wallet: ", Authuser.Address)
 
-	requestBody, err := ioutil.ReadAll(r.Body)
+	requestBody, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "Unable to read request body", http.StatusBadRequest)
 		return
 	}
 	fmt.Printf("Original POST body: %s\n", string(requestBody))
 
-	// Parse JSON into a map to allow sorting
-	var jsonData map[string]interface{}
+	// Strictly typed slice of HealthData
+	var jsonData []HealthData
 	if err := json.Unmarshal(requestBody, &jsonData); err != nil {
-		http.Error(w, "Invalid JSON format", http.StatusBadRequest)
+		http.Error(w, "Invalid JSON format: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	// Normalize JSON by removing all whitespace
+	// Normalize JSON for HMAC (optional: could sort, or just compact)
 	normalizedData, err := sortedCompactJSON(jsonData)
 	if err != nil {
-		http.Error(w, "Invalid JSON format", http.StatusBadRequest)
+		http.Error(w, "Normalization failed: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	// Create HMAC with normalized data (unless we store it, we just need to create UUID and store it with the new data - we don't do that here since its just a test function)
-	//secret := []byte(uuid.New().String())
-	secret := []byte(os.Getenv("HMAC_SECRET_KEY")) //os env is just for test so we have consistent results when developing proof
+	// HMAC calculation
+	secret := []byte(os.Getenv("HMAC_SECRET_KEY"))
 	mac := hmac.New(sha256.New, secret)
 	mac.Write([]byte(normalizedData))
 	expectedMAC := hex.EncodeToString(mac.Sum(nil))
 
 	fmt.Println("HMAC: ", expectedMAC)
-
-	// Print the raw JSON or POST body
-	//fmt.Println("RX Headers:", r.Header)
 	fmt.Printf("Normalized body: %s\n", normalizedData)
 
 	w.Header().Set("Content-Type", "application/json")
