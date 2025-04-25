@@ -128,12 +128,20 @@ func main() {
 	w.StartAsync()
 
 	//schedule twitter username polling for new verified users
-	oura := gocron.NewScheduler(time.UTC)
+	//oura := gocron.NewScheduler(time.UTC)
 	// set time
-	oura.Every(1).Day().At("11:00").Do(func() { controllers.FetchOuraData() })
+	//oura.Every(1).Day().At("11:00").Do(func() { controllers.FetchOuraData() })
 	//oura.Every(1).Days().Do(func() { controllers.FetchOuraData() })
 	// starts the scheduler asynchronously
-	oura.StartAsync()
+	//oura.StartAsync()
+
+	//schedule twitter username polling for new verified users
+	mobileNotis := gocron.NewScheduler(time.UTC)
+	// set time
+	mobileNotis.Every(1).Day().At("11:00").Do(func() { controllers.SendMobileNotifications() })
+	//oura.Every(1).Days().Do(func() { controllers.FetchOuraData() })
+	// starts the scheduler asynchronously
+	mobileNotis.StartAsync()
 
 	controllers.InitGlobals()
 	controllers.InitRandom()

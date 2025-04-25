@@ -12,10 +12,11 @@ type Ourausertemp struct {
 type Ourauser struct {
 	Id           int    `gorm:"primaryKey;autoIncrement"`
 	Wallet       string `json:"wallet"`
-	Oauth        string `json:"oauth"`
+	Uuid         string `json:"uuid"`
 	Pac          string `json:"pac"`
-	Encryptedpac string `json:"encrypted_pac"` //for use in secrets for /runProof
+	Encryptedpac string `json:"encrypted_pac"` //for use in secrets for /runProof when using Oura API directly
 	Signature    string `json:"signature"`
+	Deviceid     string `json:"deviceid"` //used for mobile device ID for notifications later on
 }
 
 type Ouradata struct {

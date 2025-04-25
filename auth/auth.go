@@ -249,11 +249,12 @@ func UserNonceHandler() http.HandlerFunc {
 }
 
 type SigninPayload struct {
-	Name    string `json:"name"`
-	Address string `json:"address"`
-	Nonce   string `json:"nonce"`
-	Sig     string `json:"sig"`
-	Msg     string `json:"msg"`
+	Name     string `json:"name"`
+	Address  string `json:"address"`
+	Nonce    string `json:"nonce"`
+	Sig      string `json:"sig"`
+	Msg      string `json:"msg"`
+	Deviceid string `json:"deviceid"` //used for mobile device notifications
 }
 
 func (s SigninPayload) Validate() error {
@@ -357,9 +358,10 @@ func SigninHandlerMobile(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 			} else {
 				//actually register the user, assign UUID and redeem referral code(redacted for now) and set nickname
 				var newUser entity.Ourauser
-				newUser.Oauth = uuid.New().String() //TODO re-using this field for test until we are sure we do this
+				newUser.Uuid = uuid.New().String()
 				newUser.Wallet = p.Address
 				newUser.Signature = p.Sig
+				newUser.Deviceid = p.Deviceid
 
 				wc_analytics.SendCustomIntraEvent(newUser.Wallet, "NEW_HEALTHKIT_REGISTRATION")
 

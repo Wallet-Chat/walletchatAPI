@@ -2509,6 +2509,7 @@ func OuraCreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+// specific to Sahha
 func GetMobileAppInfo(w http.ResponseWriter, r *http.Request) {
 	Authuser := auth.GetUserFromReqContext(r)
 
@@ -2517,11 +2518,11 @@ func GetMobileAppInfo(w http.ResponseWriter, r *http.Request) {
 
 	if userSearch.RowsAffected > 0 {
 		response := struct {
-			Oauth           string `json:"external_id"`
+			Uuid            string `json:"external_id"` //specific to Sahha
 			MobileAppID     string `json:"mobile_app_id"`
 			MobileAppSecret string `json:"mobile_app_secret"`
 		}{
-			Oauth:           existinguser.Oauth,
+			Uuid:            existinguser.Uuid,
 			MobileAppID:     os.Getenv("SAHHA_MOBILE_APP_ID"),
 			MobileAppSecret: os.Getenv("SAHHA_MOBILE_APP_SECRET"),
 		}
@@ -5155,6 +5156,20 @@ func FetchAndDecryptFile(fileUrl string, decryptionKey string) error {
 	fmt.Println("decrypted file: ", decryptedData)
 
 	return nil
+}
+
+func SendMobileNotifications() {
+	var ourausers []entity.Ourauser
+	database.Connector.Find(&ourausers)
+
+	for _, ourauser := range ourausers {
+		//skip test users
+		if len(ourauser.Signature) < 1 {
+			continue
+		}
+		fmt.Println("Sending Daily Notification for: ", ourauser.Wallet)
+
+	}
 }
 
 func FetchOuraData() {
