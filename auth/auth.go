@@ -296,6 +296,7 @@ func SigninHandlerMobile(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var p SigninPayload
 		requestBody, _ := ioutil.ReadAll(r.Body)
+		fmt.Println("SigninHandlerMobile Input: ", requestBody)
 		if err := json.Unmarshal(requestBody, &p); err != nil { // Parse []byte to the go struct pointer
 			fmt.Println("Can not unmarshal JSON in SigninHandler")
 			fmt.Println(r.Body)
