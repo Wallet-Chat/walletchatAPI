@@ -71,6 +71,7 @@ func main() {
 	router.HandleFunc("/name", controllers.OuraCreateAddrNameItem).Methods("POST")
 	router.HandleFunc("/testfile", controllers.OuraTestFile).Methods("POST")
 	router.HandleFunc("/testwebhook", controllers.HandleWebhookData).Methods("POST")
+	router.HandleFunc("/testpushnotis", controllers.TestSendMobileNotis).Methods("GET")
 	router.HandleFunc("/testmobileupload", controllers.HandleMobileData).Methods("POST")
 	router.HandleFunc("/verifyhmac/{uuid}/{hmac}", controllers.VerifyDataHMAC).Methods("GET")
 	router.HandleFunc("/name/{address}", controllers.GetAddrNameItem).Methods("GET")
@@ -142,6 +143,9 @@ func main() {
 	//oura.Every(1).Days().Do(func() { controllers.FetchOuraData() })
 	// starts the scheduler asynchronously
 	mobileNotis.StartAsync()
+
+	//test only - will be periodic above
+	//controllers.SendMobileNotifications()
 
 	controllers.InitGlobals()
 	controllers.InitRandom()

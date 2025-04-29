@@ -3,8 +3,10 @@ package controllers
 import (
 	"archive/zip"
 	"bytes"
+	"crypto/ecdsa"
 	"crypto/hmac"
 	"crypto/sha256"
+	"crypto/x509"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
@@ -33,6 +35,11 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"encoding/pem"
+
+	"github.com/golang-jwt/jwt/v5"
+	"golang.org/x/net/http2"
 
 	_ "rest-go-demo/docs"
 
@@ -2534,6 +2541,10 @@ func GetMobileAppInfo(w http.ResponseWriter, r *http.Request) {
 	} else {
 		http.Error(w, "User not found", http.StatusNotFound)
 	}
+}
+
+func TestSendMobileNotis(w http.ResponseWriter, r *http.Request) {
+	SendMobileNotifications()
 }
 
 func VerifyDataHMAC(w http.ResponseWriter, r *http.Request) {
@@ -5158,17 +5169,121 @@ func FetchAndDecryptFile(fileUrl string, decryptionKey string) error {
 	return nil
 }
 
+// PushNotification sends a background push notification to a device token via APNs
+func PushNotification(deviceToken string, customPayload map[string]interface{}) error {
+	privateKeyEnv := os.Getenv("APPLE_PRIVATE_KEY")
+	if privateKeyEnv == "" {
+		return fmt.Errorf("APPLE_PRIVATE_KEY environment variable is not set")
+	}
+
+	teamID := os.Getenv("APPLE_TEAM_ID")
+	keyID := os.Getenv("APPLE_KEY_ID")
+	bundleID := os.Getenv("APPLE_BUNDLE_ID")
+	if teamID == "" || keyID == "" || bundleID == "" {
+		return fmt.Errorf("TEAM_ID, KEY_ID, and BUNDLE_ID must be set in environment")
+	}
+
+	appleURL := os.Getenv("APPLE_PUSH_URL") //"https://api.sandbox.push.apple.com" // You can toggle to production based on env var
+
+	privateKeyFormatted := strings.ReplaceAll(privateKeyEnv, `\n`, "\n")
+
+	block, _ := pem.Decode([]byte(privateKeyFormatted))
+	if block == nil || block.Type != "PRIVATE KEY" {
+		return fmt.Errorf("failed to decode PEM block from environment variable")
+	}
+
+	parsedKey, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+	if err != nil {
+		return fmt.Errorf("failed to parse PKCS8 private key: %v", err)
+	}
+
+	ecPrivateKey, ok := parsedKey.(*ecdsa.PrivateKey)
+	if !ok {
+		return fmt.Errorf("parsed key is not an ECDSA private key")
+	}
+
+	// === Create JWT Token ===
+	now := time.Now()
+	claims := jwt.MapClaims{
+		"iss": teamID,
+		"iat": now.Unix(),
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
+	token.Header["kid"] = keyID
+
+	signedToken, err := token.SignedString(ecPrivateKey)
+	if err != nil {
+		return fmt.Errorf("failed to sign JWT: %v", err)
+	}
+
+	// === Prepare Payload ===
+	payload := map[string]interface{}{
+		"aps": map[string]interface{}{
+			"content-available": 1,
+		},
+	}
+
+	// Merge custom fields if provided
+	for k, v := range customPayload {
+		payload[k] = v
+	}
+
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("failed to marshal payload: %v", err)
+	}
+
+	// === HTTP2 Client ===
+	client := &http.Client{
+		Transport: &http2.Transport{},
+	}
+
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/3/device/%s", appleURL, deviceToken), bytes.NewReader(payloadBytes))
+	if err != nil {
+		return fmt.Errorf("failed to create request: %v", err)
+	}
+
+	req.Header.Set("authorization", fmt.Sprintf("bearer %s", signedToken))
+	req.Header.Set("apns-topic", bundleID)
+	req.Header.Set("apns-push-type", "background")
+	req.Header.Set("apns-priority", "10")
+	req.Header.Set("content-length", fmt.Sprintf("%d", len(payloadBytes)))
+
+	// Send request
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to send push notification: %v", err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("push failed with status %d: %s", resp.StatusCode, string(body))
+	}
+
+	fmt.Println("Push Success:", deviceToken)
+	return nil
+}
+
 func SendMobileNotifications() {
 	var ourausers []entity.Ourauser
 	database.Connector.Find(&ourausers)
 
 	for _, ourauser := range ourausers {
 		//skip test users
-		if len(ourauser.Signature) < 1 {
-			continue
+		if ourauser.Deviceid != "" {
+			{
+				fmt.Println("Sending Daily Notification for: ", ourauser.Wallet)
+				err := PushNotification(ourauser.Deviceid, map[string]interface{}{
+					"customKey": "start-export",
+				})
+				if err != nil {
+					log.Println("Failed to push to:", ourauser.Deviceid, "Error:", err)
+				}
+			}
 		}
-		fmt.Println("Sending Daily Notification for: ", ourauser.Wallet)
-
 	}
 }
 
