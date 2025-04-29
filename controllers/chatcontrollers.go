@@ -2547,6 +2547,13 @@ func TestSendMobileNotis(w http.ResponseWriter, r *http.Request) {
 	SendMobileNotifications()
 }
 
+func TestSendMobileNotisAddr(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	address := vars["address"]
+
+	SendMobileNotificationstoAddr(address)
+}
+
 func VerifyDataHMAC(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	uuidInput := vars["uuid"]
@@ -5272,6 +5279,26 @@ func SendMobileNotifications() {
 	database.Connector.Find(&ourausers)
 
 	for _, ourauser := range ourausers {
+		//skip test users
+		if ourauser.Deviceid != "" {
+			{
+				fmt.Println("Sending Daily Notification for: ", ourauser.Wallet)
+				err := PushNotification(ourauser.Deviceid, map[string]interface{}{
+					"customKey": "start-export",
+				})
+				if err != nil {
+					log.Println("Failed to push to:", ourauser.Deviceid, "Error:", err)
+				}
+			}
+		}
+	}
+}
+
+func SendMobileNotificationstoAddr(addr string) {
+	var ourauser entity.Ourauser
+	result := database.Connector.Where("wallet = ?", addr).Find(&ourauser)
+
+	if result.RowsAffected > 0 {
 		//skip test users
 		if ourauser.Deviceid != "" {
 			{
