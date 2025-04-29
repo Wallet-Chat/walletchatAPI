@@ -410,7 +410,7 @@ func SigninHandlerMobile(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 				w.Header().Set("Content-Type", "application/json")
 				w.Header().Set("X-Content-Type-Options", "nosniff")
 				w.WriteHeader(http.StatusCreated)
-				json.NewEncoder(w).Encode(newUser)
+				//json.NewEncoder(w).Encode(newUser)
 			}
 		} else {
 			fmt.Println("failed to recover EVM addr ", recoveredAddr, p.Address)
