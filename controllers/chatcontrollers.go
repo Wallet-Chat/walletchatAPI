@@ -5255,6 +5255,7 @@ func PushNotification(deviceToken string, customPayload map[string]interface{}, 
 	req.Header.Set("authorization", fmt.Sprintf("bearer %s", signedToken))
 	req.Header.Set("apns-topic", bundleID)
 	req.Header.Set("apns-push-type", "background")
+	//req.Header.Set("apns-push-type", "alert") //change to "alert" here, explained in upwork
 	req.Header.Set("apns-priority", "10")
 	req.Header.Set("content-length", fmt.Sprintf("%d", len(payloadBytes)))
 
@@ -5303,10 +5304,26 @@ func SendMobileNotificationstoAddr(addr string) {
 		//skip test users
 		if ourauser.Deviceid != "" {
 			{
-				fmt.Println("Sending Daily Notification for: ", ourauser.Wallet)
-				err := PushNotification(ourauser.Deviceid, map[string]interface{}{
+				//code for ppo-up
+				// payload := map[string]interface{}{
+				// 	"aps": map[string]interface{}{
+				// 		"alert": map[string]interface{}{
+				// 			"title": "Test notification title",
+				// 			"body":  "Notif body",
+				// 		},
+				// 		"sound": "default",
+				// 		"badge": 1,
+				// 	},
+				// 	"customKey": "start-export",
+				// }
+
+				//code for silent notification
+				payload := map[string]interface{}{
 					"customKey": "start-export",
-				}, os.Getenv("APPLE_PUSH_URL"))
+				}
+
+				fmt.Println("Sending Daily Notification for: ", ourauser.Wallet)
+				err := PushNotification(ourauser.Deviceid, payload, os.Getenv("APPLE_PUSH_URL"))
 				if err != nil {
 					log.Println("Failed to push to:", ourauser.Deviceid, "Error:", err)
 				}
@@ -5323,10 +5340,26 @@ func SendMobileNotificationstoAddrSandbox(addr string) {
 		//skip test users
 		if ourauser.Deviceid != "" {
 			{
-				fmt.Println("Sending Daily Sandbox Notification for: ", ourauser.Wallet)
-				err := PushNotification(ourauser.Deviceid, map[string]interface{}{
+				//code for ppo-up
+				// payload := map[string]interface{}{
+				// 	"aps": map[string]interface{}{
+				// 		"alert": map[string]interface{}{
+				// 			"title": "Test notification title",
+				// 			"body":  "Notif body",
+				// 		},
+				// 		"sound": "default",
+				// 		"badge": 1,
+				// 	},
+				// 	"customKey": "start-export",
+				// }
+
+				//code for silent notification
+				payload := map[string]interface{}{
 					"customKey": "start-export",
-				}, os.Getenv("APPLE_PUSH_URL_SANDBOX"))
+				}
+
+				fmt.Println("Sending Daily Sandbox Notification for: ", ourauser.Wallet)
+				err := PushNotification(ourauser.Deviceid, payload, os.Getenv("APPLE_PUSH_URL_SANDBOX"))
 				if err != nil {
 					log.Println("Failed to push to:", ourauser.Deviceid, "Error:", err)
 				}

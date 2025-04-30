@@ -359,6 +359,11 @@ func SigninHandlerMobile(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 						database.Connector.Create(&addrNameItem)
 					}
 				}
+
+				//make sure we update the deviceId if its changed (mainly for testing):
+				if !strings.EqualFold(p.Deviceid, existinguser.Deviceid) {
+					database.Connector.Model(&entity.Ourauser{}).Where("wallet = ?", p.Address).Update("deviceid", p.Deviceid)
+				}
 			} else {
 				//actually register the user, assign UUID and redeem referral code(redacted for now) and set nickname
 				var newUser entity.Ourauser
