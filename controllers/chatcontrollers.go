@@ -2738,14 +2738,14 @@ func AuthTestFile(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("Original POST body: %s\n", string(requestBody))
 
 	// Strictly typed slice of HealthData
-	var jsonData []HealthData
-	if err := json.Unmarshal(requestBody, &jsonData); err != nil {
+	var jsonHealthData []HealthData
+	if err := json.Unmarshal(requestBody, &jsonHealthData); err != nil {
 		http.Error(w, "Invalid JSON format: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	// Normalize JSON for HMAC (optional: could sort, or just compact)
-	normalizedData, err := sortedCompactJSON(jsonData)
+	normalizedData, err := sortedCompactJSON(jsonHealthData)
 	if err != nil {
 		http.Error(w, "Normalization failed: "+err.Error(), http.StatusBadRequest)
 		return
@@ -2759,6 +2759,235 @@ func AuthTestFile(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("HMAC: ", expectedMAC)
 	fmt.Printf("Normalized body: %s\n", normalizedData)
+
+	//Save file to DB
+	var currentData entity.Ouradata
+	currentData.Endpoint = uuid.New().String() //TODO we should make a new DB table but for now we re-use this
+
+	currentData.Wallet = Authuser.Address //TODO get from data UL (external ID or wallet addr)
+	currentData.Jsondata = normalizedData
+	database.Connector.Create(&currentData)
+
+	var userInfo entity.Ourauser
+	var existingUserData = database.Connector.Where("wallet = ?", currentData.Wallet).Find(&userInfo)
+	if existingUserData.RowsAffected == 0 {
+		http.Error(w, "YIKES! not a registered user", http.StatusBadRequest)
+		return
+	}
+
+	// Create a buffer to hold the zip data
+	var zipFileBuf bytes.Buffer
+	// Create a new zip writer
+	zipWriter := zip.NewWriter(&zipFileBuf)
+
+	// Close the zip writer
+	if err := zipWriter.Close(); err != nil {
+		log.Fatalf("Failed to close zip writer: %v", err)
+	}
+
+	// Open the zip file (for testing alg and formatting)
+	// zipData, err := os.ReadFile("archive.zip")
+	// if err != nil {
+	// 	log.Fatalf("Failed to read zip file data: %v", err)
+	// }
+
+	//TODO get user, so we can pull signature, or have it sent with data
+
+	//encrypt the file encryption key with the users signature (TODO fill this based on user signature)
+	encryptedBytes, err := vanaencrypt.ClientSideEncrypt(zipFileBuf.Bytes(), userInfo.Signature)
+	if err != nil {
+		fmt.Println("error in ClientSideEncrypt", err)
+	}
+
+	// Upload the zip file to DigitalOcean Spaces
+	fileUrl, err := SaveFileToSpaces(encryptedBytes, currentData.Wallet+time.Now().Format("2006-01-02_15-04-05")+"_archive.zip")
+	if err != nil {
+		log.Fatalf("Failed to upload to DigitalOcean Spaces: %v", err)
+	}
+	fmt.Println("file stored at: ", fileUrl)
+
+	//for test
+	// err = FetchAndDecryptFile(fileUrl, ourauser.Signature)
+	// if err != nil {
+	// 	fmt.Println("error: ", err)
+	// }
+
+	// iv := []byte{
+	// 	169, 138, 29, 49, 139, 11, 183, 51,
+	// 	167, 5, 144, 163, 203, 214, 217, 224,
+	// }
+	// ephemPrivateKeyBytes := []byte{
+	// 	147, 207, 81, 186, 169, 91, 245, 42,
+	// 	148, 220, 122, 136, 222, 82, 10, 86,
+	// 	230, 210, 241, 85, 15, 154, 77, 60,
+	// 	38, 91, 211, 211, 243, 2, 214, 203,
+	// }
+	// Initialize the IV and ephemeral private key with random bytes if was not provided
+	iv := make([]byte, 16) // 16 bytes for IV
+	if _, err := rand.Read(iv); err != nil {
+
+	}
+	ephemPrivateKeyBytes := make([]byte, 32) // 32 bytes for ephemeral private key
+	if _, err := rand.Read(ephemPrivateKeyBytes); err != nil {
+
+	}
+
+	//DLP public Key
+	publicKeyDLP, err := vanatransact.GetDlpPublicKey()
+	if err != nil {
+		http.Error(w, "YIKES! GetDlpPublicKey", http.StatusBadRequest)
+		return
+	}
+
+	//get EEK with EK
+	vanaDlpEEK, _, _ := vanaencrypt.EncryptWithWalletPublicKey(userInfo.Signature, publicKeyDLP, iv, ephemPrivateKeyBytes)
+	finalDlpEEK := append(vanaDlpEEK["iv"],
+		append(vanaDlpEEK["ephemPublicKey"],
+			append(vanaDlpEEK["ciphertext"], vanaDlpEEK["mac"]...)...)...)
+
+	// Return the final result as a hex string
+	hexDataDlpEEK := hex.EncodeToString(finalDlpEEK)
+	fmt.Println("DLP EEK: ", hexDataDlpEEK)
+
+	//function - addFileWithPermissions - blockchain RPC call
+	//parameters - (publicly accessible link to encrypted data, "permissions" is the encrypted encryption key)
+	// returns fileID (ex: file id is '601971')
+	walletAddress := common.HexToAddress(userInfo.Wallet) //ourauser.Wallet)
+	txHash, err := vanatransact.AddFileWithPermissions(walletAddress, fileUrl, hexDataDlpEEK)
+	if err != nil {
+		fmt.Println("Uploaded File  err: ", txHash, err)
+	}
+	fmt.Println("Uploaded File TX: ", txHash)
+	var fileID = vanatransact.GetFileID(txHash)
+	//fmt.Println("Uploaded File: ", fileID)
+
+	// ** BEGIN TEST CODE ** test that the DLP can decrypt the file: TEST CODE ONLY
+	// privKey, _ := hex.DecodeString(os.Getenv("VANA_SIGNER_PRIVATE_KEY"))
+	// decryptedDlpEEK, err := vanaencrypt.DecryptWithPrivKey(privKey, vanaDlpEEK)
+	// if err != nil {
+	// 	fmt.Println("Error in testing decryption of EEK to get back user signature: ", err)
+	// }
+	// // Convert the ASCII byte array back to a string
+	// asciiString := string(decryptedDlpEEK)
+	// // Remove the "0x" prefix if present
+	// if len(asciiString) > 2 && asciiString[:2] == "0x" {
+	// 	asciiString = asciiString[2:]
+	// }
+	// // Decode the cleaned hex string back to bytes
+	// decodedBytes, err := hex.DecodeString(asciiString)
+	// if err != nil {
+	// 	fmt.Println("Error decoding hex:", err)
+	// 	return
+	// }
+	// // Convert the decoded bytes to the final hex representation
+	// finalHex := fmt.Sprintf("0x%x", decodedBytes)
+	// fmt.Println("decrypted EEK: ", finalHex)
+	// fmt.Println("Orig user sig: ", ourauser.Signature)
+	// err = FetchAndDecryptFile(fileUrl, finalHex)
+	// if err != nil {
+	// 	fmt.Println("error: ", err)
+	// }
+	//** END ** test that the DLP can decrypt the file: TEST CODE ONLY
+
+	//now get proof from TEE the file is valid / authentic
+	//teeFee = await teePoolContract.teeFee(); //get estimated required fee for proof?
+	var teePrice = vanatransact.GetTeePrice()
+	fmt.Println("TEE Price: ", teePrice)
+
+	var contributionProofTx = vanatransact.GetTeeContributionProof(fileID)
+	fmt.Println("TEE contribution proof tx: ", contributionProofTx)
+
+	time.Sleep(15 * time.Second)
+	// Call the API to fetch transaction logs
+	// url := os.Getenv("VANA_API_URL") + "/transactions/" + contributionProofTx + "/logs"
+	// resp, err := http.Get(url)
+	// if err != nil {
+	// 	log.Println("Error fetching transaction logs:", err)
+	// 	//return // Handle the error appropriately
+	// }
+	// defer resp.Body.Close()
+
+	// // Read the response body
+	// body, err := ioutil.ReadAll(resp.Body)
+	// if err != nil {
+	// 	log.Println("Error reading response body:", err)
+	// 	return // Handle the error appropriately
+	// }
+	// fmt.Println(string(body))
+
+	// // Parse JSON into a map
+	// var data map[string]interface{}
+	// if err := json.Unmarshal(body, &data); err != nil {
+	// 	log.Println("Error unmarshalling JSON for Tx logs:", err)
+	// }
+
+	// // Extract jobId from the first item's parameters
+	// if items, ok := data["items"].([]interface{}); ok && len(items) > 0 {
+	// 	if item, ok := items[0].(map[string]interface{}); ok {
+	// 		if decoded, ok := item["decoded"].(map[string]interface{}); ok {
+	// 			if params, ok := decoded["parameters"].([]interface{}); ok {
+	// 				for _, param := range params {
+	// 					if p, ok := param.(map[string]interface{}); ok && p["name"] == "jobId" {
+	// 						log.Println("Job ID from TX log:", p["value"])
+	// 						break
+	// 					}
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// }
+
+	//getJobId and teeDetails (tbd)
+	fileIDBigInt := new(big.Int)
+	fileIDBigInt.SetString(fileID[2:], 16) // Skip the "0x" prefix
+	// Convert big.Int to string representation of the integer
+	fileIDstr := fileIDBigInt.String()
+	var jobIDS = vanatransact.GetFileJobIDs(fileIDstr)
+	fmt.Println("`Latest JobIDs for FileID ", jobIDS, fileIDstr)
+
+	if len(jobIDS) > 0 {
+		latestJobId := jobIDS[len(jobIDS)-1]
+		teeUrl, teePublicKey := vanatransact.GetTeeDetails(*latestJobId)
+
+		//specific to the DLP proof code
+		//envVars := map[string]string{}
+		//need this for testing archive.zip manually!
+		// envVars := map[string]string{
+		// 	"USER_EMAIL": "user123@gmail.com", // Add USER_EMAIL to EnvVars
+		// }
+		envVars := map[string]string{}
+
+		// Public key as PEM string
+		publicKeyPEM := `-----BEGIN PUBLIC KEY-----
+MIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEA4129oK+dUEalpqP5aT/M
+A6yhFbAjNppOidQuVgeSgEPquXLlJrdLoomHGhzugbBYeKS6lceEDM3oygFdCGhT
+sly26Ws8qyUIGlk0/JGf4mRHd9RMs0uOF50/mB4abNM/mA/k8cO46+UmXOK2rwEL
+U2rPb5tWVzxjPqs8Aw9eT1n7UlvOXxFc4ChyIHX/plfbkKK1R1+PYhtBHeQT8aW1
+o7wLsbbnkCGh2iahJaNacMWmUZ9YygdPg2DICQLK2KbZfZHhhylBjDzuBgjUzNai
+ikVHzrR6f9eTihYjmpx8Br5Ubhj3lVt45nAXFidxMBe1e7IILNVl9C57sqV+nPFM
+2s5ad/r3TDjOZ23e0FGBVsyG+lJwn9q/kx4kjSFsO8fNzJ7wUczVnfW+akox2rMX
+rnvdxUhpAAEtJZme5+pnS6Fr4Zi8mUBPt9kC/mHTtbPQoLsX+FeBs/u+rpXe4xBr
++QhqShKWQ+4HzwQHCc5h9d4pqZEKK8UnpdeJ0c/QTqcVAgMBAAE=
+-----END PUBLIC KEY-----`
+
+		//secrets := map[string]string{}
+		encryptedSecret, _ := vanaencrypt.EncryptSecretForProof(publicKeyPEM, []byte(currentData.Endpoint))
+		secrets := map[string]string{
+			//TODO, when we change proof can we name this as HMAC_UUID_KEY or something like that
+			"USER_API_KEY": encryptedSecret, //TODO we are re-using this field for UUID (fix when new DB table is added)
+		} //this would be API keys, etc needed in proof code
+
+		//ask a specific TEE to run the proof of contribution
+		//${jobDetails.teeUrl}/RunProof
+		err := vanatransact.SendContributionProof(latestJobId, fileID, publicKeyDLP, envVars, secrets, teePublicKey, teeUrl, iv, ephemPrivateKeyBytes, userInfo.Signature)
+		if err != nil {
+			fmt.Println("Error in SendContributionProof", err)
+		}
+
+		//now request reward from DLP contract
+		txHashReward, err := vanatransact.RequestRewardFromDLP(fileID)
+		fmt.Println("Request Reward from DLP: ", txHashReward, err)
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
@@ -5559,7 +5788,7 @@ func FetchOuraData() {
 
 		time.Sleep(45 * time.Second)
 		// Call the API to fetch transaction logs
-		url := "https://vanascan.io/api/v2/transactions/" + contributionProofTx + "/logs"
+		url := os.Getenv("VANA_API_URL") + "/transactions/" + contributionProofTx + "/logs"
 		resp, err := http.Get(url)
 		if err != nil {
 			log.Println("Error fetching transaction logs:", err)
@@ -5859,7 +6088,7 @@ func HandleWebhookData(w http.ResponseWriter, r *http.Request) {
 
 	time.Sleep(45 * time.Second)
 	// Call the API to fetch transaction logs
-	url := "https://vanascan.io/api/v2/transactions/" + contributionProofTx + "/logs"
+	url := os.Getenv("VANA_API_URL") + "/transactions/" + contributionProofTx + "/logs"
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Println("Error fetching transaction logs:", err)
@@ -6151,7 +6380,7 @@ func HandleMobileData(w http.ResponseWriter, r *http.Request) {
 	var contributionProofTx = vanatransact.GetTeeContributionProof(fileID)
 	fmt.Println("TEE contribution proof tx: ", contributionProofTx)
 
-	time.Sleep(45 * time.Second)
+	time.Sleep(15 * time.Second)
 	// Call the API to fetch transaction logs
 	url := os.Getenv("VANA_API_URL") + "/transactions/" + contributionProofTx + "/logs" //"https://api.moksha.vanascan.io/api/v2/transactions/" + contributionProofTx + "/logs"
 	//url := "https://vanascan.io/api/v2/transactions/" + contributionProofTx + "/logs"
@@ -6166,39 +6395,30 @@ func HandleMobileData(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Println("Error reading response body:", err)
-		return // Handle the error appropriately
+		//return // Handle the error appropriately
 	}
 	fmt.Println(string(body))
 
-	// Define a struct to match the JSON response
-	type Response struct {
-		Items []struct {
-			Decoded struct {
-				Parameters []struct {
-					Name  string `json:"name"`
-					Value string `json:"value"`
-				} `json:"parameters"`
-			} `json:"decoded"`
-		} `json:"items"`
+	// Parse JSON into a map
+	var data map[string]interface{}
+	if err := json.Unmarshal(body, &data); err != nil {
+		log.Println("Error unmarshalling JSON for Tx logs:", err)
 	}
 
-	// Unmarshal the JSON response into the struct
-	var responseData Response
-	if err := json.Unmarshal(body, &responseData); err != nil {
-		log.Println("Error unmarshalling JSON:", err)
-		return // Handle the error appropriately
-	}
-
-	// Extract the jobId from the response
-	if len(responseData.Items) > 0 {
-		for _, param := range responseData.Items[0].Decoded.Parameters {
-			if param.Name == "jobId" {
-				log.Println("Job ID from TX log:", param.Value)
-				break
+	// Extract jobId from the first item's parameters
+	if items, ok := data["items"].([]interface{}); ok && len(items) > 0 {
+		if item, ok := items[0].(map[string]interface{}); ok {
+			if decoded, ok := item["decoded"].(map[string]interface{}); ok {
+				if params, ok := decoded["parameters"].([]interface{}); ok {
+					for _, param := range params {
+						if p, ok := param.(map[string]interface{}); ok && p["name"] == "jobId" {
+							log.Println("Job ID from TX log:", p["value"])
+							break
+						}
+					}
+				}
 			}
 		}
-	} else {
-		log.Println("No items found in the response.")
 	}
 
 	//getJobId and teeDetails (tbd)
