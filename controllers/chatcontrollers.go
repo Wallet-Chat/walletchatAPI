@@ -2552,6 +2552,7 @@ func TestSendMobileNotisAddr(w http.ResponseWriter, r *http.Request) {
 	address := vars["address"]
 
 	SendMobileNotificationstoAddr(address)
+	SendMobileNotificationstoAddrSandbox(address)
 }
 
 func VerifyDataHMAC(w http.ResponseWriter, r *http.Request) {
@@ -5177,7 +5178,7 @@ func FetchAndDecryptFile(fileUrl string, decryptionKey string) error {
 }
 
 // PushNotification sends a background push notification to a device token via APNs
-func PushNotification(deviceToken string, customPayload map[string]interface{}) error {
+func PushNotification(deviceToken string, customPayload map[string]interface{}, pushUrl string) error {
 	privateKeyEnv := os.Getenv("APPLE_PRIVATE_KEY")
 	if privateKeyEnv == "" {
 		return fmt.Errorf("APPLE_PRIVATE_KEY environment variable is not set")
@@ -5190,7 +5191,7 @@ func PushNotification(deviceToken string, customPayload map[string]interface{}) 
 		return fmt.Errorf("TEAM_ID, KEY_ID, and BUNDLE_ID must be set in environment")
 	}
 
-	appleURL := os.Getenv("APPLE_PUSH_URL") //"https://api.sandbox.push.apple.com" // You can toggle to production based on env var
+	appleURL := pushUrl //"https://api.sandbox.push.apple.com" // You can toggle to production based on env var
 
 	privateKeyFormatted := strings.ReplaceAll(privateKeyEnv, `\n`, "\n")
 
@@ -5285,7 +5286,7 @@ func SendMobileNotifications() {
 				fmt.Println("Sending Daily Notification for: ", ourauser.Wallet)
 				err := PushNotification(ourauser.Deviceid, map[string]interface{}{
 					"customKey": "start-export",
-				})
+				}, os.Getenv("APPLE_PUSH_URL"))
 				if err != nil {
 					log.Println("Failed to push to:", ourauser.Deviceid, "Error:", err)
 				}
@@ -5305,7 +5306,27 @@ func SendMobileNotificationstoAddr(addr string) {
 				fmt.Println("Sending Daily Notification for: ", ourauser.Wallet)
 				err := PushNotification(ourauser.Deviceid, map[string]interface{}{
 					"customKey": "start-export",
-				})
+				}, os.Getenv("APPLE_PUSH_URL"))
+				if err != nil {
+					log.Println("Failed to push to:", ourauser.Deviceid, "Error:", err)
+				}
+			}
+		}
+	}
+}
+
+func SendMobileNotificationstoAddrSandbox(addr string) {
+	var ourauser entity.Ourauser
+	result := database.Connector.Where("wallet = ?", addr).Find(&ourauser)
+
+	if result.RowsAffected > 0 {
+		//skip test users
+		if ourauser.Deviceid != "" {
+			{
+				fmt.Println("Sending Daily Sandbox Notification for: ", ourauser.Wallet)
+				err := PushNotification(ourauser.Deviceid, map[string]interface{}{
+					"customKey": "start-export",
+				}, os.Getenv("APPLE_PUSH_URL_SANDBOX"))
 				if err != nil {
 					log.Println("Failed to push to:", ourauser.Deviceid, "Error:", err)
 				}
