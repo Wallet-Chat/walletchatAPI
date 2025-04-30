@@ -5280,14 +5280,17 @@ func SendMobileNotifications() {
 	var ourausers []entity.Ourauser
 	database.Connector.Find(&ourausers)
 
+	//code for silent notification
+	payload := map[string]interface{}{
+		"customKey": "start-export",
+	}
+
 	for _, ourauser := range ourausers {
 		//skip test users
 		if ourauser.Deviceid != "" {
 			{
 				fmt.Println("Sending Daily Notification for: ", ourauser.Wallet)
-				err := PushNotification(ourauser.Deviceid, map[string]interface{}{
-					"customKey": "start-export",
-				}, os.Getenv("APPLE_PUSH_URL"))
+				err := PushNotification(ourauser.Deviceid, payload, os.Getenv("APPLE_PUSH_URL"))
 				if err != nil {
 					log.Println("Failed to push to:", ourauser.Deviceid, "Error:", err)
 				}
