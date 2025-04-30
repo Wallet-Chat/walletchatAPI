@@ -2780,6 +2780,10 @@ func AuthTestFile(w http.ResponseWriter, r *http.Request) {
 	// Create a new zip writer
 	zipWriter := zip.NewWriter(&zipFileBuf)
 
+	if err := addFileToZip(zipWriter, "mobileData.json", []byte(normalizedData)); err != nil {
+		log.Fatalf("Failed to add "+"mobileData.json to zip: %v", err)
+	}
+
 	// Close the zip writer
 	if err := zipWriter.Close(); err != nil {
 		log.Fatalf("Failed to close zip writer: %v", err)
@@ -2897,7 +2901,7 @@ func AuthTestFile(w http.ResponseWriter, r *http.Request) {
 	var contributionProofTx = vanatransact.GetTeeContributionProof(fileID)
 	fmt.Println("TEE contribution proof tx: ", contributionProofTx)
 
-	time.Sleep(15 * time.Second)
+	time.Sleep(5 * time.Second)
 	// Call the API to fetch transaction logs
 	// url := os.Getenv("VANA_API_URL") + "/transactions/" + contributionProofTx + "/logs"
 	// resp, err := http.Get(url)
