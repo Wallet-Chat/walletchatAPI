@@ -73,6 +73,7 @@ func main() {
 	router.HandleFunc("/testwebhook", controllers.HandleWebhookData).Methods("POST")
 	router.HandleFunc("/testpushnotis", controllers.TestSendMobileNotis).Methods("GET")
 	router.HandleFunc("/testpushnotis/{address}", controllers.TestSendMobileNotisAddr).Methods("GET")
+	router.HandleFunc("/testpushnotis_alert/{address}", controllers.TestSendMobileNotisAddrPopupAlert).Methods("GET")
 	router.HandleFunc("/testmobileupload", controllers.HandleMobileData).Methods("POST")
 	router.HandleFunc("/verifyhmac/{uuid}/{hmac}", controllers.VerifyDataHMAC).Methods("GET")
 	router.HandleFunc("/name/{address}", controllers.GetAddrNameItem).Methods("GET")

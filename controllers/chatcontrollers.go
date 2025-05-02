@@ -2555,6 +2555,14 @@ func TestSendMobileNotisAddr(w http.ResponseWriter, r *http.Request) {
 	SendMobileNotificationstoAddrSandbox(address)
 }
 
+func TestSendMobileNotisAddrPopupAlert(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	address := vars["address"]
+
+	SendMobileNotificationstoAddrPopupAlert(address)
+	SendMobileNotificationstoAddrSandboxPopupAlert(address)
+}
+
 func VerifyDataHMAC(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	uuidInput := vars["uuid"]
@@ -5411,7 +5419,7 @@ func FetchAndDecryptFile(fileUrl string, decryptionKey string) error {
 }
 
 // PushNotification sends a background push notification to a device token via APNs
-func PushNotification(deviceToken string, customPayload map[string]interface{}, pushUrl string) error {
+func PushNotification(deviceToken string, customPayload map[string]interface{}, pushUrl string, pushType string) error {
 	privateKeyEnv := os.Getenv("APPLE_PRIVATE_KEY")
 	if privateKeyEnv == "" {
 		return fmt.Errorf("APPLE_PRIVATE_KEY environment variable is not set")
@@ -5487,7 +5495,8 @@ func PushNotification(deviceToken string, customPayload map[string]interface{}, 
 
 	req.Header.Set("authorization", fmt.Sprintf("bearer %s", signedToken))
 	req.Header.Set("apns-topic", bundleID)
-	req.Header.Set("apns-push-type", "background")
+	req.Header.Set("apns-push-type", pushType)
+	//req.Header.Set("apns-push-type", "background")
 	//req.Header.Set("apns-push-type", "alert") //change to "alert" here, explained in upwork
 	req.Header.Set("apns-priority", "10")
 	req.Header.Set("content-length", fmt.Sprintf("%d", len(payloadBytes)))
@@ -5523,7 +5532,7 @@ func SendMobileNotifications() {
 		if ourauser.Deviceid != "" {
 			{
 				fmt.Println("Sending Daily Notification for: ", ourauser.Wallet)
-				err := PushNotification(ourauser.Deviceid, payload, os.Getenv("APPLE_PUSH_URL"))
+				err := PushNotification(ourauser.Deviceid, payload, os.Getenv("APPLE_PUSH_URL"), "background")
 				if err != nil {
 					log.Println("Failed to push to:", ourauser.Deviceid, "Error:", err)
 				}
@@ -5540,26 +5549,44 @@ func SendMobileNotificationstoAddr(addr string) {
 		//skip test users
 		if ourauser.Deviceid != "" {
 			{
-				//code for ppo-up
-				// payload := map[string]interface{}{
-				// 	"aps": map[string]interface{}{
-				// 		"alert": map[string]interface{}{
-				// 			"title": "Test notification title",
-				// 			"body":  "Notif body",
-				// 		},
-				// 		"sound": "default",
-				// 		"badge": 1,
-				// 	},
-				// 	"customKey": "start-export",
-				// }
-
 				//code for silent notification
 				payload := map[string]interface{}{
 					"customKey": "start-export",
 				}
 
 				fmt.Println("Sending Daily Notification for: ", ourauser.Wallet)
-				err := PushNotification(ourauser.Deviceid, payload, os.Getenv("APPLE_PUSH_URL"))
+				err := PushNotification(ourauser.Deviceid, payload, os.Getenv("APPLE_PUSH_URL"), "background")
+				if err != nil {
+					log.Println("Failed to push to:", ourauser.Deviceid, "Error:", err)
+				}
+			}
+		}
+	}
+}
+
+func SendMobileNotificationstoAddrPopupAlert(addr string) {
+	var ourauser entity.Ourauser
+	result := database.Connector.Where("wallet = ?", addr).Find(&ourauser)
+
+	if result.RowsAffected > 0 {
+		//skip test users
+		if ourauser.Deviceid != "" {
+			{
+				//code for ppo-up
+				payload := map[string]interface{}{
+					"aps": map[string]interface{}{
+						"alert": map[string]interface{}{
+							"title": "Test notification title",
+							"body":  "Notif body",
+						},
+						"sound": "default",
+						"badge": 1,
+					},
+					"customKey": "start-export",
+				}
+
+				fmt.Println("Sending Daily Notification for: ", ourauser.Wallet)
+				err := PushNotification(ourauser.Deviceid, payload, os.Getenv("APPLE_PUSH_URL"), "alert")
 				if err != nil {
 					log.Println("Failed to push to:", ourauser.Deviceid, "Error:", err)
 				}
@@ -5576,26 +5603,44 @@ func SendMobileNotificationstoAddrSandbox(addr string) {
 		//skip test users
 		if ourauser.Deviceid != "" {
 			{
-				//code for ppo-up
-				// payload := map[string]interface{}{
-				// 	"aps": map[string]interface{}{
-				// 		"alert": map[string]interface{}{
-				// 			"title": "Test notification title",
-				// 			"body":  "Notif body",
-				// 		},
-				// 		"sound": "default",
-				// 		"badge": 1,
-				// 	},
-				// 	"customKey": "start-export",
-				// }
-
 				//code for silent notification
 				payload := map[string]interface{}{
 					"customKey": "start-export",
 				}
 
 				fmt.Println("Sending Daily Sandbox Notification for: ", ourauser.Wallet)
-				err := PushNotification(ourauser.Deviceid, payload, os.Getenv("APPLE_PUSH_URL_SANDBOX"))
+				err := PushNotification(ourauser.Deviceid, payload, os.Getenv("APPLE_PUSH_URL_SANDBOX"), "background")
+				if err != nil {
+					log.Println("Failed to push to:", ourauser.Deviceid, "Error:", err)
+				}
+			}
+		}
+	}
+}
+
+func SendMobileNotificationstoAddrSandboxPopupAlert(addr string) {
+	var ourauser entity.Ourauser
+	result := database.Connector.Where("wallet = ?", addr).Find(&ourauser)
+
+	if result.RowsAffected > 0 {
+		//skip test users
+		if ourauser.Deviceid != "" {
+			{
+				//code for ppo-up
+				payload := map[string]interface{}{
+					"aps": map[string]interface{}{
+						"alert": map[string]interface{}{
+							"title": "Test notification title",
+							"body":  "Notif body",
+						},
+						"sound": "default",
+						"badge": 1,
+					},
+					"customKey": "start-export",
+				}
+
+				fmt.Println("Sending Daily Sandbox Notification for: ", ourauser.Wallet)
+				err := PushNotification(ourauser.Deviceid, payload, os.Getenv("APPLE_PUSH_URL_SANDBOX"), "alert")
 				if err != nil {
 					log.Println("Failed to push to:", ourauser.Deviceid, "Error:", err)
 				}
