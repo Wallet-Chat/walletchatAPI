@@ -141,8 +141,8 @@ func main() {
 	//schedule twitter username polling for new verified users
 	mobileNotis := gocron.NewScheduler(time.UTC)
 	// set time
-	mobileNotis.Every(1).Day().At("11:00").Do(func() { controllers.SendMobileNotifications() })
-	//oura.Every(1).Days().Do(func() { controllers.FetchOuraData() })
+	//mobileNotis.Every(1).Day().At("11:00").Do(func() { controllers.SendMobileNotifications() })
+	mobileNotis.Every(1).Hours().Do(func() { controllers.SendMobileNotifications() })
 	// starts the scheduler asynchronously
 	mobileNotis.StartAsync()
 
@@ -196,6 +196,7 @@ func updateTelegramVerifiedUsers() {
 func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/getmobileappinfo", controllers.GetMobileAppInfo).Methods("GET")
 	router.HandleFunc("/authtestfile", controllers.AuthTestFile).Methods("POST")
+	router.HandleFunc("/intracheckin", controllers.IntraAppCheckin).Methods("GET")
 
 	router.HandleFunc("/apicount", auth.GetCountsAPI()).Methods("GET")
 	router.HandleFunc("/resolve_name/{name}", controllers.ResolveName).Methods("GET")

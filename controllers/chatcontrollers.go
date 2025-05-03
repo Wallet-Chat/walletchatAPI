@@ -2543,6 +2543,24 @@ func GetMobileAppInfo(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// when app gets a silent notification, make http request for debug/health check
+func IntraAppCheckin(w http.ResponseWriter, r *http.Request) {
+	Authuser := auth.GetUserFromReqContext(r)
+
+	var existinguser entity.Ourauser
+	var userSearch = database.Connector.Where("wallet = ?", Authuser.Address).Find(&existinguser)
+
+	if userSearch.RowsAffected > 0 {
+		fmt.Println("User checked in: ", Authuser.Address, time.Now().UTC().Format("2006-01-02_15-04-05"))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.WriteHeader(http.StatusOK)
+	} else {
+		http.Error(w, "User not found", http.StatusNotFound)
+	}
+}
+
 func TestSendMobileNotis(w http.ResponseWriter, r *http.Request) {
 	SendMobileNotifications()
 }
