@@ -361,7 +361,7 @@ func SigninHandlerMobile(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 				}
 
 				//make sure we update the deviceId if its changed (mainly for testing):
-				if !strings.EqualFold(p.Deviceid, existinguser.Deviceid) {
+				if !strings.EqualFold(p.Deviceid, existinguser.Deviceid) && p.Deviceid != "" {
 					database.Connector.Model(&entity.Ourauser{}).Where("wallet = ?", p.Address).Update("deviceid", p.Deviceid)
 				}
 			} else {
