@@ -197,6 +197,7 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/getmobileappinfo", controllers.GetMobileAppInfo).Methods("GET")
 	router.HandleFunc("/authtestfile", controllers.AuthTestFile).Methods("POST")
 	router.HandleFunc("/intracheckin", controllers.IntraAppCheckin).Methods("GET")
+	router.HandleFunc("/intracheckin/{style}", controllers.IntraAppCheckinType).Methods("GET")
 
 	router.HandleFunc("/apicount", auth.GetCountsAPI()).Methods("GET")
 	router.HandleFunc("/resolve_name/{name}", controllers.ResolveName).Methods("GET")
