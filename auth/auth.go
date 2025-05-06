@@ -360,6 +360,21 @@ func SigninHandlerMobile(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 					}
 				}
 
+				//this is only for existing users but easier for testing
+				//save to authusers as well for JWT verification later on
+				lowercaseAddress := strings.ToLower(p.Address)
+				nonce, err := GetNonce()
+				if err != nil {
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+				user := Authuser{
+					Address: lowercaseAddress,
+					Nonce:   nonce,
+				}
+				CreateIfNotExists(user)
+				//end of just for existing users, but easier for testing
+
 				//make sure we update the deviceId if its changed (mainly for testing):
 				if !strings.EqualFold(p.Deviceid, existinguser.Deviceid) && p.Deviceid != "" {
 					database.Connector.Model(&entity.Ourauser{}).Where("wallet = ?", p.Address).Update("deviceid", p.Deviceid)
