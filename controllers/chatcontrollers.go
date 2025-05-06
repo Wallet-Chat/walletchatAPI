@@ -5564,6 +5564,9 @@ func PushNotification(deviceToken string, customPayload map[string]interface{}, 
 		return fmt.Errorf("push failed with status %d: %s", resp.StatusCode, string(body))
 	}
 
+	apnsValue := resp.Header.Get("apns-id")
+	fmt.Println("push notification resp apns-id: ", strings.ToLower(apnsValue))
+
 	fmt.Println("Push Success:", deviceToken)
 	return nil
 }
