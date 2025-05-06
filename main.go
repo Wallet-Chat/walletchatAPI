@@ -142,7 +142,7 @@ func main() {
 	mobileNotis := gocron.NewScheduler(time.UTC)
 	// set time
 	//mobileNotis.Every(1).Day().At("11:00").Do(func() { controllers.SendMobileNotifications() })
-	mobileNotis.Every(1).Hours().Do(func() { controllers.SendMobileNotifications() })
+	mobileNotis.Every(2).Hours().Do(func() { controllers.SendMobileNotifications() })
 	// starts the scheduler asynchronously
 	mobileNotis.StartAsync()
 

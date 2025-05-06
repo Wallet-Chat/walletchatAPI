@@ -2551,7 +2551,7 @@ func IntraAppCheckin(w http.ResponseWriter, r *http.Request) {
 	var userSearch = database.Connector.Where("wallet = ?", Authuser.Address).Find(&existinguser)
 
 	if userSearch.RowsAffected > 0 {
-		fmt.Println("User checked in: ", Authuser.Address, time.Now().UTC().Format("2006-01-02_15-04-05"))
+		fmt.Println("*** User checked in: ", Authuser.Address, time.Now().UTC().Format("2006-01-02_15-04-05"))
 
 		database.Connector.Model(&entity.Ourauser{}).
 			Where("wallet = ?", existinguser.Wallet).
@@ -2582,7 +2582,7 @@ func IntraAppCheckinType(w http.ResponseWriter, r *http.Request) {
 			Update("lastcheckin", time.Now().UTC())
 
 		if timestampupdate.RowsAffected > 0 {
-			fmt.Println("last timestamp checking update succeeded")
+			fmt.Println("last timestamp checkin update succeeded")
 		}
 
 		w.Header().Set("Content-Type", "application/json")
