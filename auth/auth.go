@@ -612,7 +612,7 @@ func AuthMiddleware(jwtProvider *JwtHmacProvider) func(next http.Handler) http.H
 			}
 			claims, err := jwtProvider.Verify(tokenString)
 			if err != nil {
-				fmt.Println("kevin test here error:  ", err)
+				//fmt.Println("kevin test here error:  ", err)
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
