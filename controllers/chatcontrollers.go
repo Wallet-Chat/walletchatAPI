@@ -5544,7 +5544,6 @@ func PushNotification(deviceToken string, customPayload map[string]interface{}, 
 	}
 
 	expiration := time.Now().Unix() + 86400
-	fmt.Println("apns-expiration header: ", expiration)
 
 	req.Header.Set("authorization", fmt.Sprintf("bearer %s", signedToken))
 	req.Header.Set("apns-topic", bundleID)
@@ -5629,12 +5628,12 @@ func SendMobileNotificationstoAddrPopupAlert(addr string) {
 		//skip test users
 		if ourauser.Deviceid != "" {
 			{
-				//code for ppo-up
+				//code for pop-up
 				payload := map[string]interface{}{
 					"aps": map[string]interface{}{
 						"alert": map[string]interface{}{
-							"title": "Test notification title",
-							"body":  "Notif body",
+							"title": "Intra by BHDAO",
+							"body":  "Daily Sync Reminder",
 						},
 						"sound": "default",
 						"badge": 1,
@@ -5687,8 +5686,8 @@ func SendMobileNotificationstoAddrSandboxPopupAlert(addr string) {
 				payload := map[string]interface{}{
 					"aps": map[string]interface{}{
 						"alert": map[string]interface{}{
-							"title": "Test notification title",
-							"body":  "Notif body",
+							"title": "Intra by BHDAO",
+							"body":  "Daily Sync Reminder",
 						},
 						"sound": "default",
 						"badge": 1,
