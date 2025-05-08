@@ -5543,8 +5543,12 @@ func PushNotification(deviceToken string, customPayload map[string]interface{}, 
 		return fmt.Errorf("failed to create request: %v", err)
 	}
 
+	expiration := time.Now().Unix() + 86400
+	fmt.Println("apns-expiration header: ", expiration)
+
 	req.Header.Set("authorization", fmt.Sprintf("bearer %s", signedToken))
 	req.Header.Set("apns-topic", bundleID)
+	req.Header.Set("apns-expiration", strconv.FormatInt(expiration, 10))
 	req.Header.Set("apns-push-type", pushType)
 	//req.Header.Set("apns-push-type", "background")
 	//req.Header.Set("apns-push-type", "alert") //change to "alert" here, explained in upwork
