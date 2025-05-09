@@ -3586,7 +3586,7 @@ func GetConfigInfo(w http.ResponseWriter, r *http.Request) {
 		//Features:       []string{"chat", "nft", "community"},
 		ExportIntervalInMinutes: 24 * 60, // once every 24 hours
 		ExportUrl:               "https://api.v2.walletchat.fun/v1/authtestfile",
-		PrivacyPolicyUrl:        "https://intra.so/privacy",
+		PrivacyPolicyUrl:        "https://intra.so/privacy-policy",
 		AboutUsUrl:              "https://intra.so",
 	}
 
