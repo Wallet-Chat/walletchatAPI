@@ -5632,8 +5632,8 @@ func SendMobileNotificationstoAddrPopupAlert(addr string) {
 				payload := map[string]interface{}{
 					"aps": map[string]interface{}{
 						"alert": map[string]interface{}{
-							"title": "Intra by BHDAO",
-							"body":  "Daily Sync Reminder",
+							"title": "Intra - Daily Sync Reminder",
+							"body":  "Make sure to get your rewards today!",
 						},
 						"sound": "default",
 						"badge": 1,
@@ -5686,8 +5686,8 @@ func SendMobileNotificationstoAddrSandboxPopupAlert(addr string) {
 				payload := map[string]interface{}{
 					"aps": map[string]interface{}{
 						"alert": map[string]interface{}{
-							"title": "Intra by BHDAO",
-							"body":  "Daily Sync Reminder",
+							"title": "Intra - Daily Sync Reminder",
+							"body":  "Make sure to get your rewards today!",
 						},
 						"sound": "default",
 						"badge": 1,
