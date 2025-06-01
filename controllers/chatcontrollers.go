@@ -2776,6 +2776,55 @@ func OuraTestFile(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+//THIS ENDED UP NOT BEING USED BECAUSE THE SERVICE DOES THIS WORK FOR US (I THINK)
+// UploadFileForRefiner takes a bytes.Buffer containing the file data (e.g., your healthkit.json contents)
+// and POSTs it as a multipart/form-data field named "file" to the given URL.
+// It returns the HTTP status and full response body (as a byte slice), or an error.
+// func UploadFileForRefiner(zipFileBuf *bytes.Buffer) (string, []byte, error) {
+// 	// Prepare a buffer to build the multipart request body
+// 	var requestBody bytes.Buffer
+// 	writer := multipart.NewWriter(&requestBody)
+
+// 	// Create a form‐file field named "file" with filename "healthkit.json"
+// 	part, err := writer.CreateFormFile("file", "healthkit.json")
+// 	if err != nil {
+// 		return "", nil, fmt.Errorf("creating form‐file field: %w", err)
+// 	}
+
+// 	// Copy zipFileBuf’s contents into that part
+// 	if _, err := io.Copy(part, zipFileBuf); err != nil {
+// 		return "", nil, fmt.Errorf("copying file data into form‐file: %w", err)
+// 	}
+
+// 	// Finalize the multipart form
+// 	if err := writer.Close(); err != nil {
+// 		return "", nil, fmt.Errorf("closing multipart writer: %w", err)
+// 	}
+
+// 	// Build the POST request
+// 	req, err := http.NewRequest("POST", os.Getenv("DLP_URL_UPLOAD_FOR_REFINER"), &requestBody)
+// 	if err != nil {
+// 		return "", nil, fmt.Errorf("creating HTTP request: %w", err)
+// 	}
+// 	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+// 	// Send it
+// 	client := &http.Client{}
+// 	resp, err := client.Do(req)
+// 	if err != nil {
+// 		return "", nil, fmt.Errorf("sending request: %w", err)
+// 	}
+// 	defer resp.Body.Close()
+
+// 	// Read the full response body
+// 	respBytes, err := io.ReadAll(resp.Body)
+// 	if err != nil {
+// 		return resp.Status, nil, fmt.Errorf("reading response body: %w", err)
+// 	}
+
+// 	return resp.Status, respBytes, nil
+// }
+
 // HealthData represents the expected JSON structure.
 type HealthData struct {
 	StartDate     string  `json:"startDate"`
@@ -3050,6 +3099,52 @@ rnvdxUhpAAEtJZme5+pnS6Fr4Zi8mUBPt9kC/mHTtbPQoLsX+FeBs/u+rpXe4xBr
 		txHashReward, err := vanatransact.RequestRewardFromDLP(fileID)
 		fmt.Println("Request Reward from DLP: ", txHashReward, err)
 	}
+
+	//Call refinement service
+	url := os.Getenv("DLP_REFINEMENT_SERVICE")
+	method := "POST"
+	// ParseUint will accept "0x..." if base=0 and give you a uint64.
+	fileIdInt, err := strconv.ParseUint(fileID, 0, 64)
+	if err != nil {
+		fmt.Printf("couldn't convert %q to uint64: %v\n", fileID, err)
+		return
+	}
+	fmt.Printf("as uint64: %d\n", fileIdInt)
+	refinePayload := map[string]interface{}{
+		"file_id":        fileIdInt,
+		"encryption_key": userInfo.Signature,
+		"refiner_id":     69,
+		"env_vars": map[string]string{
+			"PINATA_API_KEY":    os.Getenv("PINATA_API_KEY"),
+			"PINATA_API_SECRET": os.Getenv("PINATA_API_SECRET"),
+		},
+	}
+	refinePayloadJSON, _ := json.Marshal(refinePayload)
+	payload := strings.NewReader(string(refinePayloadJSON))
+
+	client := &http.Client{}
+	req, err := http.NewRequest(method, url, payload)
+
+	if err != nil {
+		fmt.Println("call /refine step 1", err)
+		return
+	}
+	req.Header.Add("Content-Type", "application/json")
+
+	res, err := client.Do(req)
+	if err != nil {
+		fmt.Println("call /refine step 2", err)
+		return
+	}
+	defer res.Body.Close()
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println("call /refine step 3", err)
+		return
+	}
+	fmt.Println(string(body))
+	//end call refinement service
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
