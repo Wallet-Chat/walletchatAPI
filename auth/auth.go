@@ -387,6 +387,7 @@ func SigninHandlerMobile(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 				newUser.Signature = p.Sig
 				newUser.Deviceid = p.Deviceid
 				newUser.Lastcheckin = time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC)
+				newUser.Numcheckins = 0
 
 				wc_analytics.SendCustomIntraEvent(newUser.Wallet, "NEW_HEALTHKIT_REGISTRATION")
 

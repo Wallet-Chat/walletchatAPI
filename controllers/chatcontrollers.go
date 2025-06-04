@@ -2555,7 +2555,7 @@ func IntraAppCheckin(w http.ResponseWriter, r *http.Request) {
 
 		database.Connector.Model(&entity.Ourauser{}).
 			Where("wallet = ?", existinguser.Wallet).
-			Update("lastcheckin", time.Now().UTC())
+			Update("lastcheckin", time.Now().UTC(), "numcheckins", existinguser.Numcheckins+1)
 
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("X-Content-Type-Options", "nosniff")
@@ -2579,7 +2579,7 @@ func IntraAppCheckinType(w http.ResponseWriter, r *http.Request) {
 
 		var timestampupdate = database.Connector.Model(&entity.Ourauser{}).
 			Where("wallet = ?", existinguser.Wallet).
-			Update("lastcheckin", time.Now().UTC())
+			Update("lastcheckin", time.Now().UTC(), "numcheckins", existinguser.Numcheckins+1)
 
 		if timestampupdate.RowsAffected > 0 {
 			fmt.Println("last timestamp checkin update succeeded")
