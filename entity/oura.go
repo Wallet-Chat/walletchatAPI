@@ -20,7 +20,7 @@ type Ourauser struct {
 	Signature    string    `json:"signature"`
 	Deviceid     string    `json:"deviceid"` //used for mobile device ID for notifications later on
 	Lastcheckin  time.Time `json:"lastcheckin"`
-	Numcheckins  int       `json:"numcheckins"`
+	Numuploads   int       `json:"numuploads"`
 }
 
 type Ouradata struct {

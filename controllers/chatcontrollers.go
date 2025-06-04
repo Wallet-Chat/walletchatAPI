@@ -2555,7 +2555,7 @@ func IntraAppCheckin(w http.ResponseWriter, r *http.Request) {
 
 		database.Connector.Model(&entity.Ourauser{}).
 			Where("wallet = ?", existinguser.Wallet).
-			Update("lastcheckin", time.Now().UTC(), "numcheckins", existinguser.Numcheckins+1)
+			Update("lastcheckin", time.Now().UTC())
 
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("X-Content-Type-Options", "nosniff")
@@ -2579,7 +2579,7 @@ func IntraAppCheckinType(w http.ResponseWriter, r *http.Request) {
 
 		var timestampupdate = database.Connector.Model(&entity.Ourauser{}).
 			Where("wallet = ?", existinguser.Wallet).
-			Update("lastcheckin", time.Now().UTC(), "numcheckins", existinguser.Numcheckins+1)
+			Update("lastcheckin", time.Now().UTC())
 
 		if timestampupdate.RowsAffected > 0 {
 			fmt.Println("last timestamp checkin update succeeded")
@@ -3098,6 +3098,15 @@ rnvdxUhpAAEtJZme5+pnS6Fr4Zi8mUBPt9kC/mHTtbPQoLsX+FeBs/u+rpXe4xBr
 		//now request reward from DLP contract
 		txHashReward, err := vanatransact.RequestRewardFromDLP(fileID)
 		fmt.Println("Request Reward from DLP: ", txHashReward, err)
+	}
+
+	//keep track of lifetime file uploads for leaderboard
+	var uploadupdate = database.Connector.Model(&entity.Ourauser{}).
+		Where("wallet = ?", userInfo.Wallet).
+		Update("numuploads", userInfo.Numuploads+1)
+
+	if uploadupdate.RowsAffected > 0 {
+		fmt.Println("last upload update succeeded")
 	}
 
 	//Call refinement service
