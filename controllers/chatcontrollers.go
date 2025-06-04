@@ -2553,17 +2553,9 @@ func IntraAppCheckin(w http.ResponseWriter, r *http.Request) {
 	if userSearch.RowsAffected > 0 {
 		fmt.Println("*** User checked in: ", Authuser.Address, time.Now().UTC().Format("2006-01-02_15-04-05"))
 
-		result := database.Connector.
-			Model(&entity.Ourauser{}).
+		database.Connector.Model(&entity.Ourauser{}).
 			Where("wallet = ?", existinguser.Wallet).
-			Updates(map[string]interface{}{
-				"lastcheckin": time.Now().UTC(),
-				"numcheckins": existinguser.Numcheckins + 1,
-			})
-
-		if result.RowsAffected > 0 {
-			fmt.Println("last timestamp checkin update succeeded")
-		}
+			Update("lastcheckin", time.Now().UTC(), "numcheckins", existinguser.Numcheckins+1)
 
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("X-Content-Type-Options", "nosniff")
@@ -2585,15 +2577,11 @@ func IntraAppCheckinType(w http.ResponseWriter, r *http.Request) {
 	if userSearch.RowsAffected > 0 {
 		fmt.Println("***** User checked in: ", Authuser.Address, style, time.Now().UTC().Format("2006-01-02_15-04-05"))
 
-		result := database.Connector.
-			Model(&entity.Ourauser{}).
+		var timestampupdate = database.Connector.Model(&entity.Ourauser{}).
 			Where("wallet = ?", existinguser.Wallet).
-			Updates(map[string]interface{}{
-				"lastcheckin": time.Now().UTC(),
-				"numcheckins": existinguser.Numcheckins + 1,
-			})
+			Update("lastcheckin", time.Now().UTC(), "numcheckins", existinguser.Numcheckins+1)
 
-		if result.RowsAffected > 0 {
+		if timestampupdate.RowsAffected > 0 {
 			fmt.Println("last timestamp checkin update succeeded")
 		}
 
