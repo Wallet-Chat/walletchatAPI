@@ -3008,7 +3008,8 @@ func AuthTestFile(w http.ResponseWriter, r *http.Request) {
 	var contributionProofTx = vanatransact.GetTeeContributionProof(fileID)
 	fmt.Println("TEE contribution proof tx: ", contributionProofTx)
 
-	time.Sleep(5 * time.Second)
+	//TODO: better way of doing this, wait for tx results above?
+	time.Sleep(10 * time.Second)
 	// Call the API to fetch transaction logs
 	// url := os.Getenv("VANA_API_URL") + "/transactions/" + contributionProofTx + "/logs"
 	// resp, err := http.Get(url)
