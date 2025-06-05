@@ -31,6 +31,7 @@ var (
 
 // DataLiquidityPoolImplementationInitParams is an auto generated low-level Go binding around an user-defined struct.
 type DataLiquidityPoolImplementationInitParams struct {
+	TrustedForwarder    common.Address
 	OwnerAddress        common.Address
 	TokenAddress        common.Address
 	DataRegistryAddress common.Address
@@ -57,7 +58,7 @@ type IDataLiquidityPoolFileResponse struct {
 
 // VanaDlpContractMetaData contains all meta data concerning the VanaDlpContract contract.
 var VanaDlpContractMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"}],\"name\":\"AddressEmptyCode\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"AddressInsufficientBalance\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ECDSAInvalidSignature\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"length\",\"type\":\"uint256\"}],\"name\":\"ECDSAInvalidSignatureLength\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"name\":\"ECDSAInvalidSignatureS\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"ERC1967InvalidImplementation\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ERC1967NonPayable\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EnforcedPause\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ExpectedPause\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FailedInnerCall\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FileAlreadyAdded\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidAttestator\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidInitialization\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidProof\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotInitializing\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"OwnableInvalidOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"OwnableUnauthorizedAccount\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ReentrancyGuardReentrantCall\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"SafeERC20FailedOperation\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"UUPSUnauthorizedCallContext\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"slot\",\"type\":\"bytes32\"}],\"name\":\"UUPSUnsupportedProxiableUUID\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"fileId\",\"type\":\"uint256\"}],\"name\":\"FileInvalidated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newFileRewardFactor\",\"type\":\"uint256\"}],\"name\":\"FileRewardFactorUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"fileId\",\"type\":\"uint256\"}],\"name\":\"FileValidated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"version\",\"type\":\"uint64\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferStarted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Paused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"newProofInstruction\",\"type\":\"string\"}],\"name\":\"ProofInstructionUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"newPublicKey\",\"type\":\"string\"}],\"name\":\"PublicKeyUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"contributorAddress\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"fileId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"proofIndex\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"rewardAmount\",\"type\":\"uint256\"}],\"name\":\"RewardRequested\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newTeePool\",\"type\":\"address\"}],\"name\":\"TeePoolUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Unpaused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"Upgraded\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"UPGRADE_INTERFACE_VERSION\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"acceptOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"contributorsRewardAmount\",\"type\":\"uint256\"}],\"name\":\"addRewardsForContributors\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"contributorAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"contributorFiles\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"fileId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"proofIndex\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"rewardAmount\",\"type\":\"uint256\"}],\"internalType\":\"structIDataLiquidityPool.FileResponse\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"contributorAddress\",\"type\":\"address\"}],\"name\":\"contributorInfo\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"contributorAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"filesListCount\",\"type\":\"uint256\"}],\"internalType\":\"structIDataLiquidityPool.ContributorInfoResponse\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"contributors\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"contributorAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"filesListCount\",\"type\":\"uint256\"}],\"internalType\":\"structIDataLiquidityPool.ContributorInfoResponse\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"contributorsCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"dataRegistry\",\"outputs\":[{\"internalType\":\"contractIDataRegistry\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"fileRewardFactor\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"fileId\",\"type\":\"uint256\"}],\"name\":\"files\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"fileId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"proofIndex\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"rewardAmount\",\"type\":\"uint256\"}],\"internalType\":\"structIDataLiquidityPool.FileResponse\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"filesListAt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"filesListCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"ownerAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"dataRegistryAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"teePoolAddress\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"publicKey\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"proofInstruction\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"fileRewardFactor\",\"type\":\"uint256\"}],\"internalType\":\"structDataLiquidityPoolImplementation.InitParams\",\"name\":\"params\",\"type\":\"tuple\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes[]\",\"name\":\"data\",\"type\":\"bytes[]\"}],\"name\":\"multicall\",\"outputs\":[{\"internalType\":\"bytes[]\",\"name\":\"results\",\"type\":\"bytes[]\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"paused\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pendingOwner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"proofInstruction\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"proxiableUUID\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"publicKey\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"fileId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"proofIndex\",\"type\":\"uint256\"}],\"name\":\"requestReward\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"teePool\",\"outputs\":[{\"internalType\":\"contractITeePool\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"token\",\"outputs\":[{\"internalType\":\"contractIERC20\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalContributorsRewardAmount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"newFileRewardFactor\",\"type\":\"uint256\"}],\"name\":\"updateFileRewardFactor\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"newProofInstruction\",\"type\":\"string\"}],\"name\":\"updateProofInstruction\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"newPublicKey\",\"type\":\"string\"}],\"name\":\"updatePublicKey\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newTeePool\",\"type\":\"address\"}],\"name\":\"updateTeePool\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"upgradeToAndCall\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"version\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"AccessControlBadConfirmation\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"neededRole\",\"type\":\"bytes32\"}],\"name\":\"AccessControlUnauthorizedAccount\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"}],\"name\":\"AddressEmptyCode\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"AddressInsufficientBalance\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ECDSAInvalidSignature\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"length\",\"type\":\"uint256\"}],\"name\":\"ECDSAInvalidSignatureLength\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"name\":\"ECDSAInvalidSignatureS\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"ERC1967InvalidImplementation\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ERC1967NonPayable\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EnforcedPause\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ExpectedPause\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FailedInnerCall\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FileAlreadyAdded\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidAttestator\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidInitialization\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidProof\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidScore\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotInitializing\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ReentrancyGuardReentrantCall\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"SafeERC20FailedOperation\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"UUPSUnauthorizedCallContext\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"slot\",\"type\":\"bytes32\"}],\"name\":\"UUPSUnsupportedProxiableUUID\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"fileId\",\"type\":\"uint256\"}],\"name\":\"FileInvalidated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newFileRewardFactor\",\"type\":\"uint256\"}],\"name\":\"FileRewardFactorUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"fileId\",\"type\":\"uint256\"}],\"name\":\"FileValidated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"version\",\"type\":\"uint64\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Paused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"newProofInstruction\",\"type\":\"string\"}],\"name\":\"ProofInstructionUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"newPublicKey\",\"type\":\"string\"}],\"name\":\"PublicKeyUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"contributorAddress\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"fileId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"proofIndex\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"rewardAmount\",\"type\":\"uint256\"}],\"name\":\"RewardRequested\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"previousAdminRole\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"newAdminRole\",\"type\":\"bytes32\"}],\"name\":\"RoleAdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleGranted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleRevoked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newTeePool\",\"type\":\"address\"}],\"name\":\"TeePoolUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Unpaused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"Upgraded\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"DEFAULT_ADMIN_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"MAINTAINER_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"UPGRADE_INTERFACE_VERSION\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"contributorsRewardAmount\",\"type\":\"uint256\"}],\"name\":\"addRewardsForContributors\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"contributorAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"contributorFiles\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"fileId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"proofIndex\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"rewardAmount\",\"type\":\"uint256\"}],\"internalType\":\"structIDataLiquidityPool.FileResponse\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"contributorAddress\",\"type\":\"address\"}],\"name\":\"contributorInfo\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"contributorAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"filesListCount\",\"type\":\"uint256\"}],\"internalType\":\"structIDataLiquidityPool.ContributorInfoResponse\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"contributors\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"contributorAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"filesListCount\",\"type\":\"uint256\"}],\"internalType\":\"structIDataLiquidityPool.ContributorInfoResponse\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"contributorsCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"dataRegistry\",\"outputs\":[{\"internalType\":\"contractIDataRegistry\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"fileRewardFactor\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"fileId\",\"type\":\"uint256\"}],\"name\":\"files\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"fileId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"proofIndex\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"rewardAmount\",\"type\":\"uint256\"}],\"internalType\":\"structIDataLiquidityPool.FileResponse\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"filesListAt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"filesListCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleAdmin\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"grantRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"hasRole\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"trustedForwarder\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"ownerAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"dataRegistryAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"teePoolAddress\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"publicKey\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"proofInstruction\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"fileRewardFactor\",\"type\":\"uint256\"}],\"internalType\":\"structDataLiquidityPoolImplementation.InitParams\",\"name\":\"params\",\"type\":\"tuple\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"forwarder\",\"type\":\"address\"}],\"name\":\"isTrustedForwarder\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes[]\",\"name\":\"data\",\"type\":\"bytes[]\"}],\"name\":\"multicall\",\"outputs\":[{\"internalType\":\"bytes[]\",\"name\":\"results\",\"type\":\"bytes[]\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"paused\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"proofInstruction\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"proxiableUUID\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"publicKey\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"callerConfirmation\",\"type\":\"address\"}],\"name\":\"renounceRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"fileId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"proofIndex\",\"type\":\"uint256\"}],\"name\":\"requestReward\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"revokeRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"teePool\",\"outputs\":[{\"internalType\":\"contractITeePool\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"token\",\"outputs\":[{\"internalType\":\"contractIERC20\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalContributorsRewardAmount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"trustedForwarder\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"newFileRewardFactor\",\"type\":\"uint256\"}],\"name\":\"updateFileRewardFactor\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"newProofInstruction\",\"type\":\"string\"}],\"name\":\"updateProofInstruction\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"newPublicKey\",\"type\":\"string\"}],\"name\":\"updatePublicKey\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newTeePool\",\"type\":\"address\"}],\"name\":\"updateTeePool\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"trustedForwarderAddress\",\"type\":\"address\"}],\"name\":\"updateTrustedForwarder\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"upgradeToAndCall\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"version\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"}]",
 }
 
 // VanaDlpContractABI is the input ABI used to generate the binding from.
@@ -204,6 +205,68 @@ func (_VanaDlpContract *VanaDlpContractTransactorRaw) Transfer(opts *bind.Transa
 // Transact invokes the (paid) contract method with params as input values.
 func (_VanaDlpContract *VanaDlpContractTransactorRaw) Transact(opts *bind.TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
 	return _VanaDlpContract.Contract.contract.Transact(opts, method, params...)
+}
+
+// DEFAULTADMINROLE is a free data retrieval call binding the contract method 0xa217fddf.
+//
+// Solidity: function DEFAULT_ADMIN_ROLE() view returns(bytes32)
+func (_VanaDlpContract *VanaDlpContractCaller) DEFAULTADMINROLE(opts *bind.CallOpts) ([32]byte, error) {
+	var out []interface{}
+	err := _VanaDlpContract.contract.Call(opts, &out, "DEFAULT_ADMIN_ROLE")
+
+	if err != nil {
+		return *new([32]byte), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
+
+	return out0, err
+
+}
+
+// DEFAULTADMINROLE is a free data retrieval call binding the contract method 0xa217fddf.
+//
+// Solidity: function DEFAULT_ADMIN_ROLE() view returns(bytes32)
+func (_VanaDlpContract *VanaDlpContractSession) DEFAULTADMINROLE() ([32]byte, error) {
+	return _VanaDlpContract.Contract.DEFAULTADMINROLE(&_VanaDlpContract.CallOpts)
+}
+
+// DEFAULTADMINROLE is a free data retrieval call binding the contract method 0xa217fddf.
+//
+// Solidity: function DEFAULT_ADMIN_ROLE() view returns(bytes32)
+func (_VanaDlpContract *VanaDlpContractCallerSession) DEFAULTADMINROLE() ([32]byte, error) {
+	return _VanaDlpContract.Contract.DEFAULTADMINROLE(&_VanaDlpContract.CallOpts)
+}
+
+// MAINTAINERROLE is a free data retrieval call binding the contract method 0xf8742254.
+//
+// Solidity: function MAINTAINER_ROLE() view returns(bytes32)
+func (_VanaDlpContract *VanaDlpContractCaller) MAINTAINERROLE(opts *bind.CallOpts) ([32]byte, error) {
+	var out []interface{}
+	err := _VanaDlpContract.contract.Call(opts, &out, "MAINTAINER_ROLE")
+
+	if err != nil {
+		return *new([32]byte), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
+
+	return out0, err
+
+}
+
+// MAINTAINERROLE is a free data retrieval call binding the contract method 0xf8742254.
+//
+// Solidity: function MAINTAINER_ROLE() view returns(bytes32)
+func (_VanaDlpContract *VanaDlpContractSession) MAINTAINERROLE() ([32]byte, error) {
+	return _VanaDlpContract.Contract.MAINTAINERROLE(&_VanaDlpContract.CallOpts)
+}
+
+// MAINTAINERROLE is a free data retrieval call binding the contract method 0xf8742254.
+//
+// Solidity: function MAINTAINER_ROLE() view returns(bytes32)
+func (_VanaDlpContract *VanaDlpContractCallerSession) MAINTAINERROLE() ([32]byte, error) {
+	return _VanaDlpContract.Contract.MAINTAINERROLE(&_VanaDlpContract.CallOpts)
 }
 
 // UPGRADEINTERFACEVERSION is a free data retrieval call binding the contract method 0xad3cb1cc.
@@ -516,6 +579,99 @@ func (_VanaDlpContract *VanaDlpContractCallerSession) FilesListCount() (*big.Int
 	return _VanaDlpContract.Contract.FilesListCount(&_VanaDlpContract.CallOpts)
 }
 
+// GetRoleAdmin is a free data retrieval call binding the contract method 0x248a9ca3.
+//
+// Solidity: function getRoleAdmin(bytes32 role) view returns(bytes32)
+func (_VanaDlpContract *VanaDlpContractCaller) GetRoleAdmin(opts *bind.CallOpts, role [32]byte) ([32]byte, error) {
+	var out []interface{}
+	err := _VanaDlpContract.contract.Call(opts, &out, "getRoleAdmin", role)
+
+	if err != nil {
+		return *new([32]byte), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
+
+	return out0, err
+
+}
+
+// GetRoleAdmin is a free data retrieval call binding the contract method 0x248a9ca3.
+//
+// Solidity: function getRoleAdmin(bytes32 role) view returns(bytes32)
+func (_VanaDlpContract *VanaDlpContractSession) GetRoleAdmin(role [32]byte) ([32]byte, error) {
+	return _VanaDlpContract.Contract.GetRoleAdmin(&_VanaDlpContract.CallOpts, role)
+}
+
+// GetRoleAdmin is a free data retrieval call binding the contract method 0x248a9ca3.
+//
+// Solidity: function getRoleAdmin(bytes32 role) view returns(bytes32)
+func (_VanaDlpContract *VanaDlpContractCallerSession) GetRoleAdmin(role [32]byte) ([32]byte, error) {
+	return _VanaDlpContract.Contract.GetRoleAdmin(&_VanaDlpContract.CallOpts, role)
+}
+
+// HasRole is a free data retrieval call binding the contract method 0x91d14854.
+//
+// Solidity: function hasRole(bytes32 role, address account) view returns(bool)
+func (_VanaDlpContract *VanaDlpContractCaller) HasRole(opts *bind.CallOpts, role [32]byte, account common.Address) (bool, error) {
+	var out []interface{}
+	err := _VanaDlpContract.contract.Call(opts, &out, "hasRole", role, account)
+
+	if err != nil {
+		return *new(bool), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
+
+	return out0, err
+
+}
+
+// HasRole is a free data retrieval call binding the contract method 0x91d14854.
+//
+// Solidity: function hasRole(bytes32 role, address account) view returns(bool)
+func (_VanaDlpContract *VanaDlpContractSession) HasRole(role [32]byte, account common.Address) (bool, error) {
+	return _VanaDlpContract.Contract.HasRole(&_VanaDlpContract.CallOpts, role, account)
+}
+
+// HasRole is a free data retrieval call binding the contract method 0x91d14854.
+//
+// Solidity: function hasRole(bytes32 role, address account) view returns(bool)
+func (_VanaDlpContract *VanaDlpContractCallerSession) HasRole(role [32]byte, account common.Address) (bool, error) {
+	return _VanaDlpContract.Contract.HasRole(&_VanaDlpContract.CallOpts, role, account)
+}
+
+// IsTrustedForwarder is a free data retrieval call binding the contract method 0x572b6c05.
+//
+// Solidity: function isTrustedForwarder(address forwarder) view returns(bool)
+func (_VanaDlpContract *VanaDlpContractCaller) IsTrustedForwarder(opts *bind.CallOpts, forwarder common.Address) (bool, error) {
+	var out []interface{}
+	err := _VanaDlpContract.contract.Call(opts, &out, "isTrustedForwarder", forwarder)
+
+	if err != nil {
+		return *new(bool), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
+
+	return out0, err
+
+}
+
+// IsTrustedForwarder is a free data retrieval call binding the contract method 0x572b6c05.
+//
+// Solidity: function isTrustedForwarder(address forwarder) view returns(bool)
+func (_VanaDlpContract *VanaDlpContractSession) IsTrustedForwarder(forwarder common.Address) (bool, error) {
+	return _VanaDlpContract.Contract.IsTrustedForwarder(&_VanaDlpContract.CallOpts, forwarder)
+}
+
+// IsTrustedForwarder is a free data retrieval call binding the contract method 0x572b6c05.
+//
+// Solidity: function isTrustedForwarder(address forwarder) view returns(bool)
+func (_VanaDlpContract *VanaDlpContractCallerSession) IsTrustedForwarder(forwarder common.Address) (bool, error) {
+	return _VanaDlpContract.Contract.IsTrustedForwarder(&_VanaDlpContract.CallOpts, forwarder)
+}
+
 // Name is a free data retrieval call binding the contract method 0x06fdde03.
 //
 // Solidity: function name() view returns(string)
@@ -547,37 +703,6 @@ func (_VanaDlpContract *VanaDlpContractCallerSession) Name() (string, error) {
 	return _VanaDlpContract.Contract.Name(&_VanaDlpContract.CallOpts)
 }
 
-// Owner is a free data retrieval call binding the contract method 0x8da5cb5b.
-//
-// Solidity: function owner() view returns(address)
-func (_VanaDlpContract *VanaDlpContractCaller) Owner(opts *bind.CallOpts) (common.Address, error) {
-	var out []interface{}
-	err := _VanaDlpContract.contract.Call(opts, &out, "owner")
-
-	if err != nil {
-		return *new(common.Address), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
-
-	return out0, err
-
-}
-
-// Owner is a free data retrieval call binding the contract method 0x8da5cb5b.
-//
-// Solidity: function owner() view returns(address)
-func (_VanaDlpContract *VanaDlpContractSession) Owner() (common.Address, error) {
-	return _VanaDlpContract.Contract.Owner(&_VanaDlpContract.CallOpts)
-}
-
-// Owner is a free data retrieval call binding the contract method 0x8da5cb5b.
-//
-// Solidity: function owner() view returns(address)
-func (_VanaDlpContract *VanaDlpContractCallerSession) Owner() (common.Address, error) {
-	return _VanaDlpContract.Contract.Owner(&_VanaDlpContract.CallOpts)
-}
-
 // Paused is a free data retrieval call binding the contract method 0x5c975abb.
 //
 // Solidity: function paused() view returns(bool)
@@ -607,37 +732,6 @@ func (_VanaDlpContract *VanaDlpContractSession) Paused() (bool, error) {
 // Solidity: function paused() view returns(bool)
 func (_VanaDlpContract *VanaDlpContractCallerSession) Paused() (bool, error) {
 	return _VanaDlpContract.Contract.Paused(&_VanaDlpContract.CallOpts)
-}
-
-// PendingOwner is a free data retrieval call binding the contract method 0xe30c3978.
-//
-// Solidity: function pendingOwner() view returns(address)
-func (_VanaDlpContract *VanaDlpContractCaller) PendingOwner(opts *bind.CallOpts) (common.Address, error) {
-	var out []interface{}
-	err := _VanaDlpContract.contract.Call(opts, &out, "pendingOwner")
-
-	if err != nil {
-		return *new(common.Address), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
-
-	return out0, err
-
-}
-
-// PendingOwner is a free data retrieval call binding the contract method 0xe30c3978.
-//
-// Solidity: function pendingOwner() view returns(address)
-func (_VanaDlpContract *VanaDlpContractSession) PendingOwner() (common.Address, error) {
-	return _VanaDlpContract.Contract.PendingOwner(&_VanaDlpContract.CallOpts)
-}
-
-// PendingOwner is a free data retrieval call binding the contract method 0xe30c3978.
-//
-// Solidity: function pendingOwner() view returns(address)
-func (_VanaDlpContract *VanaDlpContractCallerSession) PendingOwner() (common.Address, error) {
-	return _VanaDlpContract.Contract.PendingOwner(&_VanaDlpContract.CallOpts)
 }
 
 // ProofInstruction is a free data retrieval call binding the contract method 0x084a09da.
@@ -733,6 +827,37 @@ func (_VanaDlpContract *VanaDlpContractCallerSession) PublicKey() (string, error
 	return _VanaDlpContract.Contract.PublicKey(&_VanaDlpContract.CallOpts)
 }
 
+// SupportsInterface is a free data retrieval call binding the contract method 0x01ffc9a7.
+//
+// Solidity: function supportsInterface(bytes4 interfaceId) view returns(bool)
+func (_VanaDlpContract *VanaDlpContractCaller) SupportsInterface(opts *bind.CallOpts, interfaceId [4]byte) (bool, error) {
+	var out []interface{}
+	err := _VanaDlpContract.contract.Call(opts, &out, "supportsInterface", interfaceId)
+
+	if err != nil {
+		return *new(bool), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
+
+	return out0, err
+
+}
+
+// SupportsInterface is a free data retrieval call binding the contract method 0x01ffc9a7.
+//
+// Solidity: function supportsInterface(bytes4 interfaceId) view returns(bool)
+func (_VanaDlpContract *VanaDlpContractSession) SupportsInterface(interfaceId [4]byte) (bool, error) {
+	return _VanaDlpContract.Contract.SupportsInterface(&_VanaDlpContract.CallOpts, interfaceId)
+}
+
+// SupportsInterface is a free data retrieval call binding the contract method 0x01ffc9a7.
+//
+// Solidity: function supportsInterface(bytes4 interfaceId) view returns(bool)
+func (_VanaDlpContract *VanaDlpContractCallerSession) SupportsInterface(interfaceId [4]byte) (bool, error) {
+	return _VanaDlpContract.Contract.SupportsInterface(&_VanaDlpContract.CallOpts, interfaceId)
+}
+
 // TeePool is a free data retrieval call binding the contract method 0xd503d4e4.
 //
 // Solidity: function teePool() view returns(address)
@@ -826,6 +951,37 @@ func (_VanaDlpContract *VanaDlpContractCallerSession) TotalContributorsRewardAmo
 	return _VanaDlpContract.Contract.TotalContributorsRewardAmount(&_VanaDlpContract.CallOpts)
 }
 
+// TrustedForwarder is a free data retrieval call binding the contract method 0x7da0a877.
+//
+// Solidity: function trustedForwarder() view returns(address)
+func (_VanaDlpContract *VanaDlpContractCaller) TrustedForwarder(opts *bind.CallOpts) (common.Address, error) {
+	var out []interface{}
+	err := _VanaDlpContract.contract.Call(opts, &out, "trustedForwarder")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
+}
+
+// TrustedForwarder is a free data retrieval call binding the contract method 0x7da0a877.
+//
+// Solidity: function trustedForwarder() view returns(address)
+func (_VanaDlpContract *VanaDlpContractSession) TrustedForwarder() (common.Address, error) {
+	return _VanaDlpContract.Contract.TrustedForwarder(&_VanaDlpContract.CallOpts)
+}
+
+// TrustedForwarder is a free data retrieval call binding the contract method 0x7da0a877.
+//
+// Solidity: function trustedForwarder() view returns(address)
+func (_VanaDlpContract *VanaDlpContractCallerSession) TrustedForwarder() (common.Address, error) {
+	return _VanaDlpContract.Contract.TrustedForwarder(&_VanaDlpContract.CallOpts)
+}
+
 // Version is a free data retrieval call binding the contract method 0x54fd4d50.
 //
 // Solidity: function version() pure returns(uint256)
@@ -857,27 +1013,6 @@ func (_VanaDlpContract *VanaDlpContractCallerSession) Version() (*big.Int, error
 	return _VanaDlpContract.Contract.Version(&_VanaDlpContract.CallOpts)
 }
 
-// AcceptOwnership is a paid mutator transaction binding the contract method 0x79ba5097.
-//
-// Solidity: function acceptOwnership() returns()
-func (_VanaDlpContract *VanaDlpContractTransactor) AcceptOwnership(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _VanaDlpContract.contract.Transact(opts, "acceptOwnership")
-}
-
-// AcceptOwnership is a paid mutator transaction binding the contract method 0x79ba5097.
-//
-// Solidity: function acceptOwnership() returns()
-func (_VanaDlpContract *VanaDlpContractSession) AcceptOwnership() (*types.Transaction, error) {
-	return _VanaDlpContract.Contract.AcceptOwnership(&_VanaDlpContract.TransactOpts)
-}
-
-// AcceptOwnership is a paid mutator transaction binding the contract method 0x79ba5097.
-//
-// Solidity: function acceptOwnership() returns()
-func (_VanaDlpContract *VanaDlpContractTransactorSession) AcceptOwnership() (*types.Transaction, error) {
-	return _VanaDlpContract.Contract.AcceptOwnership(&_VanaDlpContract.TransactOpts)
-}
-
 // AddRewardsForContributors is a paid mutator transaction binding the contract method 0x1201c547.
 //
 // Solidity: function addRewardsForContributors(uint256 contributorsRewardAmount) returns()
@@ -899,23 +1034,44 @@ func (_VanaDlpContract *VanaDlpContractTransactorSession) AddRewardsForContribut
 	return _VanaDlpContract.Contract.AddRewardsForContributors(&_VanaDlpContract.TransactOpts, contributorsRewardAmount)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0x3f76c7cb.
+// GrantRole is a paid mutator transaction binding the contract method 0x2f2ff15d.
 //
-// Solidity: function initialize((address,address,address,address,string,string,string,uint256) params) returns()
+// Solidity: function grantRole(bytes32 role, address account) returns()
+func (_VanaDlpContract *VanaDlpContractTransactor) GrantRole(opts *bind.TransactOpts, role [32]byte, account common.Address) (*types.Transaction, error) {
+	return _VanaDlpContract.contract.Transact(opts, "grantRole", role, account)
+}
+
+// GrantRole is a paid mutator transaction binding the contract method 0x2f2ff15d.
+//
+// Solidity: function grantRole(bytes32 role, address account) returns()
+func (_VanaDlpContract *VanaDlpContractSession) GrantRole(role [32]byte, account common.Address) (*types.Transaction, error) {
+	return _VanaDlpContract.Contract.GrantRole(&_VanaDlpContract.TransactOpts, role, account)
+}
+
+// GrantRole is a paid mutator transaction binding the contract method 0x2f2ff15d.
+//
+// Solidity: function grantRole(bytes32 role, address account) returns()
+func (_VanaDlpContract *VanaDlpContractTransactorSession) GrantRole(role [32]byte, account common.Address) (*types.Transaction, error) {
+	return _VanaDlpContract.Contract.GrantRole(&_VanaDlpContract.TransactOpts, role, account)
+}
+
+// Initialize is a paid mutator transaction binding the contract method 0x3b149013.
+//
+// Solidity: function initialize((address,address,address,address,address,string,string,string,uint256) params) returns()
 func (_VanaDlpContract *VanaDlpContractTransactor) Initialize(opts *bind.TransactOpts, params DataLiquidityPoolImplementationInitParams) (*types.Transaction, error) {
 	return _VanaDlpContract.contract.Transact(opts, "initialize", params)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0x3f76c7cb.
+// Initialize is a paid mutator transaction binding the contract method 0x3b149013.
 //
-// Solidity: function initialize((address,address,address,address,string,string,string,uint256) params) returns()
+// Solidity: function initialize((address,address,address,address,address,string,string,string,uint256) params) returns()
 func (_VanaDlpContract *VanaDlpContractSession) Initialize(params DataLiquidityPoolImplementationInitParams) (*types.Transaction, error) {
 	return _VanaDlpContract.Contract.Initialize(&_VanaDlpContract.TransactOpts, params)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0x3f76c7cb.
+// Initialize is a paid mutator transaction binding the contract method 0x3b149013.
 //
-// Solidity: function initialize((address,address,address,address,string,string,string,uint256) params) returns()
+// Solidity: function initialize((address,address,address,address,address,string,string,string,uint256) params) returns()
 func (_VanaDlpContract *VanaDlpContractTransactorSession) Initialize(params DataLiquidityPoolImplementationInitParams) (*types.Transaction, error) {
 	return _VanaDlpContract.Contract.Initialize(&_VanaDlpContract.TransactOpts, params)
 }
@@ -962,25 +1118,25 @@ func (_VanaDlpContract *VanaDlpContractTransactorSession) Pause() (*types.Transa
 	return _VanaDlpContract.Contract.Pause(&_VanaDlpContract.TransactOpts)
 }
 
-// RenounceOwnership is a paid mutator transaction binding the contract method 0x715018a6.
+// RenounceRole is a paid mutator transaction binding the contract method 0x36568abe.
 //
-// Solidity: function renounceOwnership() returns()
-func (_VanaDlpContract *VanaDlpContractTransactor) RenounceOwnership(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _VanaDlpContract.contract.Transact(opts, "renounceOwnership")
+// Solidity: function renounceRole(bytes32 role, address callerConfirmation) returns()
+func (_VanaDlpContract *VanaDlpContractTransactor) RenounceRole(opts *bind.TransactOpts, role [32]byte, callerConfirmation common.Address) (*types.Transaction, error) {
+	return _VanaDlpContract.contract.Transact(opts, "renounceRole", role, callerConfirmation)
 }
 
-// RenounceOwnership is a paid mutator transaction binding the contract method 0x715018a6.
+// RenounceRole is a paid mutator transaction binding the contract method 0x36568abe.
 //
-// Solidity: function renounceOwnership() returns()
-func (_VanaDlpContract *VanaDlpContractSession) RenounceOwnership() (*types.Transaction, error) {
-	return _VanaDlpContract.Contract.RenounceOwnership(&_VanaDlpContract.TransactOpts)
+// Solidity: function renounceRole(bytes32 role, address callerConfirmation) returns()
+func (_VanaDlpContract *VanaDlpContractSession) RenounceRole(role [32]byte, callerConfirmation common.Address) (*types.Transaction, error) {
+	return _VanaDlpContract.Contract.RenounceRole(&_VanaDlpContract.TransactOpts, role, callerConfirmation)
 }
 
-// RenounceOwnership is a paid mutator transaction binding the contract method 0x715018a6.
+// RenounceRole is a paid mutator transaction binding the contract method 0x36568abe.
 //
-// Solidity: function renounceOwnership() returns()
-func (_VanaDlpContract *VanaDlpContractTransactorSession) RenounceOwnership() (*types.Transaction, error) {
-	return _VanaDlpContract.Contract.RenounceOwnership(&_VanaDlpContract.TransactOpts)
+// Solidity: function renounceRole(bytes32 role, address callerConfirmation) returns()
+func (_VanaDlpContract *VanaDlpContractTransactorSession) RenounceRole(role [32]byte, callerConfirmation common.Address) (*types.Transaction, error) {
+	return _VanaDlpContract.Contract.RenounceRole(&_VanaDlpContract.TransactOpts, role, callerConfirmation)
 }
 
 // RequestReward is a paid mutator transaction binding the contract method 0x5062bc5a.
@@ -1004,25 +1160,25 @@ func (_VanaDlpContract *VanaDlpContractTransactorSession) RequestReward(fileId *
 	return _VanaDlpContract.Contract.RequestReward(&_VanaDlpContract.TransactOpts, fileId, proofIndex)
 }
 
-// TransferOwnership is a paid mutator transaction binding the contract method 0xf2fde38b.
+// RevokeRole is a paid mutator transaction binding the contract method 0xd547741f.
 //
-// Solidity: function transferOwnership(address newOwner) returns()
-func (_VanaDlpContract *VanaDlpContractTransactor) TransferOwnership(opts *bind.TransactOpts, newOwner common.Address) (*types.Transaction, error) {
-	return _VanaDlpContract.contract.Transact(opts, "transferOwnership", newOwner)
+// Solidity: function revokeRole(bytes32 role, address account) returns()
+func (_VanaDlpContract *VanaDlpContractTransactor) RevokeRole(opts *bind.TransactOpts, role [32]byte, account common.Address) (*types.Transaction, error) {
+	return _VanaDlpContract.contract.Transact(opts, "revokeRole", role, account)
 }
 
-// TransferOwnership is a paid mutator transaction binding the contract method 0xf2fde38b.
+// RevokeRole is a paid mutator transaction binding the contract method 0xd547741f.
 //
-// Solidity: function transferOwnership(address newOwner) returns()
-func (_VanaDlpContract *VanaDlpContractSession) TransferOwnership(newOwner common.Address) (*types.Transaction, error) {
-	return _VanaDlpContract.Contract.TransferOwnership(&_VanaDlpContract.TransactOpts, newOwner)
+// Solidity: function revokeRole(bytes32 role, address account) returns()
+func (_VanaDlpContract *VanaDlpContractSession) RevokeRole(role [32]byte, account common.Address) (*types.Transaction, error) {
+	return _VanaDlpContract.Contract.RevokeRole(&_VanaDlpContract.TransactOpts, role, account)
 }
 
-// TransferOwnership is a paid mutator transaction binding the contract method 0xf2fde38b.
+// RevokeRole is a paid mutator transaction binding the contract method 0xd547741f.
 //
-// Solidity: function transferOwnership(address newOwner) returns()
-func (_VanaDlpContract *VanaDlpContractTransactorSession) TransferOwnership(newOwner common.Address) (*types.Transaction, error) {
-	return _VanaDlpContract.Contract.TransferOwnership(&_VanaDlpContract.TransactOpts, newOwner)
+// Solidity: function revokeRole(bytes32 role, address account) returns()
+func (_VanaDlpContract *VanaDlpContractTransactorSession) RevokeRole(role [32]byte, account common.Address) (*types.Transaction, error) {
+	return _VanaDlpContract.Contract.RevokeRole(&_VanaDlpContract.TransactOpts, role, account)
 }
 
 // Unpause is a paid mutator transaction binding the contract method 0x3f4ba83a.
@@ -1128,6 +1284,27 @@ func (_VanaDlpContract *VanaDlpContractSession) UpdateTeePool(newTeePool common.
 // Solidity: function updateTeePool(address newTeePool) returns()
 func (_VanaDlpContract *VanaDlpContractTransactorSession) UpdateTeePool(newTeePool common.Address) (*types.Transaction, error) {
 	return _VanaDlpContract.Contract.UpdateTeePool(&_VanaDlpContract.TransactOpts, newTeePool)
+}
+
+// UpdateTrustedForwarder is a paid mutator transaction binding the contract method 0xf90b0311.
+//
+// Solidity: function updateTrustedForwarder(address trustedForwarderAddress) returns()
+func (_VanaDlpContract *VanaDlpContractTransactor) UpdateTrustedForwarder(opts *bind.TransactOpts, trustedForwarderAddress common.Address) (*types.Transaction, error) {
+	return _VanaDlpContract.contract.Transact(opts, "updateTrustedForwarder", trustedForwarderAddress)
+}
+
+// UpdateTrustedForwarder is a paid mutator transaction binding the contract method 0xf90b0311.
+//
+// Solidity: function updateTrustedForwarder(address trustedForwarderAddress) returns()
+func (_VanaDlpContract *VanaDlpContractSession) UpdateTrustedForwarder(trustedForwarderAddress common.Address) (*types.Transaction, error) {
+	return _VanaDlpContract.Contract.UpdateTrustedForwarder(&_VanaDlpContract.TransactOpts, trustedForwarderAddress)
+}
+
+// UpdateTrustedForwarder is a paid mutator transaction binding the contract method 0xf90b0311.
+//
+// Solidity: function updateTrustedForwarder(address trustedForwarderAddress) returns()
+func (_VanaDlpContract *VanaDlpContractTransactorSession) UpdateTrustedForwarder(trustedForwarderAddress common.Address) (*types.Transaction, error) {
+	return _VanaDlpContract.Contract.UpdateTrustedForwarder(&_VanaDlpContract.TransactOpts, trustedForwarderAddress)
 }
 
 // UpgradeToAndCall is a paid mutator transaction binding the contract method 0x4f1ef286.
@@ -1707,312 +1884,6 @@ func (_VanaDlpContract *VanaDlpContractFilterer) ParseInitialized(log types.Log)
 	return event, nil
 }
 
-// VanaDlpContractOwnershipTransferStartedIterator is returned from FilterOwnershipTransferStarted and is used to iterate over the raw logs and unpacked data for OwnershipTransferStarted events raised by the VanaDlpContract contract.
-type VanaDlpContractOwnershipTransferStartedIterator struct {
-	Event *VanaDlpContractOwnershipTransferStarted // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *VanaDlpContractOwnershipTransferStartedIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(VanaDlpContractOwnershipTransferStarted)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(VanaDlpContractOwnershipTransferStarted)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *VanaDlpContractOwnershipTransferStartedIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *VanaDlpContractOwnershipTransferStartedIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// VanaDlpContractOwnershipTransferStarted represents a OwnershipTransferStarted event raised by the VanaDlpContract contract.
-type VanaDlpContractOwnershipTransferStarted struct {
-	PreviousOwner common.Address
-	NewOwner      common.Address
-	Raw           types.Log // Blockchain specific contextual infos
-}
-
-// FilterOwnershipTransferStarted is a free log retrieval operation binding the contract event 0x38d16b8cac22d99fc7c124b9cd0de2d3fa1faef420bfe791d8c362d765e22700.
-//
-// Solidity: event OwnershipTransferStarted(address indexed previousOwner, address indexed newOwner)
-func (_VanaDlpContract *VanaDlpContractFilterer) FilterOwnershipTransferStarted(opts *bind.FilterOpts, previousOwner []common.Address, newOwner []common.Address) (*VanaDlpContractOwnershipTransferStartedIterator, error) {
-
-	var previousOwnerRule []interface{}
-	for _, previousOwnerItem := range previousOwner {
-		previousOwnerRule = append(previousOwnerRule, previousOwnerItem)
-	}
-	var newOwnerRule []interface{}
-	for _, newOwnerItem := range newOwner {
-		newOwnerRule = append(newOwnerRule, newOwnerItem)
-	}
-
-	logs, sub, err := _VanaDlpContract.contract.FilterLogs(opts, "OwnershipTransferStarted", previousOwnerRule, newOwnerRule)
-	if err != nil {
-		return nil, err
-	}
-	return &VanaDlpContractOwnershipTransferStartedIterator{contract: _VanaDlpContract.contract, event: "OwnershipTransferStarted", logs: logs, sub: sub}, nil
-}
-
-// WatchOwnershipTransferStarted is a free log subscription operation binding the contract event 0x38d16b8cac22d99fc7c124b9cd0de2d3fa1faef420bfe791d8c362d765e22700.
-//
-// Solidity: event OwnershipTransferStarted(address indexed previousOwner, address indexed newOwner)
-func (_VanaDlpContract *VanaDlpContractFilterer) WatchOwnershipTransferStarted(opts *bind.WatchOpts, sink chan<- *VanaDlpContractOwnershipTransferStarted, previousOwner []common.Address, newOwner []common.Address) (event.Subscription, error) {
-
-	var previousOwnerRule []interface{}
-	for _, previousOwnerItem := range previousOwner {
-		previousOwnerRule = append(previousOwnerRule, previousOwnerItem)
-	}
-	var newOwnerRule []interface{}
-	for _, newOwnerItem := range newOwner {
-		newOwnerRule = append(newOwnerRule, newOwnerItem)
-	}
-
-	logs, sub, err := _VanaDlpContract.contract.WatchLogs(opts, "OwnershipTransferStarted", previousOwnerRule, newOwnerRule)
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(VanaDlpContractOwnershipTransferStarted)
-				if err := _VanaDlpContract.contract.UnpackLog(event, "OwnershipTransferStarted", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseOwnershipTransferStarted is a log parse operation binding the contract event 0x38d16b8cac22d99fc7c124b9cd0de2d3fa1faef420bfe791d8c362d765e22700.
-//
-// Solidity: event OwnershipTransferStarted(address indexed previousOwner, address indexed newOwner)
-func (_VanaDlpContract *VanaDlpContractFilterer) ParseOwnershipTransferStarted(log types.Log) (*VanaDlpContractOwnershipTransferStarted, error) {
-	event := new(VanaDlpContractOwnershipTransferStarted)
-	if err := _VanaDlpContract.contract.UnpackLog(event, "OwnershipTransferStarted", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
-// VanaDlpContractOwnershipTransferredIterator is returned from FilterOwnershipTransferred and is used to iterate over the raw logs and unpacked data for OwnershipTransferred events raised by the VanaDlpContract contract.
-type VanaDlpContractOwnershipTransferredIterator struct {
-	Event *VanaDlpContractOwnershipTransferred // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *VanaDlpContractOwnershipTransferredIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(VanaDlpContractOwnershipTransferred)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(VanaDlpContractOwnershipTransferred)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *VanaDlpContractOwnershipTransferredIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *VanaDlpContractOwnershipTransferredIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// VanaDlpContractOwnershipTransferred represents a OwnershipTransferred event raised by the VanaDlpContract contract.
-type VanaDlpContractOwnershipTransferred struct {
-	PreviousOwner common.Address
-	NewOwner      common.Address
-	Raw           types.Log // Blockchain specific contextual infos
-}
-
-// FilterOwnershipTransferred is a free log retrieval operation binding the contract event 0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0.
-//
-// Solidity: event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)
-func (_VanaDlpContract *VanaDlpContractFilterer) FilterOwnershipTransferred(opts *bind.FilterOpts, previousOwner []common.Address, newOwner []common.Address) (*VanaDlpContractOwnershipTransferredIterator, error) {
-
-	var previousOwnerRule []interface{}
-	for _, previousOwnerItem := range previousOwner {
-		previousOwnerRule = append(previousOwnerRule, previousOwnerItem)
-	}
-	var newOwnerRule []interface{}
-	for _, newOwnerItem := range newOwner {
-		newOwnerRule = append(newOwnerRule, newOwnerItem)
-	}
-
-	logs, sub, err := _VanaDlpContract.contract.FilterLogs(opts, "OwnershipTransferred", previousOwnerRule, newOwnerRule)
-	if err != nil {
-		return nil, err
-	}
-	return &VanaDlpContractOwnershipTransferredIterator{contract: _VanaDlpContract.contract, event: "OwnershipTransferred", logs: logs, sub: sub}, nil
-}
-
-// WatchOwnershipTransferred is a free log subscription operation binding the contract event 0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0.
-//
-// Solidity: event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)
-func (_VanaDlpContract *VanaDlpContractFilterer) WatchOwnershipTransferred(opts *bind.WatchOpts, sink chan<- *VanaDlpContractOwnershipTransferred, previousOwner []common.Address, newOwner []common.Address) (event.Subscription, error) {
-
-	var previousOwnerRule []interface{}
-	for _, previousOwnerItem := range previousOwner {
-		previousOwnerRule = append(previousOwnerRule, previousOwnerItem)
-	}
-	var newOwnerRule []interface{}
-	for _, newOwnerItem := range newOwner {
-		newOwnerRule = append(newOwnerRule, newOwnerItem)
-	}
-
-	logs, sub, err := _VanaDlpContract.contract.WatchLogs(opts, "OwnershipTransferred", previousOwnerRule, newOwnerRule)
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(VanaDlpContractOwnershipTransferred)
-				if err := _VanaDlpContract.contract.UnpackLog(event, "OwnershipTransferred", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseOwnershipTransferred is a log parse operation binding the contract event 0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0.
-//
-// Solidity: event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)
-func (_VanaDlpContract *VanaDlpContractFilterer) ParseOwnershipTransferred(log types.Log) (*VanaDlpContractOwnershipTransferred, error) {
-	event := new(VanaDlpContractOwnershipTransferred)
-	if err := _VanaDlpContract.contract.UnpackLog(event, "OwnershipTransferred", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
 // VanaDlpContractPausedIterator is returned from FilterPaused and is used to iterate over the raw logs and unpacked data for Paused events raised by the VanaDlpContract contract.
 type VanaDlpContractPausedIterator struct {
 	Event *VanaDlpContractPaused // Event containing the contract specifics and raw log
@@ -2572,6 +2443,492 @@ func (_VanaDlpContract *VanaDlpContractFilterer) WatchRewardRequested(opts *bind
 func (_VanaDlpContract *VanaDlpContractFilterer) ParseRewardRequested(log types.Log) (*VanaDlpContractRewardRequested, error) {
 	event := new(VanaDlpContractRewardRequested)
 	if err := _VanaDlpContract.contract.UnpackLog(event, "RewardRequested", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// VanaDlpContractRoleAdminChangedIterator is returned from FilterRoleAdminChanged and is used to iterate over the raw logs and unpacked data for RoleAdminChanged events raised by the VanaDlpContract contract.
+type VanaDlpContractRoleAdminChangedIterator struct {
+	Event *VanaDlpContractRoleAdminChanged // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *VanaDlpContractRoleAdminChangedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(VanaDlpContractRoleAdminChanged)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(VanaDlpContractRoleAdminChanged)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *VanaDlpContractRoleAdminChangedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *VanaDlpContractRoleAdminChangedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// VanaDlpContractRoleAdminChanged represents a RoleAdminChanged event raised by the VanaDlpContract contract.
+type VanaDlpContractRoleAdminChanged struct {
+	Role              [32]byte
+	PreviousAdminRole [32]byte
+	NewAdminRole      [32]byte
+	Raw               types.Log // Blockchain specific contextual infos
+}
+
+// FilterRoleAdminChanged is a free log retrieval operation binding the contract event 0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff.
+//
+// Solidity: event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole)
+func (_VanaDlpContract *VanaDlpContractFilterer) FilterRoleAdminChanged(opts *bind.FilterOpts, role [][32]byte, previousAdminRole [][32]byte, newAdminRole [][32]byte) (*VanaDlpContractRoleAdminChangedIterator, error) {
+
+	var roleRule []interface{}
+	for _, roleItem := range role {
+		roleRule = append(roleRule, roleItem)
+	}
+	var previousAdminRoleRule []interface{}
+	for _, previousAdminRoleItem := range previousAdminRole {
+		previousAdminRoleRule = append(previousAdminRoleRule, previousAdminRoleItem)
+	}
+	var newAdminRoleRule []interface{}
+	for _, newAdminRoleItem := range newAdminRole {
+		newAdminRoleRule = append(newAdminRoleRule, newAdminRoleItem)
+	}
+
+	logs, sub, err := _VanaDlpContract.contract.FilterLogs(opts, "RoleAdminChanged", roleRule, previousAdminRoleRule, newAdminRoleRule)
+	if err != nil {
+		return nil, err
+	}
+	return &VanaDlpContractRoleAdminChangedIterator{contract: _VanaDlpContract.contract, event: "RoleAdminChanged", logs: logs, sub: sub}, nil
+}
+
+// WatchRoleAdminChanged is a free log subscription operation binding the contract event 0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff.
+//
+// Solidity: event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole)
+func (_VanaDlpContract *VanaDlpContractFilterer) WatchRoleAdminChanged(opts *bind.WatchOpts, sink chan<- *VanaDlpContractRoleAdminChanged, role [][32]byte, previousAdminRole [][32]byte, newAdminRole [][32]byte) (event.Subscription, error) {
+
+	var roleRule []interface{}
+	for _, roleItem := range role {
+		roleRule = append(roleRule, roleItem)
+	}
+	var previousAdminRoleRule []interface{}
+	for _, previousAdminRoleItem := range previousAdminRole {
+		previousAdminRoleRule = append(previousAdminRoleRule, previousAdminRoleItem)
+	}
+	var newAdminRoleRule []interface{}
+	for _, newAdminRoleItem := range newAdminRole {
+		newAdminRoleRule = append(newAdminRoleRule, newAdminRoleItem)
+	}
+
+	logs, sub, err := _VanaDlpContract.contract.WatchLogs(opts, "RoleAdminChanged", roleRule, previousAdminRoleRule, newAdminRoleRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(VanaDlpContractRoleAdminChanged)
+				if err := _VanaDlpContract.contract.UnpackLog(event, "RoleAdminChanged", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseRoleAdminChanged is a log parse operation binding the contract event 0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff.
+//
+// Solidity: event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole)
+func (_VanaDlpContract *VanaDlpContractFilterer) ParseRoleAdminChanged(log types.Log) (*VanaDlpContractRoleAdminChanged, error) {
+	event := new(VanaDlpContractRoleAdminChanged)
+	if err := _VanaDlpContract.contract.UnpackLog(event, "RoleAdminChanged", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// VanaDlpContractRoleGrantedIterator is returned from FilterRoleGranted and is used to iterate over the raw logs and unpacked data for RoleGranted events raised by the VanaDlpContract contract.
+type VanaDlpContractRoleGrantedIterator struct {
+	Event *VanaDlpContractRoleGranted // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *VanaDlpContractRoleGrantedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(VanaDlpContractRoleGranted)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(VanaDlpContractRoleGranted)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *VanaDlpContractRoleGrantedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *VanaDlpContractRoleGrantedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// VanaDlpContractRoleGranted represents a RoleGranted event raised by the VanaDlpContract contract.
+type VanaDlpContractRoleGranted struct {
+	Role    [32]byte
+	Account common.Address
+	Sender  common.Address
+	Raw     types.Log // Blockchain specific contextual infos
+}
+
+// FilterRoleGranted is a free log retrieval operation binding the contract event 0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d.
+//
+// Solidity: event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender)
+func (_VanaDlpContract *VanaDlpContractFilterer) FilterRoleGranted(opts *bind.FilterOpts, role [][32]byte, account []common.Address, sender []common.Address) (*VanaDlpContractRoleGrantedIterator, error) {
+
+	var roleRule []interface{}
+	for _, roleItem := range role {
+		roleRule = append(roleRule, roleItem)
+	}
+	var accountRule []interface{}
+	for _, accountItem := range account {
+		accountRule = append(accountRule, accountItem)
+	}
+	var senderRule []interface{}
+	for _, senderItem := range sender {
+		senderRule = append(senderRule, senderItem)
+	}
+
+	logs, sub, err := _VanaDlpContract.contract.FilterLogs(opts, "RoleGranted", roleRule, accountRule, senderRule)
+	if err != nil {
+		return nil, err
+	}
+	return &VanaDlpContractRoleGrantedIterator{contract: _VanaDlpContract.contract, event: "RoleGranted", logs: logs, sub: sub}, nil
+}
+
+// WatchRoleGranted is a free log subscription operation binding the contract event 0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d.
+//
+// Solidity: event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender)
+func (_VanaDlpContract *VanaDlpContractFilterer) WatchRoleGranted(opts *bind.WatchOpts, sink chan<- *VanaDlpContractRoleGranted, role [][32]byte, account []common.Address, sender []common.Address) (event.Subscription, error) {
+
+	var roleRule []interface{}
+	for _, roleItem := range role {
+		roleRule = append(roleRule, roleItem)
+	}
+	var accountRule []interface{}
+	for _, accountItem := range account {
+		accountRule = append(accountRule, accountItem)
+	}
+	var senderRule []interface{}
+	for _, senderItem := range sender {
+		senderRule = append(senderRule, senderItem)
+	}
+
+	logs, sub, err := _VanaDlpContract.contract.WatchLogs(opts, "RoleGranted", roleRule, accountRule, senderRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(VanaDlpContractRoleGranted)
+				if err := _VanaDlpContract.contract.UnpackLog(event, "RoleGranted", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseRoleGranted is a log parse operation binding the contract event 0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d.
+//
+// Solidity: event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender)
+func (_VanaDlpContract *VanaDlpContractFilterer) ParseRoleGranted(log types.Log) (*VanaDlpContractRoleGranted, error) {
+	event := new(VanaDlpContractRoleGranted)
+	if err := _VanaDlpContract.contract.UnpackLog(event, "RoleGranted", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// VanaDlpContractRoleRevokedIterator is returned from FilterRoleRevoked and is used to iterate over the raw logs and unpacked data for RoleRevoked events raised by the VanaDlpContract contract.
+type VanaDlpContractRoleRevokedIterator struct {
+	Event *VanaDlpContractRoleRevoked // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *VanaDlpContractRoleRevokedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(VanaDlpContractRoleRevoked)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(VanaDlpContractRoleRevoked)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *VanaDlpContractRoleRevokedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *VanaDlpContractRoleRevokedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// VanaDlpContractRoleRevoked represents a RoleRevoked event raised by the VanaDlpContract contract.
+type VanaDlpContractRoleRevoked struct {
+	Role    [32]byte
+	Account common.Address
+	Sender  common.Address
+	Raw     types.Log // Blockchain specific contextual infos
+}
+
+// FilterRoleRevoked is a free log retrieval operation binding the contract event 0xf6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b.
+//
+// Solidity: event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender)
+func (_VanaDlpContract *VanaDlpContractFilterer) FilterRoleRevoked(opts *bind.FilterOpts, role [][32]byte, account []common.Address, sender []common.Address) (*VanaDlpContractRoleRevokedIterator, error) {
+
+	var roleRule []interface{}
+	for _, roleItem := range role {
+		roleRule = append(roleRule, roleItem)
+	}
+	var accountRule []interface{}
+	for _, accountItem := range account {
+		accountRule = append(accountRule, accountItem)
+	}
+	var senderRule []interface{}
+	for _, senderItem := range sender {
+		senderRule = append(senderRule, senderItem)
+	}
+
+	logs, sub, err := _VanaDlpContract.contract.FilterLogs(opts, "RoleRevoked", roleRule, accountRule, senderRule)
+	if err != nil {
+		return nil, err
+	}
+	return &VanaDlpContractRoleRevokedIterator{contract: _VanaDlpContract.contract, event: "RoleRevoked", logs: logs, sub: sub}, nil
+}
+
+// WatchRoleRevoked is a free log subscription operation binding the contract event 0xf6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b.
+//
+// Solidity: event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender)
+func (_VanaDlpContract *VanaDlpContractFilterer) WatchRoleRevoked(opts *bind.WatchOpts, sink chan<- *VanaDlpContractRoleRevoked, role [][32]byte, account []common.Address, sender []common.Address) (event.Subscription, error) {
+
+	var roleRule []interface{}
+	for _, roleItem := range role {
+		roleRule = append(roleRule, roleItem)
+	}
+	var accountRule []interface{}
+	for _, accountItem := range account {
+		accountRule = append(accountRule, accountItem)
+	}
+	var senderRule []interface{}
+	for _, senderItem := range sender {
+		senderRule = append(senderRule, senderItem)
+	}
+
+	logs, sub, err := _VanaDlpContract.contract.WatchLogs(opts, "RoleRevoked", roleRule, accountRule, senderRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(VanaDlpContractRoleRevoked)
+				if err := _VanaDlpContract.contract.UnpackLog(event, "RoleRevoked", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseRoleRevoked is a log parse operation binding the contract event 0xf6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b.
+//
+// Solidity: event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender)
+func (_VanaDlpContract *VanaDlpContractFilterer) ParseRoleRevoked(log types.Log) (*VanaDlpContractRoleRevoked, error) {
+	event := new(VanaDlpContractRoleRevoked)
+	if err := _VanaDlpContract.contract.UnpackLog(event, "RoleRevoked", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
