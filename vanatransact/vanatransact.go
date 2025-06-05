@@ -364,16 +364,6 @@ func RequestRewardFromDLP(fileId string) (string, error) {
 	tx, err := instance.RequestReward(opts, bigFileID, big.NewInt(1))
 	if err != nil {
 		fmt.Println("request reward err", err, opts.From, tx)
-		// // Check revert reason
-		// callMsg := ethereum.CallMsg{
-		// 	From: opts.From,
-		// 	To:   &contractAddress,
-		// 	Data: tx.Data(),
-		// }
-		// result, callErr := client.CallContract(context.Background(), callMsg, nil)
-		// if callErr == nil && len(result) > 0 {
-		// 	return "", fmt.Errorf("transaction reverted: %s", string(result))
-		// }
 		return "", fmt.Errorf("transaction failed: %w", err)
 	}
 
@@ -439,7 +429,7 @@ func SendContributionProof(jobID *big.Int, fileID string, dlpPubKey string, envV
 	requestBody := RequestBody{
 		JobID:    jobID,
 		FileID:   fileIDBigInt,
-		Nonce:    "18",                            //int(nonce.Int64()), // Convert *big.Int to int
+		Nonce:    "52",                            //int(nonce.Int64()), // Convert *big.Int to int
 		ProofURL: os.Getenv("VANA_DLP_PROOF_URL"), //"https://github.com/Wallet-Chat/vana-satya-proof-template-py/releases/download/v7/my-proof-7.tar.gz",
 		//ProofURL:            "https://github.com/vana-com/vana-satya-proof-template/releases/download/v24/gsc-my-proof-24.tar.gz",
 		EncryptionSeed:      os.Getenv("VANA_ENCRYPT_KEY_SEED"),
