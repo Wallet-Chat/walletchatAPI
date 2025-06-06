@@ -3097,8 +3097,8 @@ rnvdxUhpAAEtJZme5+pnS6Fr4Zi8mUBPt9kC/mHTtbPQoLsX+FeBs/u+rpXe4xBr
 		}
 
 		//now request reward from DLP contract
-		txHashReward, err := vanatransact.RequestRewardFromDLP(fileID)
-		fmt.Println("Request Reward from DLP: ", txHashReward, err)
+		txHashReward, _ := vanatransact.RequestRewardFromDLP(fileID)
+		fmt.Println("Request Reward from DLP: ", txHashReward)
 	}
 
 	//keep track of lifetime file uploads for leaderboard
