@@ -3119,7 +3119,7 @@ rnvdxUhpAAEtJZme5+pnS6Fr4Zi8mUBPt9kC/mHTtbPQoLsX+FeBs/u+rpXe4xBr
 		fmt.Printf("couldn't convert %q to uint64: %v\n", fileID, err)
 		return
 	}
-	fmt.Printf("as uint64: %d\n", fileIdInt)
+	//fmt.Printf("fileId as uint64: %d\n", fileIdInt)
 	refinePayload := map[string]interface{}{
 		"file_id":        fileIdInt,
 		"encryption_key": userInfo.Signature,
