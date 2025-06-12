@@ -64,9 +64,9 @@ func main() {
 	router.PathPrefix("/docs").Handler(httpSwagger.WrapHandler)
 	router.HandleFunc("/track_ga4/{event}/{email}/{addr}/{placeholder_photo}", controllers.TrackEventGA4).Methods("GET")
 	router.HandleFunc("/get_leaderboard_data", referrals.GetLeaderboardData).Methods("GET")
-	router.HandleFunc("/get_oura_leaderboard_data", referrals.GetOuraLeaderboardData).Methods("GET")
+	router.HandleFunc("/get_intra_leaderboard_data", referrals.GetOuraLeaderboardData).Methods("GET")
 	router.HandleFunc("/get_leaderboard_data/{address}", referrals.GetLeaderboardDataSingle).Methods("GET")
-	router.HandleFunc("/get_oura_leaderboard_data/{address}", referrals.GetOuraLeaderboardDataSingle).Methods("GET")
+	router.HandleFunc("/get_intra_leaderboard_data/{address}", referrals.GetOuraLeaderboardDataSingle).Methods("GET")
 	//naming addresses (users or NFT collections)
 	router.HandleFunc("/name", controllers.OuraCreateAddrNameItem).Methods("POST")
 	router.HandleFunc("/testfile", controllers.OuraTestFile).Methods("POST")
@@ -120,16 +120,6 @@ func main() {
 	// starts the scheduler asynchronously
 	//v.StartAsync()
 
-	w := gocron.NewScheduler(time.UTC)
-	// // set time
-	// w.Every(100000).Seconds().Do(func() { referrals.GetLeaderboardDataCronJob() })
-	// // starts the scheduler asynchronously
-	// w.StartAsync()
-	w.Every(1).Day().At("05:00").Do(func() { referrals.GetOuraLeaderboardDataCronJob() })
-	//w.Every(1).Days().Do(func() { referrals.GetOuraLeaderboardDataCronJob() })
-	// starts the scheduler asynchronously
-	w.StartAsync()
-
 	//schedule twitter username polling for new verified users
 	//oura := gocron.NewScheduler(time.UTC)
 	// set time
@@ -145,6 +135,16 @@ func main() {
 	mobileNotis.Every(2).Hours().Do(func() { controllers.SendMobileNotifications() })
 	// starts the scheduler asynchronously
 	mobileNotis.StartAsync()
+
+	w := gocron.NewScheduler(time.UTC)
+	// // set time
+	// w.Every(100000).Seconds().Do(func() { referrals.GetLeaderboardDataCronJob() })
+	// // starts the scheduler asynchronously
+	// w.StartAsync()
+	//w.Every(1).Day().At("05:00").Do(func() { referrals.GetOuraLeaderboardDataCronJob() })
+	w.Every(1).Days().Do(func() { referrals.GetOuraLeaderboardDataCronJob() })
+	// starts the scheduler asynchronously
+	w.StartAsync()
 
 	//test only - will be periodic above
 	//controllers.SendMobileNotifications()
