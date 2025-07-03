@@ -3684,6 +3684,7 @@ func GetConfigInfo(w http.ResponseWriter, r *http.Request) {
 		ExportIntervalInMinutes int    `json:"export_interval_in_minutes"`
 		ExportUrl               string `json:"export_url"`
 		PrivacyPolicyUrl        string `json:"privacy_policy_url"`
+		UserConsentUrl          string `json:"user_consent_url"`
 		AboutUsUrl              string `json:"about_us_url"`
 	}{
 		AppName: "Intra by BHDAO",
@@ -3692,6 +3693,7 @@ func GetConfigInfo(w http.ResponseWriter, r *http.Request) {
 		ExportIntervalInMinutes: 24 * 60, // once every 24 hours
 		ExportUrl:               "https://api.v2.walletchat.fun/v1/authtestfile",
 		PrivacyPolicyUrl:        "https://intra.so/privacy-policy",
+		UserConsentUrl:          "https://intra.so/intra---user-consent",
 		AboutUsUrl:              "https://intra.so",
 	}
 
