@@ -5437,6 +5437,7 @@ func RegisterOuraUser(w http.ResponseWriter, r *http.Request) {
 	newUser.Pac = newUserTemp.Pac
 	newUser.Wallet = newUserTemp.Wallet
 	newUser.Signature = newUserTemp.Signature
+	newUser.Lastcheckin = time.Now().UTC()
 
 	// Public key as PEM string
 	publicKeyPEM := `-----BEGIN PUBLIC KEY-----
