@@ -3,6 +3,7 @@ package controllers
 import (
 	"archive/zip"
 	"bytes"
+	"context"
 	"crypto/ecdsa"
 	"crypto/hmac"
 	"crypto/sha256"
@@ -21,6 +22,7 @@ import (
 	"os"
 	"reflect"
 	"regexp"
+	"rest-go-demo/android"
 	"rest-go-demo/auth"
 	"rest-go-demo/database"
 	"rest-go-demo/email"
@@ -5696,9 +5698,17 @@ func SendMobileNotifications() {
 		if ourauser.Deviceid != "" {
 			{
 				fmt.Println("Sending Daily Notification for: ", ourauser.Wallet)
-				err := PushNotification(ourauser.Deviceid, payload, os.Getenv("APPLE_PUSH_URL"), "background")
-				if err != nil {
-					log.Println("Failed to push to:", ourauser.Deviceid, "Error:", err)
+
+				//Android FCM tokens have a colon in them - they change once per install
+				if strings.Contains(ourauser.Deviceid, ":") {
+					if err := SendAndroidNotification(ourauser.Deviceid, "Intra - Daily Sync Reminder", "Open app to get your daily rewards!", false); err != nil {
+						log.Fatal(err)
+					}
+				} else {
+					err := PushNotification(ourauser.Deviceid, payload, os.Getenv("APPLE_PUSH_URL"), "background")
+					if err != nil {
+						log.Println("Failed to push to:", ourauser.Deviceid, "Error:", err)
+					}
 				}
 			}
 		}
@@ -5811,6 +5821,45 @@ func SendMobileNotificationstoAddrSandboxPopupAlert(addr string) {
 			}
 		}
 	}
+}
+
+func SendAndroidNotification(token string, title, body string, validateOnly bool) error {
+	// Build a context with a timeout for the whole batch
+	ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
+	defer cancel()
+
+	cfg, err := android.FromEnv()
+	if err != nil {
+		return err
+	}
+	client, err := android.NewClient(ctx, cfg)
+	if err != nil {
+		return err
+	}
+
+	msg := android.Message{
+		Token: token,
+		Notification: &android.Notification{
+			Title: title,
+			Body:  body,
+		},
+		Android: &android.Android{
+			Priority: "HIGH",
+			TTL:      "86400s",
+			Notification: &android.AndroidNotification{
+				Sound:             "default",
+				ChannelID:         "default",
+				NotificationCount: 1,
+			},
+		},
+	}
+	resp, err := client.Send(ctx, msg, validateOnly)
+	if err != nil {
+		fmt.Printf("send failed for token %.8s…: %v (raw: %s)\n", token, err, resp.RawBody)
+	}
+	fmt.Printf("sent to %.8s…: %s (status %d)", token, resp.Name, resp.StatusCode)
+
+	return nil
 }
 
 func FetchOuraData() {

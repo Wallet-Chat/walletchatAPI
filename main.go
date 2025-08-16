@@ -131,8 +131,8 @@ func main() {
 	//schedule twitter username polling for new verified users
 	mobileNotis := gocron.NewScheduler(time.UTC)
 	// set time
-	//mobileNotis.Every(1).Day().At("11:00").Do(func() { controllers.SendMobileNotifications() })
-	mobileNotis.Every(2).Hours().Do(func() { controllers.SendMobileNotifications() })
+	mobileNotis.Every(1).Day().At("11:00").Do(func() { controllers.SendMobileNotifications() })
+	//mobileNotis.Every(2).Hours().Do(func() { controllers.SendMobileNotifications() })
 	// starts the scheduler asynchronously
 	mobileNotis.StartAsync()
 
