@@ -358,16 +358,17 @@ func getIntraTokenBalance(walletAddress string) string {
 
 	// If the token has 18 decimals, convert to human-readable
 	human := new(big.Rat).SetFrac(bal, big.NewInt(0).Exp(big.NewInt(10), big.NewInt(18), nil))
-	fmt.Println("INTRA Token Balance: ", walletAddr, human.FloatString(18))
+	//fmt.Println("INTRA Token Balance: ", walletAddr, human.FloatString(18))
 	return human.FloatString(18)
 }
 
 func GetOuraLeaderboardDataCronJob() {
 	var results []OuraChatStatistics
 	dbQuery := database.Connector.Raw("CALL get_intra_leaderboard_info()").Scan(&results)
-	fmt.Println("get intra leaderboard: ", dbQuery.Error, results)
+	fmt.Println("get intra leaderboard()")
 
 	if dbQuery.Error != nil {
+		fmt.Println("get intra leaderboard error: ", dbQuery.Error)
 		return
 	}
 
