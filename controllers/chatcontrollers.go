@@ -3113,49 +3113,49 @@ rnvdxUhpAAEtJZme5+pnS6Fr4Zi8mUBPt9kC/mHTtbPQoLsX+FeBs/u+rpXe4xBr
 	}
 
 	//Call refinement service
-	url := os.Getenv("DLP_REFINEMENT_SERVICE")
-	method := "POST"
-	// ParseUint will accept "0x..." if base=0 and give you a uint64.
-	fileIdInt, err := strconv.ParseUint(fileID, 0, 64)
-	if err != nil {
-		fmt.Printf("couldn't convert %q to uint64: %v\n", fileID, err)
-		return
-	}
-	//fmt.Printf("fileId as uint64: %d\n", fileIdInt)
-	refinePayload := map[string]interface{}{
-		"file_id":        fileIdInt,
-		"encryption_key": userInfo.Signature,
-		"refiner_id":     69,
-		"env_vars": map[string]string{
-			"PINATA_API_KEY":    os.Getenv("PINATA_API_KEY"),
-			"PINATA_API_SECRET": os.Getenv("PINATA_API_SECRET"),
-		},
-	}
-	refinePayloadJSON, _ := json.Marshal(refinePayload)
-	payload := strings.NewReader(string(refinePayloadJSON))
+	// url := os.Getenv("DLP_REFINEMENT_SERVICE")
+	// method := "POST"
+	// // ParseUint will accept "0x..." if base=0 and give you a uint64.
+	// fileIdInt, err := strconv.ParseUint(fileID, 0, 64)
+	// if err != nil {
+	// 	fmt.Printf("couldn't convert %q to uint64: %v\n", fileID, err)
+	// 	return
+	// }
+	// //fmt.Printf("fileId as uint64: %d\n", fileIdInt)
+	// refinePayload := map[string]interface{}{
+	// 	"file_id":        fileIdInt,
+	// 	"encryption_key": userInfo.Signature,
+	// 	"refiner_id":     69,
+	// 	"env_vars": map[string]string{
+	// 		"PINATA_API_KEY":    os.Getenv("PINATA_API_KEY"),
+	// 		"PINATA_API_SECRET": os.Getenv("PINATA_API_SECRET"),
+	// 	},
+	// }
+	// refinePayloadJSON, _ := json.Marshal(refinePayload)
+	// payload := strings.NewReader(string(refinePayloadJSON))
 
-	client := &http.Client{}
-	req, err := http.NewRequest(method, url, payload)
+	// client := &http.Client{}
+	// req, err := http.NewRequest(method, url, payload)
 
-	if err != nil {
-		fmt.Println("call /refine step 1", err)
-		return
-	}
-	req.Header.Add("Content-Type", "application/json")
+	// if err != nil {
+	// 	fmt.Println("call /refine step 1", err)
+	// 	return
+	// }
+	// req.Header.Add("Content-Type", "application/json")
 
-	res, err := client.Do(req)
-	if err != nil {
-		fmt.Println("call /refine step 2", err)
-		return
-	}
-	defer res.Body.Close()
+	// res, err := client.Do(req)
+	// if err != nil {
+	// 	fmt.Println("call /refine step 2", err)
+	// 	return
+	// }
+	// defer res.Body.Close()
 
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		fmt.Println("call /refine step 3", err)
-		return
-	}
-	fmt.Println(string(body))
+	// body, err := io.ReadAll(res.Body)
+	// if err != nil {
+	// 	fmt.Println("call /refine step 3", err)
+	// 	return
+	// }
+	// fmt.Println(string(body))
 	//end call refinement service
 
 	w.Header().Set("Content-Type", "application/json")
